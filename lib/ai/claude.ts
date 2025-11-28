@@ -6,47 +6,13 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-type FileData = 
-  | { type: 'pdf'; buffer: Buffer; mimeType: string }
-  | { type: 'image'; base64: string; mimeType: string };
-
-export async function extractWithClaude(fileData: FileData): Promise<RawExtractionFields> {
+export async function extractWithClaude(imageBase64: string): Promise<RawExtractionFields> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not set');
   }
 
   try {
-    // Build content array based on file type
-    const content: any[] = [];
-    
-    if (fileData.type === 'pdf') {
-      // Claude supports PDFs directly via file API or base64
-      // Using base64 approach for consistency
-      content.push({
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: 'application/pdf',
-          data: fileData.buffer.toString('base64'),
-        },
-      });
-    } else {
-      // Image files
-      const base64Data = fileData.base64.split(',')[1] || fileData.base64;
-      content.push({
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: fileData.mimeType || 'image/png',
-          data: base64Data,
-        },
-      });
-    }
-    
-    content.push({
-      type: 'text',
-      text: EXTRACTION_USER_PROMPT,
-    });
+    const base64Data = imageBase64.split(',')[1] || imageBase64; // Remove data URL prefix if present
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -55,7 +21,20 @@ export async function extractWithClaude(fileData: FileData): Promise<RawExtracti
       messages: [
         {
           role: 'user',
-          content,
+          content: [
+            {
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: 'image/png',
+                data: base64Data,
+              },
+            },
+            {
+              type: 'text',
+              text: EXTRACTION_USER_PROMPT,
+            },
+          ],
         },
       ],
     });

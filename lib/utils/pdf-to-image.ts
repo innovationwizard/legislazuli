@@ -165,17 +165,16 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
     // The legacy build is designed for Node.js/serverless environments
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     
-    // Disable worker for server-side rendering - workers aren't needed in Node.js
-    // Node.js ESM doesn't support HTTPS URLs for workers, and we don't need them anyway
-    pdfjsLib.GlobalWorkerOptions.workerPort = null;
-    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
-    
-    // Load the PDF document
+    // Load the PDF document with worker disabled for server-side rendering
     const loadingTask = pdfjsLib.getDocument({
       data: new Uint8Array(pdfBuffer),
       useSystemFonts: true,
       verbosity: 0, // Suppress warnings
       isEvalSupported: false, // Security: disable eval
+      useWorkerFetch: false, // Disable worker fetch
+      disableAutoFetch: false,
+      disableStream: false,
+      disableRange: false,
     });
     
     const pdf = await loadingTask.promise;
