@@ -5,6 +5,7 @@ import { createServerClient } from '@/lib/db/supabase';
 import { extractWithClaude } from '@/lib/ai/claude';
 import { extractWithOpenAI } from '@/lib/ai/openai';
 import { compareResults, convertToExtractedFields } from '@/lib/ai/consensus';
+import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
 import { DocType } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -31,7 +32,9 @@ export async function POST(request: NextRequest) {
 
     // Upload to Supabase Storage
     const supabase = createServerClient();
-    const fileName = `${Date.now()}_${file.name}`;
+    // Sanitize filename to remove spaces and special characters
+    const sanitizedFilename = sanitizeFilename(file.name);
+    const fileName = `${Date.now()}_${sanitizedFilename}`;
     const filePath = `${session.user.id}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
