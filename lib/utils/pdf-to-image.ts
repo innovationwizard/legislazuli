@@ -5,15 +5,12 @@
 
 export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
   try {
-    // Dynamic import to avoid issues in serverless
-    const pdfjsLib = await import('pdfjs-dist');
+    // Use legacy build for Node.js environments (avoids DOMMatrix and other browser APIs)
+    // The legacy build is designed for Node.js/serverless environments
+    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     
-    // Set worker source for serverless compatibility
-    if (typeof window === 'undefined') {
-      // Server-side: use CDN worker (works in serverless)
-      const version = pdfjsLib.version || '4.0.379';
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.mjs`;
-    }
+    // Disable worker for server-side rendering (not needed in Node.js)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
     
     // Load the PDF document
     const loadingTask = pdfjsLib.getDocument({
