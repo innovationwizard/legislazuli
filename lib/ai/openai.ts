@@ -59,13 +59,13 @@ export async function extractWithOpenAI(fileData: FileData): Promise<RawExtracti
       max_tokens: 4096,
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
+    const responseContent = response.choices[0]?.message?.content;
+    if (!responseContent) {
       throw new Error('No content in OpenAI response');
     }
 
     // Extract JSON from response
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('No JSON found in OpenAI response');
     }
