@@ -3,6 +3,7 @@
 import { ExtractedField } from '@/types';
 import { CopyButton } from './ui/CopyButton';
 import { Card } from './ui/Card';
+import { getFieldDisplayName } from '@/lib/utils/field-names';
 
 interface ExtractionResultsProps {
   fields: ExtractedField[];
@@ -73,7 +74,7 @@ export function ExtractionResults({
           </h4>
           <ul className="list-disc list-inside text-yellow-700">
             {discrepancies.map((field) => (
-              <li key={field}>{field}</li>
+              <li key={field}>{getFieldDisplayName(field)}</li>
             ))}
           </ul>
         </div>
