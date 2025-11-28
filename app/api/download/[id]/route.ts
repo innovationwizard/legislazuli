@@ -17,7 +17,7 @@ export async function GET(
     const supabase = createServerClient();
     const format = request.nextUrl.searchParams.get('format') || 'txt';
 
-    // Get extraction with fields
+    // Get extraction with fields (only non-deleted)
     const { data: extraction, error: extractionError } = await supabase
       .from('extractions')
       .select(`
@@ -25,6 +25,7 @@ export async function GET(
         documents!inner(user_id, filename)
       `)
       .eq('id', params.id)
+      .is('deleted_at', null) // Only get non-deleted extractions
       .single();
 
     if (extractionError || !extraction) {

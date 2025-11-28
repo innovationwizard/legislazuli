@@ -26,6 +26,7 @@ export async function GET(
         )
       `)
       .eq('id', params.id)
+      .is('deleted_at', null) // Only get non-deleted extractions
       .single();
 
     if (extractionError || !extraction) {
@@ -81,22 +82,23 @@ export async function DELETE(
       .from('extractions')
       .select('document_id, documents!inner(user_id)')
       .eq('id', params.id)
+      .is('deleted_at', null) // Only allow deleting non-deleted extractions
       .single();
 
     if (extractionError || !extraction) {
       return NextResponse.json({ error: 'Extraction not found' }, { status: 404 });
     }
 
-    // Delete extracted fields first
-    await supabase
-      .from('extracted_fields')
-      .delete()
-      .eq('extraction_id', params.id);
+    // Verify ownership
+    const document = extraction.documents as any;
+    if (!document || document.user_id !== session.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
 
-    // Delete extraction
+    // Soft delete: set deleted_at timestamp instead of actually deleting
     const { error: deleteError } = await supabase
       .from('extractions')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', params.id);
 
     if (deleteError) {

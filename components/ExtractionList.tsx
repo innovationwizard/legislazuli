@@ -36,6 +36,29 @@ export function ExtractionList() {
     }
   };
 
+  const handleDelete = async (id: string, filename: string) => {
+    if (!confirm(`¿Estás seguro de que deseas eliminar la extracción de "${filename}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/extractions/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Remove from local state
+        setExtractions(extractions.filter(e => e.id !== id));
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Error al eliminar la extracción');
+      }
+    } catch (error) {
+      console.error('Error deleting extraction:', error);
+      alert('Error al eliminar la extracción');
+    }
+  };
+
   const getConfidenceBadge = (confidence: string) => {
     const badges = {
       full: { text: '✓ Completo', className: 'bg-green-100 text-green-800' },
@@ -89,12 +112,21 @@ export function ExtractionList() {
             </div>
             {getConfidenceBadge(extraction.confidence)}
           </div>
-          <Link
-            href={`/extraction/${extraction.id}`}
-            className="px-4 py-2 bg-lapis text-white rounded-md hover:bg-lapis-dark transition-colors"
-          >
-            Ver
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/extraction/${extraction.id}`}
+              className="px-4 py-2 bg-lapis text-white rounded-md hover:bg-lapis-dark transition-colors"
+            >
+              Ver
+            </Link>
+            <button
+              onClick={() => handleDelete(extraction.id, extraction.documents.filename)}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              title="Eliminar extracción"
+            >
+              Eliminar
+            </button>
+          </div>
         </div>
       ))}
     </div>

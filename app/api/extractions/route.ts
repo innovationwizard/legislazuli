@@ -12,6 +12,18 @@ export async function GET(request: NextRequest) {
 
     const supabase = createServerClient();
 
+    // First get user's documents, then get extractions for those documents
+    const { data: userDocuments } = await supabase
+      .from('documents')
+      .select('id')
+      .eq('user_id', session.user.id);
+
+    if (!userDocuments || userDocuments.length === 0) {
+      return NextResponse.json([]);
+    }
+
+    const documentIds = userDocuments.map(doc => doc.id);
+
     const { data: extractions, error } = await supabase
       .from('extractions')
       .select(`
@@ -24,6 +36,8 @@ export async function GET(request: NextRequest) {
           doc_type
         )
       `)
+      .in('document_id', documentIds)
+      .is('deleted_at', null) // Only get non-deleted extractions
       .order('created_at', { ascending: false })
       .limit(50);
 
