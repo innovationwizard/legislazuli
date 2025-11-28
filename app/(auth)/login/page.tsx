@@ -48,8 +48,8 @@ export default function LoginPage() {
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <Input
-            label="Correo electrónico"
-            type="email"
+            label="Usuario"
+            type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
