@@ -5,22 +5,14 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
     // Mark these as external packages for serverless compatibility
-    serverComponentsExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
+    serverComponentsExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
   },
   images: {
     formats: ['image/avif', 'image/webp'],
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Handle JSON files in pdfjs-dist
-      config.module = config.module || {};
-      config.module.rules = config.module.rules || [];
-      config.module.rules.push({
-        test: /pdfjs-dist[\\/].*\.json$/,
-        type: 'json',
-      });
-      
-      // Ignore native binary files (but allow @napi-rs/canvas to handle its own)
+      // Ignore native binary files
       config.module.rules.push({
         test: /\.node$/,
         use: 'ignore-loader',
