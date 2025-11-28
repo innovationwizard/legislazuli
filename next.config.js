@@ -4,18 +4,23 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    // Mark these as external packages for serverless compatibility
+    serverComponentsExternalPackages: ['@napi-rs/canvas', 'pdfjs-dist'],
   },
   images: {
     formats: ['image/avif', 'image/webp'],
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Don't externalize canvas - let it be bundled (may not work in serverless)
-      // If @napi-rs/canvas doesn't work, we'll need an alternative approach
-      
-      // Ignore native binary files
+      // Handle JSON files in pdfjs-dist
       config.module = config.module || {};
       config.module.rules = config.module.rules || [];
+      config.module.rules.push({
+        test: /pdfjs-dist[\\/].*\.json$/,
+        type: 'json',
+      });
+      
+      // Ignore native binary files (but allow @napi-rs/canvas to handle its own)
       config.module.rules.push({
         test: /\.node$/,
         use: 'ignore-loader',
