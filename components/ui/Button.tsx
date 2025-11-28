@@ -11,7 +11,7 @@ export function Button({ children, variant = 'primary', className = '', ...props
   const variantClasses = {
     primary: 'bg-lapis text-white hover:bg-lapis-dark',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    danger: 'bg-burgundy text-white hover:bg-burgundy-dark',
   };
 
   return (

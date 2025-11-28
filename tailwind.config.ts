@@ -19,6 +19,11 @@ const config: Config = {
           light: '#fcd34d',
           dark: '#f59e0b',
         },
+        burgundy: {
+          DEFAULT: '#800020',
+          dark: '#5c0017',
+          light: '#a0002a',
+        },
       },
     },
   },
