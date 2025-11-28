@@ -6,6 +6,7 @@ import { extractWithClaude } from '@/lib/ai/claude';
 import { extractWithOpenAI } from '@/lib/ai/openai';
 import { compareResults, convertToExtractedFields } from '@/lib/ai/consensus';
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
+import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
 import { DocType } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -23,12 +24,44 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing file or doc_type' }, { status: 400 });
     }
 
-    // Convert file to base64
-    // Note: For PDFs, vision APIs work best with image formats (PNG/JPG)
-    // Users should convert PDFs to images for optimal results
+    // Validate file type
+    const validImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    const isPdf = file.type === 'application/pdf';
+    
+    if (!isPdf && !validImageTypes.includes(file.type)) {
+      return NextResponse.json(
+        { 
+          error: `Formato de archivo no soportado: ${file.type}. Por favor, sube un archivo PDF, PNG, JPG, GIF o WEBP.`,
+          errorCode: 'UNSUPPORTED_FORMAT'
+        },
+        { status: 400 }
+      );
+    }
+
+    // Get file buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const base64 = buffer.toString('base64');
+    
+    // Convert to base64 - PDFs need to be converted to image first
+    let base64: string;
+    if (isPdf) {
+      try {
+        // Convert PDF first page to PNG image
+        base64 = await convertPdfToImage(buffer);
+      } catch (error) {
+        console.error('PDF conversion error:', error);
+        return NextResponse.json(
+          { 
+            error: 'Error al procesar el PDF. Por favor, asegúrate de que el archivo PDF no esté corrupto.',
+            errorCode: 'PDF_CONVERSION_ERROR'
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Image files can be used directly
+      base64 = buffer.toString('base64');
+    }
 
     // Upload to Supabase Storage
     const supabase = createServerClient();
