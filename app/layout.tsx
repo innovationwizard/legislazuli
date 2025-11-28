@@ -13,10 +13,14 @@ export const metadata: Metadata = {
   description: 'Sistema de extracción de datos para documentos legales guatemaltecos con 100% de precisión mediante consenso multi-API',
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png', sizes: '32x32' },
       { url: '/icon.svg', type: 'image/svg+xml' },
     ],
-    apple: '/apple-icon.svg',
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/apple-icon.svg', type: 'image/svg+xml' },
+    ],
   },
   openGraph: {
     title: 'Legislazuli - Extracción de Datos Legales',
