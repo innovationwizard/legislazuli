@@ -18,7 +18,6 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
       defaultViewport: { width: 1920, height: 1080 },
       executablePath: await Chromium.executablePath(),
       headless: true,
-      ignoreHTTPSErrors: true,
     });
     
     try {
