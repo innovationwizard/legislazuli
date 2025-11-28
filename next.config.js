@@ -5,7 +5,7 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
     // Mark these as external packages for serverless compatibility
-    serverComponentsExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
+    serverComponentsExternalPackages: ['@aws-sdk/client-textract'],
   },
   images: {
     formats: ['image/avif', 'image/webp'],

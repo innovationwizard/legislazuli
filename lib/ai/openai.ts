@@ -57,3 +57,47 @@ export async function extractWithOpenAI(imageBase64: string): Promise<RawExtract
   }
 }
 
+/**
+ * Extract structured data from text using OpenAI
+ * Used when PDF text is extracted via AWS Textract
+ */
+export async function extractWithOpenAIFromText(text: string): Promise<RawExtractionFields> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY is not set');
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: EXTRACTION_SYSTEM_PROMPT,
+        },
+        {
+          role: 'user',
+          content: `${EXTRACTION_USER_PROMPT}\n\nDocument text:\n${text}`,
+        },
+      ],
+      max_tokens: 4096,
+    });
+
+    const responseContent = response.choices[0]?.message?.content;
+    if (!responseContent) {
+      throw new Error('No content in OpenAI response');
+    }
+
+    // Extract JSON from response
+    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in OpenAI response');
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
+    return parsed;
+  } catch (error) {
+    console.error('OpenAI text extraction error:', error);
+    throw error;
+  }
+}
+

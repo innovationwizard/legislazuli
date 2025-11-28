@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createServerClient } from '@/lib/db/supabase';
-import { extractWithClaude } from '@/lib/ai/claude';
-import { extractWithOpenAI } from '@/lib/ai/openai';
+import { extractWithClaude, extractWithClaudeFromText } from '@/lib/ai/claude';
+import { extractWithOpenAI, extractWithOpenAIFromText } from '@/lib/ai/openai';
 import { compareResults, convertToExtractedFields } from '@/lib/ai/consensus';
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
 import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
+import { extractTextFromPdf } from '@/lib/utils/textract';
 import { DocType } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -42,21 +43,32 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Convert to base64 - PDFs need to be converted to image first
-    let base64: string;
+    // Process PDFs with AWS Textract (better accuracy for legal documents)
+    // Images are converted to base64 for vision APIs
+    let useTextExtraction = false;
+    let extractedText = '';
+    let base64 = '';
+    
     if (isPdf) {
       try {
-        // Convert PDF first page to PNG image
-        base64 = await convertPdfToImage(buffer);
-      } catch (error) {
-        console.error('PDF conversion error:', error);
-        return NextResponse.json(
-          { 
-            error: 'Error al procesar el PDF. Por favor, asegúrate de que el archivo PDF no esté corrupto.',
-            errorCode: 'PDF_CONVERSION_ERROR'
-          },
-          { status: 400 }
-        );
+        // Use AWS Textract for PDFs - purpose-built for legal/government forms
+        extractedText = await extractTextFromPdf(buffer);
+        useTextExtraction = true;
+      } catch (textractError) {
+        console.error('Textract error, falling back to image conversion:', textractError);
+        // Fallback to image conversion if Textract fails
+        try {
+          base64 = await convertPdfToImage(buffer);
+        } catch (imageError) {
+          console.error('PDF conversion error:', imageError);
+          return NextResponse.json(
+            { 
+              error: 'Error al procesar el PDF. Por favor, asegúrate de que el archivo PDF no esté corrupto.',
+              errorCode: 'PDF_CONVERSION_ERROR'
+            },
+            { status: 400 }
+          );
+        }
       }
     } else {
       // Image files can be used directly
@@ -99,15 +111,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract with both APIs in parallel
+    // Use text extraction for PDFs (via Textract), image extraction for images
     const [claudeResult, openaiResult] = await Promise.all([
-      extractWithClaude(base64).catch(err => {
-        console.error('Claude error:', err);
-        return null;
-      }),
-      extractWithOpenAI(base64).catch(err => {
-        console.error('OpenAI error:', err);
-        return null;
-      }),
+      useTextExtraction
+        ? extractWithClaudeFromText(extractedText).catch(err => {
+            console.error('Claude text extraction error:', err);
+            return null;
+          })
+        : extractWithClaude(base64).catch(err => {
+            console.error('Claude image extraction error:', err);
+            return null;
+          }),
+      useTextExtraction
+        ? extractWithOpenAIFromText(extractedText).catch(err => {
+            console.error('OpenAI text extraction error:', err);
+            return null;
+          })
+        : extractWithOpenAI(base64).catch(err => {
+            console.error('OpenAI image extraction error:', err);
+            return null;
+          }),
     ]);
 
     if (!claudeResult || !openaiResult) {
