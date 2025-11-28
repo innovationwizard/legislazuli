@@ -10,11 +10,8 @@ const nextConfig = {
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Exclude native binaries from bundling
-      config.externals = [...(config.externals || []), {
-        '@napi-rs/canvas': '@napi-rs/canvas',
-        'canvas': '@napi-rs/canvas',
-      }];
+      // Don't externalize canvas - let it be bundled (may not work in serverless)
+      // If @napi-rs/canvas doesn't work, we'll need an alternative approach
       
       // Ignore native binary files
       config.module = config.module || {};

@@ -125,11 +125,24 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
     setupPolyfills();
 
     // Import canvas first and make it available globally for pdfjs-dist auto-detection
-    const canvasModule = await import('@napi-rs/canvas');
-    const { createCanvas } = canvasModule;
+    let canvasModule: any;
+    let createCanvas: any;
+    
+    try {
+      canvasModule = await import('@napi-rs/canvas');
+      createCanvas = canvasModule.createCanvas || canvasModule.default?.createCanvas;
+      
+      if (!createCanvas) {
+        throw new Error('createCanvas not found in @napi-rs/canvas');
+      }
+    } catch (canvasError) {
+      console.warn('Failed to load @napi-rs/canvas, PDF conversion may not work:', canvasError);
+      // In serverless environments, native modules may not be available
+      // We'll try to continue anyway - pdfjs-dist might have fallbacks
+      throw new Error('Canvas library not available in this environment. PDF conversion requires a native canvas implementation.');
+    }
     
     // Make canvas available globally before pdfjs-dist tries to auto-detect it
-    // This prevents the "Cannot find module '@napi-rs/canvas'" warning
     if (typeof (globalThis as any).Canvas === 'undefined') {
       (globalThis as any).Canvas = createCanvas;
     }
@@ -152,8 +165,9 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
     // The legacy build is designed for Node.js/serverless environments
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
     
-    // Disable worker for server-side rendering (not needed in Node.js)
-    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+    // Set worker source for serverless compatibility (legacy build needs a valid worker)
+    const version = pdfjsLib.version || '5.4.394';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/legacy/build/pdf.worker.min.mjs`;
     
     // Load the PDF document
     const loadingTask = pdfjsLib.getDocument({
