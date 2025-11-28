@@ -45,7 +45,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        <FileUpload onUpload={handleUpload} />
+        <FileUpload onUpload={handleUpload} processing={uploading} />
       </div>
 
       <div className="border-t pt-8">
