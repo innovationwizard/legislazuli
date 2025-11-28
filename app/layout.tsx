@@ -27,17 +27,18 @@ export const metadata: Metadata = {
     description: 'Sistema de extracción de datos para documentos legales guatemaltecos con 100% de precisión',
     url: baseUrl,
     siteName: 'Legislazuli',
+    type: 'website',
+    locale: 'es_GT',
     images: [
       {
-        url: `${baseUrl}/opengraph-image.png`, // Use .png extension for better WhatsApp compatibility
+        url: `${baseUrl}/opengraph-image.png`,
         width: 1200,
         height: 630,
         alt: 'Legislazuli - Extracción de Datos Legales',
         type: 'image/png',
+        secureUrl: `${baseUrl}/opengraph-image.png`,
       },
     ],
-    type: 'website',
-    locale: 'es_GT',
   },
   twitter: {
     card: 'summary_large_image',
