@@ -10,10 +10,7 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
     const puppeteer = await import('puppeteer-core');
     const chromium = await import('@sparticuz/chromium');
     
-    // Configure Chromium for serverless
-    chromium.setGraphicsMode(false); // Disable graphics for serverless
-    
-    // Launch browser
+    // Launch browser with Chromium for serverless
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
