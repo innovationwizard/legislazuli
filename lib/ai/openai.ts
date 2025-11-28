@@ -6,12 +6,44 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
 
-export async function extractWithOpenAI(imageBase64: string): Promise<RawExtractionFields> {
+type FileData = 
+  | { type: 'pdf'; buffer: Buffer; mimeType: string }
+  | { type: 'image'; base64: string; mimeType: string };
+
+export async function extractWithOpenAI(fileData: FileData): Promise<RawExtractionFields> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is not set');
   }
 
   try {
+    // Build content array based on file type
+    const content: any[] = [
+      {
+        type: 'text',
+        text: EXTRACTION_USER_PROMPT,
+      },
+    ];
+    
+    if (fileData.type === 'pdf') {
+      // OpenAI GPT-4o vision API supports PDFs via data URL
+      // If this doesn't work, we may need to convert PDF to image as fallback
+      content.push({
+        type: 'image_url',
+        image_url: {
+          url: `data:application/pdf;base64,${fileData.buffer.toString('base64')}`,
+        },
+      });
+    } else {
+      // Image files
+      const base64Data = fileData.base64.split(',')[1] || fileData.base64;
+      content.push({
+        type: 'image_url',
+        image_url: {
+          url: `data:${fileData.mimeType || 'image/png'};base64,${base64Data}`,
+        },
+      });
+    }
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
@@ -21,18 +53,7 @@ export async function extractWithOpenAI(imageBase64: string): Promise<RawExtract
         },
         {
           role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: EXTRACTION_USER_PROMPT,
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/png;base64,${imageBase64}`,
-              },
-            },
-          ],
+          content,
         },
       ],
       max_tokens: 4096,

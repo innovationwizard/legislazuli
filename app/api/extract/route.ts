@@ -6,7 +6,6 @@ import { extractWithClaude } from '@/lib/ai/claude';
 import { extractWithOpenAI } from '@/lib/ai/openai';
 import { compareResults, convertToExtractedFields } from '@/lib/ai/consensus';
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
-import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
 import { DocType } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -42,26 +41,12 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Convert to base64 - PDFs need to be converted to image first
-    let base64: string;
-    if (isPdf) {
-      try {
-        // Convert PDF first page to PNG image
-        base64 = await convertPdfToImage(buffer);
-      } catch (error) {
-        console.error('PDF conversion error:', error);
-        return NextResponse.json(
-          { 
-            error: 'Error al procesar el PDF. Por favor, asegúrate de que el archivo PDF no esté corrupto.',
-            errorCode: 'PDF_CONVERSION_ERROR'
-          },
-          { status: 400 }
-        );
-      }
-    } else {
-      // Image files can be used directly
-      base64 = buffer.toString('base64');
-    }
+    // Prepare file data for API calls
+    // PDFs are sent directly to APIs (no conversion needed)
+    // Images are converted to base64 for compatibility
+    const fileData = isPdf 
+      ? { type: 'pdf' as const, buffer, mimeType: file.type }
+      : { type: 'image' as const, base64: buffer.toString('base64'), mimeType: file.type };
 
     // Upload to Supabase Storage
     const supabase = createServerClient();
@@ -99,12 +84,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract with both APIs in parallel
+    // Both APIs support PDFs directly, which is better for legal documents
     const [claudeResult, openaiResult] = await Promise.all([
-      extractWithClaude(base64).catch(err => {
+      extractWithClaude(fileData).catch(err => {
         console.error('Claude error:', err);
         return null;
       }),
-      extractWithOpenAI(base64).catch(err => {
+      extractWithOpenAI(fileData).catch(err => {
         console.error('OpenAI error:', err);
         return null;
       }),

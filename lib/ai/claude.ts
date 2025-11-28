@@ -6,12 +6,48 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-export async function extractWithClaude(imageBase64: string): Promise<RawExtractionFields> {
+type FileData = 
+  | { type: 'pdf'; buffer: Buffer; mimeType: string }
+  | { type: 'image'; base64: string; mimeType: string };
+
+export async function extractWithClaude(fileData: FileData): Promise<RawExtractionFields> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not set');
   }
 
   try {
+    // Build content array based on file type
+    const content: any[] = [];
+    
+    if (fileData.type === 'pdf') {
+      // Claude supports PDFs directly via file API or base64
+      // Using base64 approach for consistency
+      content.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: fileData.buffer.toString('base64'),
+        },
+      });
+    } else {
+      // Image files
+      const base64Data = fileData.base64.split(',')[1] || fileData.base64;
+      content.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: fileData.mimeType || 'image/png',
+          data: base64Data,
+        },
+      });
+    }
+    
+    content.push({
+      type: 'text',
+      text: EXTRACTION_USER_PROMPT,
+    });
+
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
@@ -19,31 +55,18 @@ export async function extractWithClaude(imageBase64: string): Promise<RawExtract
       messages: [
         {
           role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: 'image/png',
-                data: imageBase64.split(',')[1] || imageBase64, // Remove data URL prefix if present
-              },
-            },
-            {
-              type: 'text',
-              text: EXTRACTION_USER_PROMPT,
-            },
-          ],
+          content,
         },
       ],
     });
 
-    const content = message.content[0];
-    if (content.type !== 'text') {
+    const responseContent = message.content[0];
+    if (responseContent.type !== 'text') {
       throw new Error('Unexpected response type from Claude');
     }
 
     // Extract JSON from response
-    const text = content.text;
+    const text = responseContent.text;
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('No JSON found in Claude response');
