@@ -55,9 +55,9 @@ export default function ExtractionPage() {
     }
   };
 
-  const handleDownload = (format: 'txt' | 'html') => {
+  const handleDownload = () => {
     if (!extraction) return;
-    window.open(`/api/download/${extraction.id}?format=${format}`, '_blank');
+    window.open(`/api/download/${extraction.id}?format=txt`, '_blank');
   };
 
   if (loading) {
@@ -88,20 +88,12 @@ export default function ExtractionPage() {
         >
           ← Volver
         </Link>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            onClick={() => handleDownload('txt')}
-          >
-            Descargar TXT
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => handleDownload('html')}
-          >
-            Descargar HTML
-          </Button>
-        </div>
+        <Button
+          variant="secondary"
+          onClick={handleDownload}
+        >
+          Descargar TXT
+        </Button>
       </div>
 
       <ExtractionResults

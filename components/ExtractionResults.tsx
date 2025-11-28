@@ -49,7 +49,7 @@ export function ExtractionResults({
                   )}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <p className="text-gray-700">{field.field_value}</p>
+                  <p className="text-gray-700 whitespace-pre-line">{field.field_value}</p>
                   <CopyButton value={field.field_value} />
                 </div>
                 {field.field_value_words && (

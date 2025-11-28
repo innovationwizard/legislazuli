@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createServerClient } from '@/lib/db/supabase';
+import { translateConfidence, getFieldDisplayName } from '@/lib/utils/field-names';
 
 export async function GET(
   request: NextRequest,
@@ -71,7 +72,7 @@ function generateTXT(extraction: any, fields: any[]): string {
   text += '='.repeat(50) + '\n\n';
   
   fields.forEach(field => {
-    text += `${field.field_name}: ${field.field_value}\n`;
+    text += `${field.field_name}\n${field.field_value}\n`;
     if (field.field_value_words) {
       text += `  (${field.field_value_words})\n`;
     }
@@ -81,9 +82,10 @@ function generateTXT(extraction: any, fields: any[]): string {
     text += '\n';
   });
 
-  text += `\nConfianza: ${extraction.confidence}\n`;
+  text += `\nConfianza: ${translateConfidence(extraction.confidence)}\n`;
   if (extraction.discrepancies && extraction.discrepancies.length > 0) {
-    text += `Discrepancias: ${extraction.discrepancies.join(', ')}\n`;
+    const displayNames = extraction.discrepancies.map((key: string) => getFieldDisplayName(key));
+    text += `Discrepancias: ${displayNames.join(', ')}\n`;
   }
 
   return text;
