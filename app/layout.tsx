@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     siteName: 'Legislazuli',
     images: [
       {
-        url: `${baseUrl}/opengraph-image`,
+        url: `${baseUrl}/opengraph-image.png`, // Use .png extension for better WhatsApp compatibility
         width: 1200,
         height: 630,
         alt: 'Legislazuli - Extracción de Datos Legales',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Legislazuli - Extracción de Datos Legales',
     description: 'Sistema de extracción de datos para documentos legales guatemaltecos con 100% de precisión',
-    images: [`${baseUrl}/opengraph-image`],
+    images: [`${baseUrl}/opengraph-image.png`],
   },
 };
 
