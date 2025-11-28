@@ -5,7 +5,7 @@ import { SessionProvider } from '@/components/SessionProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const baseUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://legislazuli.com';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -31,12 +31,11 @@ export const metadata: Metadata = {
     locale: 'es_GT',
     images: [
       {
-        url: `${baseUrl}/opengraph-image.png`,
+        url: `${baseUrl}/opengraph-image`,
         width: 1200,
         height: 630,
         alt: 'Legislazuli - Extracción de Datos Legales',
         type: 'image/png',
-        secureUrl: `${baseUrl}/opengraph-image.png`,
       },
     ],
   },
@@ -44,7 +43,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Legislazuli - Extracción de Datos Legales',
     description: 'Sistema de extracción de datos para documentos legales guatemaltecos con 100% de precisión',
-    images: [`${baseUrl}/opengraph-image.png`],
+    images: [`${baseUrl}/opengraph-image`],
   },
 };
 
