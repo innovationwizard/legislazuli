@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50;
+}
+
+/* Lapis & Gold Theme */
+:root {
+  --lapis-blue: #1e3a8a;
+  --lapis-blue-dark: #0f4c81;
+  --gold: #fbbf24;
+  --gold-light: #fcd34d;
+  --gold-dark: #f59e0b;
+}
+
