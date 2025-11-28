@@ -6,6 +6,7 @@ import { SessionProvider } from '@/components/SessionProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'),
   title: 'Legislazuli - Extracción de Datos Legales',
   description: 'Sistema de extracción de datos para documentos legales guatemaltecos con 100% de precisión mediante consenso multi-API',
   icons: {

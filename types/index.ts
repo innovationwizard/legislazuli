@@ -38,6 +38,10 @@ export interface PatenteComercionFields {
 }
 
 // Raw API response format
+// Note: JSON objects cannot have duplicate keys, so if a document has multiple
+// fields with the same semantic meaning, the AI should return them as arrays
+// or with distinguishing suffixes. The final ExtractedField[] array can contain
+// multiple entries with the same field_name to preserve all occurrences.
 export interface RawExtractionFields {
   tipo_patente: string;
   numero_patente: string;
@@ -59,12 +63,15 @@ export interface RawExtractionFields {
   nombre_propietario: string;
   nacionalidad: string;
   documento_identificacion?: string;
-  direccion_propietario?: string;
   representante?: string;
   fecha_emision_dia: string;
   fecha_emision_mes: string;
   fecha_emision_ano: string;
   hecho_por: string;
+  // If a document has multiple occurrences of the same field type,
+  // they can be returned with suffixes (e.g., direccion_propietario_2)
+  // or as arrays. The consensus engine will handle them appropriately.
+  [key: string]: string | string[] | undefined;
 }
 
 export interface ConsensusResult {
