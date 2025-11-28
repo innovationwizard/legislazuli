@@ -31,8 +31,8 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
     // Set up viewport with good quality (2x scale for better OCR)
     const viewport = page.getViewport({ scale: 2.0 });
     
-    // Create canvas using node-canvas
-    const { createCanvas } = await import('canvas');
+    // Create canvas using @napi-rs/canvas (serverless-compatible)
+    const { createCanvas } = await import('@napi-rs/canvas');
     const canvas = createCanvas(viewport.width, viewport.height);
     const context = canvas.getContext('2d');
     
