@@ -1,4 +1,4 @@
-import { Scale } from 'lucide-react';
+import Image from 'next/image';
 
 interface LogoProps {
   className?: string;
@@ -10,10 +10,12 @@ export function Logo({ className = '', size = 32, showText = true }: LogoProps) 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <div className="relative">
-        <Scale 
-          size={size} 
-          className="text-amber-400" 
-          strokeWidth={2.5}
+        <Image
+          src="/logo.png"
+          alt="Legislazuli Logo"
+          width={size}
+          height={size}
+          className="object-contain"
         />
       </div>
       {showText && (
