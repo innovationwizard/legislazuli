@@ -10,8 +10,8 @@ const config: Config = {
     extend: {
       colors: {
         lapis: {
-          DEFAULT: '#1e3a8a',
-          dark: '#0f4c81',
+          DEFAULT: '#15317e',
+          dark: '#0d2556',
           light: '#3b82f6',
         },
         gold: {

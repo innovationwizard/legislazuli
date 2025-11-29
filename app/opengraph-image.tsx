@@ -13,7 +13,7 @@ export default async function Image() {
     (
       <div
         style={{
-          background: 'linear-gradient(135deg, #1e3a8a 0%, #0f4c81 100%)',
+          background: 'linear-gradient(135deg, #15317e 0%, #0d2556 100%)',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -41,7 +41,7 @@ export default async function Image() {
             <rect width="32" height="32" rx="6" fill="#fbbf24"/>
             <path
               d="M8 16L12 12L16 16L20 12L24 16M8 20L12 16L16 20L20 16L24 20"
-              stroke="#1e3a8a"
+              stroke="#15317e"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
       { url: '/icon.png', type: 'image/png', sizes: '32x32' },
       { url: '/icon.svg', type: 'image/svg+xml' },
     ],
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
     locale: 'es_GT',
     images: [
       {
-        url: `${baseUrl}/opengraph-image`,
+        url: `${baseUrl}/og-image.png`,
         width: 1200,
         height: 630,
         alt: 'Legislazuli - Extracción de Datos Legales',
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Legislazuli - Extracción de Datos Legales',
     description: 'Sistema de extracción de datos para documentos legales guatemaltecos con 100% de precisión',
-    images: [`${baseUrl}/opengraph-image`],
+    images: [`${baseUrl}/og-image.png`],
   },
 };
 
