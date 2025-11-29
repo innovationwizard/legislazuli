@@ -7,7 +7,7 @@ export default function HomePage() {
       <Logo size={64} />
       <h1 className="text-4xl font-bold text-white mt-6 mb-4">Legislazuli</h1>
       <p className="text-xl text-white/80 mb-8 text-center max-w-md">
-        Extracción de datos legales guatemaltecos con 100% de precisión
+        Extracción de datos legales con 100% de precisión
       </p>
       <Link
         href="/login"
