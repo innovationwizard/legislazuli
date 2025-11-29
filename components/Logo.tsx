@@ -20,7 +20,7 @@ export function Logo({ className = '', size = 32, showText = true }: LogoProps) 
       </div>
       {showText && (
         <span className="text-xl font-bold text-white tracking-tight">
-          LEGISLAZULI
+          Legislazuli
         </span>
       )}
     </div>

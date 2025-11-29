@@ -42,7 +42,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-lapis to-lapis-dark">
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-8 bg-lapis rounded-lg p-4">
           <Logo size={48} />
         </div>
         

@@ -4,9 +4,9 @@ import { Logo } from '@/components/Logo';
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-lapis flex flex-col items-center justify-center p-8">
-      <Logo size={64} />
+      <Logo size={64} showText={false} />
       <h1 className="text-4xl font-bold text-white mt-6 mb-4">Legislazuli</h1>
-      <p className="text-xl text-white/80 mb-8 text-center max-w-md">
+      <p className="text-xl text-gold mb-8 text-center max-w-md md:max-w-2xl lg:max-w-3xl">
         Extracción de datos legales con 100% de precisión
       </p>
       <Link
