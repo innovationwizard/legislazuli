@@ -1,6 +1,8 @@
 import { ImageResponse } from 'next/og';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const alt = 'Legislazuli';
 export const size = {
   width: 1200,
@@ -9,6 +11,12 @@ export const size = {
 export const contentType = 'image/png';
 
 export default async function Image() {
+  // Load the logo image from public directory
+  const logoPath = join(process.cwd(), 'public', 'logo.png');
+  const logoBuffer = readFileSync(logoPath);
+  const logoBase64 = logoBuffer.toString('base64');
+  const logoDataUrl = `data:image/png;base64,${logoBase64}`;
+
   return new ImageResponse(
     (
       <div
@@ -31,22 +39,15 @@ export default async function Image() {
             marginBottom: '40px',
           }}
         >
-          <svg
-            width="120"
-            height="120"
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect width="32" height="32" rx="6" fill="#fbbf24"/>
-            <path
-              d="M8 16L12 12L16 16L20 12L24 16M8 20L12 16L16 20L20 16L24 20"
-              stroke="#15317e"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <img
+            src={logoDataUrl}
+            alt="Legislazuli Logo"
+            width={120}
+            height={120}
+            style={{
+              objectFit: 'contain',
+            }}
+          />
           <h1
             style={{
               fontSize: '96px',
