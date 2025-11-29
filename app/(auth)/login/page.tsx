@@ -29,7 +29,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Credenciales inválidas');
       } else {
-        router.push('/');
+        router.push('/dashboard');
         router.refresh();
       }
     } catch (err) {

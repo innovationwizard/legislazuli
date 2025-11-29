@@ -72,7 +72,7 @@ export default function ExtractionPage() {
     return (
       <div className="text-center py-12">
         <div className="text-red-600 mb-4">{error || 'Extracción no encontrada'}</div>
-        <Link href="/" className="text-lapis hover:text-lapis-dark transition-colors">
+        <Link href="/dashboard" className="text-lapis hover:text-lapis-dark transition-colors">
           Volver al dashboard
         </Link>
       </div>
@@ -83,7 +83,7 @@ export default function ExtractionPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <Link
-          href="/"
+          href="/dashboard"
           className="text-lapis hover:text-lapis-dark flex items-center gap-2 transition-colors"
         >
           ← Volver
