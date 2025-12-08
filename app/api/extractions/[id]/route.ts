@@ -22,7 +22,8 @@ export async function GET(
         documents (
           id,
           filename,
-          doc_type
+          doc_type,
+          detected_document_type
         )
       `)
       .eq('id', params.id)

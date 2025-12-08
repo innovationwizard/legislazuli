@@ -89,6 +89,7 @@ export function FileUpload({ onUpload, processing = false }: FileUploadProps) {
         >
           <option value="patente_empresa">Patente de Comercio - Empresa</option>
           <option value="patente_sociedad">Patente de Comercio - Sociedad</option>
+          <option value="otros">Otros</option>
         </select>
       </div>
 

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS documents (
   filename TEXT NOT NULL,
   file_path TEXT NOT NULL,
   doc_type TEXT NOT NULL,
+  detected_document_type TEXT,
   uploaded_at TIMESTAMPTZ DEFAULT NOW()
 );
 

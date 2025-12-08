@@ -39,3 +39,6 @@ convert app/favicon.svg -define icon:auto-resize=16,32,48 app/favicon.ico
 
 After creating the files, Next.js will automatically detect and use them.
 
+
+
+

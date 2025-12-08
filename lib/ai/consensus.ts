@@ -300,3 +300,110 @@ export function convertToExtractedFields(
   return fields;
 }
 
+/**
+ * Generic consensus function for "Otros" documents
+ * Works with any fields dynamically extracted from the document
+ */
+export function compareGenericResults(
+  claudeRaw: RawExtractionFields,
+  openaiRaw: RawExtractionFields
+): {
+  consensus: Record<string, any>;
+  results: ConsensusResult[];
+  confidence: 'full' | 'partial' | 'review_required';
+  discrepancies: string[];
+} {
+  // Get all unique field names from both results
+  const allFields = new Set<string>();
+  Object.keys(claudeRaw).forEach(key => allFields.add(key));
+  Object.keys(openaiRaw).forEach(key => allFields.add(key));
+
+  const results: ConsensusResult[] = [];
+  const discrepancies: string[] = [];
+  const consensus: Record<string, any> = {};
+
+  // Compare all fields
+  for (const fieldName of allFields) {
+    const claudeValue = claudeRaw[fieldName];
+    const openaiValue = openaiRaw[fieldName];
+
+    // Skip if both are empty/null/undefined
+    if (!claudeValue && !openaiValue) {
+      continue;
+    }
+
+    const result = compareField(fieldName, claudeValue, openaiValue);
+    results.push(result);
+
+    if (result.match) {
+      consensus[fieldName] = result.final_value;
+    } else {
+      // Prefer Claude's value, fallback to OpenAI's
+      consensus[fieldName] = result.claude_value || result.openai_value || '';
+      discrepancies.push(fieldName);
+    }
+  }
+
+  // Determine confidence level
+  const totalFields = results.length;
+  if (totalFields === 0) {
+    return {
+      consensus: {},
+      results: [],
+      confidence: 'review_required',
+      discrepancies: [],
+    };
+  }
+
+  const matchedFields = results.filter(r => r.match).length;
+  const matchPercentage = matchedFields / totalFields;
+
+  let confidence: 'full' | 'partial' | 'review_required';
+  if (matchPercentage >= 0.95) {
+    confidence = 'full';
+  } else if (matchPercentage >= 0.8) {
+    confidence = 'partial';
+  } else {
+    confidence = 'review_required';
+  }
+
+  return {
+    consensus,
+    results,
+    confidence,
+    discrepancies,
+  };
+}
+
+/**
+ * Convert generic consensus result to ExtractedField array
+ */
+export function convertGenericToExtractedFields(
+  consensus: Record<string, any>,
+  discrepancies: string[]
+): ExtractedField[] {
+  const fields: ExtractedField[] = [];
+
+  // Sort fields by name for consistent ordering
+  const sortedFields = Object.keys(consensus).sort();
+
+  sortedFields.forEach((fieldName, index) => {
+    const value = consensus[fieldName];
+    if (value !== undefined && value !== null && value !== '') {
+      // Format field name: convert snake_case to Title Case
+      const formattedName = fieldName
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      fields.push({
+        field_name: formattedName,
+        field_value: String(value),
+        needs_review: discrepancies.includes(fieldName),
+      });
+    }
+  });
+
+  return fields;
+}
+

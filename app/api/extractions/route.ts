@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
         documents (
           id,
           filename,
-          doc_type
+          doc_type,
+          detected_document_type
         )
       `)
       .in('document_id', documentIds)

@@ -11,6 +11,7 @@ interface Extraction {
     id: string;
     filename: string;
     doc_type: string;
+    detected_document_type?: string | null;
   };
 }
 
@@ -108,6 +109,11 @@ export function ExtractionList() {
               <div className="font-medium">{extraction.documents.filename}</div>
               <div className="text-sm text-gray-500">
                 {formatDate(extraction.created_at)}
+                {extraction.documents.detected_document_type && (
+                  <span className="ml-2 text-lapis">
+                    • {extraction.documents.detected_document_type}
+                  </span>
+                )}
               </div>
             </div>
             {getConfidenceBadge(extraction.confidence)}

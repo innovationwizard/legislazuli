@@ -34,3 +34,17 @@ VALUES (
   '$2a$12$5QgGp58GBgTy9QXLGaDu4OgrEJYy/zyaJ8CwQKZL30ebEljOjmuRi'
 ) ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 
+-- Usuario: JPROSALES / Password: JP_1992
+INSERT INTO users (email, password_hash) 
+VALUES (
+  'JPROSALES',
+  '$2a$12$AJ0QEOXfMcuXPcn.WD/0n.wqf3U1KGQSF253MkPJOoa13AIeeiFUa'
+) ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash;
+
+-- Usuario: ALSS / Password: ALSS*1*2*9_
+INSERT INTO users (email, password_hash) 
+VALUES (
+  'ALSS',
+  '$2a$12$tVZQmOsUlxn3bnuJ/osxxe2n.uoyIP41Gar82hgA0r9u0qc9XiJWG'
+) ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash;
+

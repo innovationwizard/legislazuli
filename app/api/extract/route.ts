@@ -2,9 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createServerClient } from '@/lib/db/supabase';
-import { extractWithClaude, extractWithClaudeFromText } from '@/lib/ai/claude';
-import { extractWithOpenAI, extractWithOpenAIFromText } from '@/lib/ai/openai';
-import { compareResults, convertToExtractedFields } from '@/lib/ai/consensus';
+import { 
+  extractWithClaude, 
+  extractWithClaudeFromText,
+  detectDocumentTypeWithClaude,
+  detectDocumentTypeWithClaudeFromText,
+  extractGenericWithClaude,
+  extractGenericWithClaudeFromText
+} from '@/lib/ai/claude';
+import { 
+  extractWithOpenAI, 
+  extractWithOpenAIFromText,
+  detectDocumentTypeWithOpenAI,
+  detectDocumentTypeWithOpenAIFromText,
+  extractGenericWithOpenAI,
+  extractGenericWithOpenAIFromText
+} from '@/lib/ai/openai';
+import { 
+  compareResults, 
+  convertToExtractedFields,
+  compareGenericResults,
+  convertGenericToExtractedFields
+} from '@/lib/ai/consensus';
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
 import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
 import { extractTextFromPdf } from '@/lib/utils/textract';
@@ -94,6 +113,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
     }
 
+    // Detect document type if doc_type is "otros"
+    let detectedDocumentType: string | null = null;
+    if (docType === 'otros') {
+      try {
+        const [claudeDetection, openaiDetection] = await Promise.all([
+          useTextExtraction
+            ? detectDocumentTypeWithClaudeFromText(extractedText).catch(err => {
+                console.error('Claude document type detection error:', err);
+                return null;
+              })
+            : detectDocumentTypeWithClaude(base64).catch(err => {
+                console.error('Claude document type detection error:', err);
+                return null;
+              }),
+          useTextExtraction
+            ? detectDocumentTypeWithOpenAIFromText(extractedText).catch(err => {
+                console.error('OpenAI document type detection error:', err);
+                return null;
+              })
+            : detectDocumentTypeWithOpenAI(base64).catch(err => {
+                console.error('OpenAI document type detection error:', err);
+                return null;
+              }),
+        ]);
+
+        // Use the detection with higher confidence, or Claude's if both available
+        if (claudeDetection && openaiDetection) {
+          // Prefer the one with higher confidence, or Claude's if equal
+          const claudeConf = claudeDetection.confidence === 'alta' ? 3 : claudeDetection.confidence === 'media' ? 2 : 1;
+          const openaiConf = openaiDetection.confidence === 'alta' ? 3 : openaiDetection.confidence === 'media' ? 2 : 1;
+          detectedDocumentType = claudeConf >= openaiConf ? claudeDetection.document_type : openaiDetection.document_type;
+        } else if (claudeDetection) {
+          detectedDocumentType = claudeDetection.document_type;
+        } else if (openaiDetection) {
+          detectedDocumentType = openaiDetection.document_type;
+        }
+
+        if (detectedDocumentType) {
+          console.log('Detected document type:', detectedDocumentType);
+        }
+      } catch (error) {
+        console.error('Error detecting document type:', error);
+        // Continue with extraction even if detection fails
+      }
+    }
+
     // Save document record
     const { data: document, error: docError } = await supabase
       .from('documents')
@@ -102,6 +167,7 @@ export async function POST(request: NextRequest) {
         filename: file.name,
         file_path: filePath,
         doc_type: docType,
+        detected_document_type: detectedDocumentType,
       })
       .select()
       .single();
@@ -111,26 +177,47 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract with both APIs in parallel
+    // Use generic extraction for "otros", specific extraction for other types
     // Use text extraction for PDFs (via Textract), image extraction for images
     const [claudeResult, openaiResult] = await Promise.all([
       useTextExtraction
-        ? extractWithClaudeFromText(extractedText).catch(err => {
-            console.error('Claude text extraction error:', err);
-            return null;
-          })
-        : extractWithClaude(base64).catch(err => {
-            console.error('Claude image extraction error:', err);
-            return null;
-          }),
+        ? (docType === 'otros'
+            ? extractGenericWithClaudeFromText(extractedText).catch(err => {
+                console.error('Claude generic text extraction error:', err);
+                return null;
+              })
+            : extractWithClaudeFromText(extractedText).catch(err => {
+                console.error('Claude text extraction error:', err);
+                return null;
+              }))
+        : (docType === 'otros'
+            ? extractGenericWithClaude(base64).catch(err => {
+                console.error('Claude generic image extraction error:', err);
+                return null;
+              })
+            : extractWithClaude(base64).catch(err => {
+                console.error('Claude image extraction error:', err);
+                return null;
+              })),
       useTextExtraction
-        ? extractWithOpenAIFromText(extractedText).catch(err => {
-            console.error('OpenAI text extraction error:', err);
-            return null;
-          })
-        : extractWithOpenAI(base64).catch(err => {
-            console.error('OpenAI image extraction error:', err);
-            return null;
-          }),
+        ? (docType === 'otros'
+            ? extractGenericWithOpenAIFromText(extractedText).catch(err => {
+                console.error('OpenAI generic text extraction error:', err);
+                return null;
+              })
+            : extractWithOpenAIFromText(extractedText).catch(err => {
+                console.error('OpenAI text extraction error:', err);
+                return null;
+              }))
+        : (docType === 'otros'
+            ? extractGenericWithOpenAI(base64).catch(err => {
+                console.error('OpenAI generic image extraction error:', err);
+                return null;
+              })
+            : extractWithOpenAI(base64).catch(err => {
+                console.error('OpenAI image extraction error:', err);
+                return null;
+              })),
     ]);
 
     if (!claudeResult || !openaiResult) {
@@ -141,8 +228,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Compare and create consensus
-    const { consensus, confidence, discrepancies } = compareResults(claudeResult, openaiResult);
-    const extractedFields = convertToExtractedFields(consensus, discrepancies);
+    // Use generic consensus for "otros", specific consensus for other types
+    let consensus: any;
+    let confidence: 'full' | 'partial' | 'review_required';
+    let discrepancies: string[];
+    let extractedFields: any[];
+
+    if (docType === 'otros') {
+      const genericResult = compareGenericResults(claudeResult, openaiResult);
+      consensus = genericResult.consensus;
+      confidence = genericResult.confidence;
+      discrepancies = genericResult.discrepancies;
+      extractedFields = convertGenericToExtractedFields(consensus, discrepancies);
+    } else {
+      const specificResult = compareResults(claudeResult, openaiResult);
+      consensus = specificResult.consensus;
+      confidence = specificResult.confidence;
+      discrepancies = specificResult.discrepancies;
+      extractedFields = convertToExtractedFields(consensus, discrepancies);
+    }
 
     // Save extraction
     const { data: extraction, error: extractionError } = await supabase

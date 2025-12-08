@@ -18,3 +18,6 @@ console.log('4. Place them in the app/ directory');
 // For now, let's create an optimized favicon.ico reference
 // Next.js will automatically use app/icon.png or app/icon.ico if present
 
+
+
+

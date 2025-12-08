@@ -97,5 +97,5 @@ export interface ExtractedField {
   needs_review: boolean;
 }
 
-export type DocType = 'patente_empresa' | 'patente_sociedad';
+export type DocType = 'patente_empresa' | 'patente_sociedad' | 'otros';
 
