@@ -4,8 +4,8 @@ import {
   EXTRACTION_USER_PROMPT,
   DOCUMENT_TYPE_DETECTION_SYSTEM_PROMPT,
   DOCUMENT_TYPE_DETECTION_USER_PROMPT,
-  GENERIC_EXTRACTION_SYSTEM_PROMPT,
-  GENERIC_EXTRACTION_USER_PROMPT
+  FULL_TEXT_EXTRACTION_SYSTEM_PROMPT,
+  FULL_TEXT_EXTRACTION_USER_PROMPT
 } from './prompts';
 import { RawExtractionFields } from '@/types';
 
@@ -204,9 +204,9 @@ export async function detectDocumentTypeWithOpenAIFromText(text: string): Promis
 }
 
 /**
- * Extract data from generic document using OpenAI (for "Otros" type)
+ * Extract full text from document using OpenAI (for "Otros" type)
  */
-export async function extractGenericWithOpenAI(imageBase64: string): Promise<RawExtractionFields> {
+export async function extractFullTextWithOpenAI(imageBase64: string): Promise<{ full_text: string }> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is not set');
   }
@@ -217,14 +217,14 @@ export async function extractGenericWithOpenAI(imageBase64: string): Promise<Raw
       messages: [
         {
           role: 'system',
-          content: GENERIC_EXTRACTION_SYSTEM_PROMPT,
+          content: FULL_TEXT_EXTRACTION_SYSTEM_PROMPT,
         },
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: GENERIC_EXTRACTION_USER_PROMPT,
+              text: FULL_TEXT_EXTRACTION_USER_PROMPT,
             },
             {
               type: 'image_url',
@@ -235,7 +235,7 @@ export async function extractGenericWithOpenAI(imageBase64: string): Promise<Raw
           ],
         },
       ],
-      max_tokens: 4096,
+      max_tokens: 8192,
     });
 
     const responseContent = response.choices[0]?.message?.content;
@@ -248,53 +248,20 @@ export async function extractGenericWithOpenAI(imageBase64: string): Promise<Raw
       throw new Error('No JSON found in OpenAI response');
     }
 
-    const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
+    const parsed = JSON.parse(jsonMatch[0]) as { full_text: string };
     return parsed;
   } catch (error) {
-    console.error('OpenAI generic extraction error:', error);
+    console.error('OpenAI full text extraction error:', error);
     throw error;
   }
 }
 
 /**
- * Extract data from generic document using OpenAI from text (for "Otros" type)
+ * Extract full text from document using OpenAI from text (for "Otros" type)
+ * For PDFs that already have extracted text, we can return it directly
  */
-export async function extractGenericWithOpenAIFromText(text: string): Promise<RawExtractionFields> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is not set');
-  }
-
-  try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: GENERIC_EXTRACTION_SYSTEM_PROMPT,
-        },
-        {
-          role: 'user',
-          content: `${GENERIC_EXTRACTION_USER_PROMPT}\n\nDocument text:\n${text}`,
-        },
-      ],
-      max_tokens: 4096,
-    });
-
-    const responseContent = response.choices[0]?.message?.content;
-    if (!responseContent) {
-      throw new Error('No content in OpenAI response');
-    }
-
-    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('No JSON found in OpenAI response');
-    }
-
-    const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
-    return parsed;
-  } catch (error) {
-    console.error('OpenAI generic text extraction error:', error);
-    throw error;
-  }
+export async function extractFullTextWithOpenAIFromText(text: string): Promise<{ full_text: string }> {
+  // For text-based documents, return the text directly wrapped in the expected format
+  return { full_text: text };
 }
 

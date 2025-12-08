@@ -7,22 +7,20 @@ import {
   extractWithClaudeFromText,
   detectDocumentTypeWithClaude,
   detectDocumentTypeWithClaudeFromText,
-  extractGenericWithClaude,
-  extractGenericWithClaudeFromText
+  extractFullTextWithClaude,
+  extractFullTextWithClaudeFromText
 } from '@/lib/ai/claude';
 import { 
   extractWithOpenAI, 
   extractWithOpenAIFromText,
   detectDocumentTypeWithOpenAI,
   detectDocumentTypeWithOpenAIFromText,
-  extractGenericWithOpenAI,
-  extractGenericWithOpenAIFromText
+  extractFullTextWithOpenAI,
+  extractFullTextWithOpenAIFromText
 } from '@/lib/ai/openai';
 import { 
   compareResults, 
-  convertToExtractedFields,
-  compareGenericResults,
-  convertGenericToExtractedFields
+  convertToExtractedFields
 } from '@/lib/ai/consensus';
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
 import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
@@ -177,71 +175,103 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract with both APIs in parallel
-    // Use generic extraction for "otros", specific extraction for other types
+    // Use full text extraction for "otros", specific extraction for other types
     // Use text extraction for PDFs (via Textract), image extraction for images
-    const [claudeResult, openaiResult] = await Promise.all([
-      useTextExtraction
-        ? (docType === 'otros'
-            ? extractGenericWithClaudeFromText(extractedText).catch(err => {
-                console.error('Claude generic text extraction error:', err);
-                return null;
-              })
-            : extractWithClaudeFromText(extractedText).catch(err => {
-                console.error('Claude text extraction error:', err);
-                return null;
-              }))
-        : (docType === 'otros'
-            ? extractGenericWithClaude(base64).catch(err => {
-                console.error('Claude generic image extraction error:', err);
-                return null;
-              })
-            : extractWithClaude(base64).catch(err => {
-                console.error('Claude image extraction error:', err);
-                return null;
-              })),
-      useTextExtraction
-        ? (docType === 'otros'
-            ? extractGenericWithOpenAIFromText(extractedText).catch(err => {
-                console.error('OpenAI generic text extraction error:', err);
-                return null;
-              })
-            : extractWithOpenAIFromText(extractedText).catch(err => {
-                console.error('OpenAI text extraction error:', err);
-                return null;
-              }))
-        : (docType === 'otros'
-            ? extractGenericWithOpenAI(base64).catch(err => {
-                console.error('OpenAI generic image extraction error:', err);
-                return null;
-              })
-            : extractWithOpenAI(base64).catch(err => {
-                console.error('OpenAI image extraction error:', err);
-                return null;
-              })),
-    ]);
-
-    if (!claudeResult || !openaiResult) {
-      return NextResponse.json(
-        { error: 'Failed to extract data from document' },
-        { status: 500 }
-      );
-    }
-
-    // Compare and create consensus
-    // Use generic consensus for "otros", specific consensus for other types
     let consensus: any;
     let confidence: 'full' | 'partial' | 'review_required';
     let discrepancies: string[];
     let extractedFields: any[];
+    let claudeResult: any;
+    let openaiResult: any;
 
     if (docType === 'otros') {
-      const genericResult = compareGenericResults(claudeResult, openaiResult);
-      consensus = genericResult.consensus;
-      confidence = genericResult.confidence;
-      discrepancies = genericResult.discrepancies;
-      extractedFields = convertGenericToExtractedFields(consensus, discrepancies);
+      // For "Otros", extract full text
+      const [claudeFullText, openaiFullText] = await Promise.all([
+        useTextExtraction
+          ? extractFullTextWithClaudeFromText(extractedText).catch(err => {
+              console.error('Claude full text extraction error:', err);
+              return null;
+            })
+          : extractFullTextWithClaude(base64).catch(err => {
+              console.error('Claude full text extraction error:', err);
+              return null;
+            }),
+        useTextExtraction
+          ? extractFullTextWithOpenAIFromText(extractedText).catch(err => {
+              console.error('OpenAI full text extraction error:', err);
+              return null;
+            })
+          : extractFullTextWithOpenAI(base64).catch(err => {
+              console.error('OpenAI full text extraction error:', err);
+              return null;
+            }),
+      ]);
+
+      if (!claudeFullText || !openaiFullText) {
+        return NextResponse.json(
+          { error: 'Failed to extract full text from document' },
+          { status: 500 }
+        );
+      }
+
+      // For full text, prefer Claude's result (more accurate for OCR), but compare both
+      const claudeText = claudeFullText.full_text.trim();
+      const openaiText = openaiFullText.full_text.trim();
+      
+      // Simple similarity check
+      const similarity = claudeText === openaiText ? 1.0 : 
+        (claudeText.length > 0 && openaiText.length > 0 ? 
+          Math.min(claudeText.length, openaiText.length) / Math.max(claudeText.length, openaiText.length) : 0);
+      
+      // Use Claude's text as primary (better OCR), but mark if there are significant differences
+      consensus = { full_text: claudeText };
+      confidence = similarity > 0.95 ? 'full' : similarity > 0.8 ? 'partial' : 'review_required';
+      discrepancies = similarity < 0.95 ? ['full_text'] : [];
+      
+      // Store results for database
+      claudeResult = claudeFullText;
+      openaiResult = openaiFullText;
+      
+      // Convert full text to extracted fields format
+      extractedFields = [{
+        field_name: 'Texto Completo',
+        field_value: claudeText,
+        needs_review: confidence === 'review_required',
+      }];
     } else {
-      const specificResult = compareResults(claudeResult, openaiResult);
+      // For specific document types, use structured extraction
+      const [claudeStructured, openaiStructured] = await Promise.all([
+        useTextExtraction
+          ? extractWithClaudeFromText(extractedText).catch(err => {
+              console.error('Claude text extraction error:', err);
+              return null;
+            })
+          : extractWithClaude(base64).catch(err => {
+              console.error('Claude image extraction error:', err);
+              return null;
+            }),
+        useTextExtraction
+          ? extractWithOpenAIFromText(extractedText).catch(err => {
+              console.error('OpenAI text extraction error:', err);
+              return null;
+            })
+          : extractWithOpenAI(base64).catch(err => {
+              console.error('OpenAI image extraction error:', err);
+              return null;
+            }),
+      ]);
+
+      if (!claudeStructured || !openaiStructured) {
+        return NextResponse.json(
+          { error: 'Failed to extract data from document' },
+          { status: 500 }
+        );
+      }
+
+      claudeResult = claudeStructured;
+      openaiResult = openaiStructured;
+
+      const specificResult = compareResults(claudeStructured, openaiStructured);
       consensus = specificResult.consensus;
       confidence = specificResult.confidence;
       discrepancies = specificResult.discrepancies;

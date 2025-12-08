@@ -4,8 +4,8 @@ import {
   EXTRACTION_USER_PROMPT,
   DOCUMENT_TYPE_DETECTION_SYSTEM_PROMPT,
   DOCUMENT_TYPE_DETECTION_USER_PROMPT,
-  GENERIC_EXTRACTION_SYSTEM_PROMPT,
-  GENERIC_EXTRACTION_USER_PROMPT
+  FULL_TEXT_EXTRACTION_SYSTEM_PROMPT,
+  FULL_TEXT_EXTRACTION_USER_PROMPT
 } from './prompts';
 import { RawExtractionFields } from '@/types';
 
@@ -207,9 +207,9 @@ export async function detectDocumentTypeWithClaudeFromText(text: string): Promis
 }
 
 /**
- * Extract data from generic document using Claude (for "Otros" type)
+ * Extract full text from document using Claude (for "Otros" type)
  */
-export async function extractGenericWithClaude(imageBase64: string): Promise<RawExtractionFields> {
+export async function extractFullTextWithClaude(imageBase64: string): Promise<{ full_text: string }> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not set');
   }
@@ -219,8 +219,8 @@ export async function extractGenericWithClaude(imageBase64: string): Promise<Raw
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: GENERIC_EXTRACTION_SYSTEM_PROMPT,
+      max_tokens: 8192,
+      system: FULL_TEXT_EXTRACTION_SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
@@ -235,7 +235,7 @@ export async function extractGenericWithClaude(imageBase64: string): Promise<Raw
             },
             {
               type: 'text',
-              text: GENERIC_EXTRACTION_USER_PROMPT,
+              text: FULL_TEXT_EXTRACTION_USER_PROMPT,
             },
           ],
         },
@@ -253,51 +253,20 @@ export async function extractGenericWithClaude(imageBase64: string): Promise<Raw
       throw new Error('No JSON found in Claude response');
     }
 
-    const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
+    const parsed = JSON.parse(jsonMatch[0]) as { full_text: string };
     return parsed;
   } catch (error) {
-    console.error('Claude generic extraction error:', error);
+    console.error('Claude full text extraction error:', error);
     throw error;
   }
 }
 
 /**
- * Extract data from generic document using Claude from text (for "Otros" type)
+ * Extract full text from document using Claude from text (for "Otros" type)
+ * For PDFs that already have extracted text, we can return it directly
  */
-export async function extractGenericWithClaudeFromText(text: string): Promise<RawExtractionFields> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY is not set');
-  }
-
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: GENERIC_EXTRACTION_SYSTEM_PROMPT,
-      messages: [
-        {
-          role: 'user',
-          content: `${GENERIC_EXTRACTION_USER_PROMPT}\n\nDocument text:\n${text}`,
-        },
-      ],
-    });
-
-    const responseContent = message.content[0];
-    if (responseContent.type !== 'text') {
-      throw new Error('Unexpected response type from Claude');
-    }
-
-    const responseText = responseContent.text;
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('No JSON found in Claude response');
-    }
-
-    const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
-    return parsed;
-  } catch (error) {
-    console.error('Claude generic text extraction error:', error);
-    throw error;
-  }
+export async function extractFullTextWithClaudeFromText(text: string): Promise<{ full_text: string }> {
+  // For text-based documents, return the text directly wrapped in the expected format
+  return { full_text: text };
 }
 

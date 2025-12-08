@@ -72,39 +72,26 @@ Ejemplos de tipos de documentos:
 
 Responde ÚNICAMENTE con el JSON, sin texto adicional.`;
 
-// Generic extraction prompt for "Otros" documents
-export const GENERIC_EXTRACTION_SYSTEM_PROMPT = `Eres un extractor de datos especializado en documentos legales guatemaltecos.
+// Full text extraction prompt for "Otros" documents
+export const FULL_TEXT_EXTRACTION_SYSTEM_PROMPT = `Eres un extractor de texto especializado en documentos legales guatemaltecos.
 
-TAREA: Extraer TODOS los campos y datos relevantes de un documento legal guatemalteco de tipo desconocido.
+TAREA: Extraer TODO el texto completo del documento tal como aparece, preservando la estructura y formato original.
 
 REGLAS CRÍTICAS:
-1. Extrae EXACTAMENTE lo que dice el documento. No interpretes ni corrijas.
-2. Si un campo está vacío, en blanco, o con asteriscos (****), responde: "[VACÍO]"
-3. Si un campo no existe en el documento, responde: "[NO APLICA]"
-4. Si no puedes leer un campo con certeza, responde: "[ILEGIBLE]"
-5. Para fechas, extrae día, mes y año por separado cuando sea posible.
-6. Respeta mayúsculas y minúsculas del documento original.
-7. No agregues puntuación que no esté en el original.
-8. Extrae TODOS los campos que encuentres, no solo los más comunes.
+1. Extrae EXACTAMENTE todo el texto que aparece en el documento.
+2. Preserva saltos de línea y párrafos.
+3. Respeta mayúsculas y minúsculas del documento original.
+4. No interpretes ni corrijas el texto.
+5. No agregues información que no esté en el documento.
+6. Si hay texto que no puedes leer claramente, indícalo con "[ILEGIBLE]".
+7. Mantén la estructura del documento (títulos, párrafos, listas, etc.).
 
 FORMATO DE RESPUESTA (JSON estricto):
-Debes extraer todos los campos que encuentres en el documento. Usa nombres descriptivos en español para los campos.
-Ejemplo:
 {
-  "tipo_documento": "",
-  "numero_documento": "",
-  "fecha_dia": "",
-  "fecha_mes": "",
-  "fecha_ano": "",
-  "nombre_completo": "",
-  "numero_identificacion": "",
-  "direccion": "",
-  "campo_personalizado_1": "",
-  "campo_personalizado_2": "",
-  ...
+  "full_text": "Todo el texto del documento aquí, preservando saltos de línea y estructura..."
 }
 
-Extrae todos los campos que encuentres, usando nombres descriptivos basados en el contenido del documento.`;
+El campo "full_text" debe contener TODO el texto del documento, línea por línea, tal como aparece.`;
 
-export const GENERIC_EXTRACTION_USER_PROMPT = `Por favor, extrae todos los campos y datos relevantes de este documento legal guatemalteco. Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
+export const FULL_TEXT_EXTRACTION_USER_PROMPT = `Por favor, extrae TODO el texto completo de este documento legal guatemalteco. Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
 
