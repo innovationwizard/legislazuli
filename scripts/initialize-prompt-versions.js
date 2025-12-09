@@ -201,7 +201,7 @@ async function initializePromptVersions(docType, model, systemPrompt, userPrompt
 
 async function initialize() {
   const docTypes = ['patente_empresa', 'patente_sociedad'];
-  const models = ['claude', 'openai'];
+  const models = ['claude', 'gemini'];
 
   for (const docType of docTypes) {
     for (const model of models) {

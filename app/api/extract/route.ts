@@ -11,18 +11,18 @@ import {
   extractFullTextWithClaudeFromText
 } from '@/lib/ai/claude';
 import { 
-  extractWithOpenAI, 
-  extractWithOpenAIFromText,
-  detectDocumentTypeWithOpenAI,
-  detectDocumentTypeWithOpenAIFromText,
-  extractFullTextWithOpenAI,
-  extractFullTextWithOpenAIFromText
-} from '@/lib/ai/openai';
+  extractWithGemini, 
+  extractWithGeminiFromText,
+  detectDocumentTypeWithGemini,
+  detectDocumentTypeWithGeminiFromText,
+  extractFullTextWithGemini,
+  extractFullTextWithGeminiFromText
+} from '@/lib/ai/gemini';
 import {
   extractWithClaudeVersioned,
   extractWithClaudeFromTextVersioned,
-  extractWithOpenAIVersioned,
-  extractWithOpenAIFromTextVersioned,
+  extractWithGeminiVersioned,
+  extractWithGeminiFromTextVersioned,
 } from '@/lib/ai/extract-with-prompts';
 import { saveExtractionPromptVersions } from '@/lib/ml/prompt-versioning';
 import { 
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     let detectedDocumentType: string | null = null;
     if (docType === 'otros') {
       try {
-        const [claudeDetection, openaiDetection] = await Promise.all([
+        const [claudeDetection, geminiDetection] = await Promise.all([
           useTextExtraction
             ? detectDocumentTypeWithClaudeFromText(extractedText).catch(err => {
                 console.error('Claude document type detection error:', err);
@@ -170,26 +170,26 @@ export async function POST(request: NextRequest) {
                 return null;
               }),
           useTextExtraction
-            ? detectDocumentTypeWithOpenAIFromText(extractedText).catch(err => {
-                console.error('OpenAI document type detection error:', err);
+            ? detectDocumentTypeWithGeminiFromText(extractedText).catch(err => {
+                console.error('Gemini document type detection error:', err);
                 return null;
               })
-            : detectDocumentTypeWithOpenAI(base64).catch(err => {
-                console.error('OpenAI document type detection error:', err);
+            : detectDocumentTypeWithGemini(base64).catch(err => {
+                console.error('Gemini document type detection error:', err);
                 return null;
               }),
         ]);
 
         // Use the detection with higher confidence, or Claude's if both available
-        if (claudeDetection && openaiDetection) {
+        if (claudeDetection && geminiDetection) {
           // Prefer the one with higher confidence, or Claude's if equal
           const claudeConf = claudeDetection.confidence === 'alta' ? 3 : claudeDetection.confidence === 'media' ? 2 : 1;
-          const openaiConf = openaiDetection.confidence === 'alta' ? 3 : openaiDetection.confidence === 'media' ? 2 : 1;
-          detectedDocumentType = claudeConf >= openaiConf ? claudeDetection.document_type : openaiDetection.document_type;
+          const geminiConf = geminiDetection.confidence === 'alta' ? 3 : geminiDetection.confidence === 'media' ? 2 : 1;
+          detectedDocumentType = claudeConf >= geminiConf ? claudeDetection.document_type : geminiDetection.document_type;
         } else if (claudeDetection) {
           detectedDocumentType = claudeDetection.document_type;
-        } else if (openaiDetection) {
-          detectedDocumentType = openaiDetection.document_type;
+        } else if (geminiDetection) {
+          detectedDocumentType = geminiDetection.document_type;
         }
 
         if (detectedDocumentType) {
@@ -226,16 +226,16 @@ export async function POST(request: NextRequest) {
     let discrepancies: string[];
     let extractedFields: any[];
     let claudeResult: any;
-    let openaiResult: any;
+    let geminiResult: any;
     // Prompt version IDs (for structured documents only)
     let claudeSystemVersionId = '';
     let claudeUserVersionId = '';
-    let openaiSystemVersionId = '';
-    let openaiUserVersionId = '';
+    let geminiSystemVersionId = '';
+    let geminiUserVersionId = '';
 
     if (docType === 'otros') {
       // For "Otros", extract full text
-      const [claudeFullText, openaiFullText] = await Promise.all([
+      const [claudeFullText, geminiFullText] = await Promise.all([
         useTextExtraction
           ? extractFullTextWithClaudeFromText(extractedText).catch(err => {
               console.error('Claude full text extraction error:', err);
@@ -246,17 +246,17 @@ export async function POST(request: NextRequest) {
               return null;
             }),
         useTextExtraction
-          ? extractFullTextWithOpenAIFromText(extractedText).catch(err => {
-              console.error('OpenAI full text extraction error:', err);
+          ? extractFullTextWithGeminiFromText(extractedText).catch(err => {
+              console.error('Gemini full text extraction error:', err);
               return null;
             })
-          : extractFullTextWithOpenAI(base64).catch(err => {
-              console.error('OpenAI full text extraction error:', err);
+          : extractFullTextWithGemini(base64).catch(err => {
+              console.error('Gemini full text extraction error:', err);
               return null;
             }),
       ]);
 
-      if (!claudeFullText || !openaiFullText) {
+      if (!claudeFullText || !geminiFullText) {
         return NextResponse.json(
           { error: 'Failed to extract full text from document' },
           { status: 500 }
@@ -265,12 +265,12 @@ export async function POST(request: NextRequest) {
 
       // For full text, prefer Claude's result (more accurate for OCR), but compare both
       const claudeText = claudeFullText.full_text.trim();
-      const openaiText = openaiFullText.full_text.trim();
+      const geminiText = geminiFullText.full_text.trim();
       
       // Simple similarity check
-      const similarity = claudeText === openaiText ? 1.0 : 
-        (claudeText.length > 0 && openaiText.length > 0 ? 
-          Math.min(claudeText.length, openaiText.length) / Math.max(claudeText.length, openaiText.length) : 0);
+      const similarity = claudeText === geminiText ? 1.0 : 
+        (claudeText.length > 0 && geminiText.length > 0 ? 
+          Math.min(claudeText.length, geminiText.length) / Math.max(claudeText.length, geminiText.length) : 0);
       
       // Use Claude's text as primary (better OCR), but mark if there are significant differences
       consensus = { full_text: claudeText };
@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
       
       // Store results for database
       claudeResult = claudeFullText;
-      openaiResult = openaiFullText;
+      geminiResult = geminiFullText;
       
       // Convert full text to extracted fields format
       extractedFields = [{
@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
       }];
     } else {
       // For specific document types, use structured extraction with versioned prompts
-      const [claudeExtraction, openaiExtraction] = await Promise.all([
+      const [claudeExtraction, geminiExtraction] = await Promise.all([
         (async () => {
           try {
             if (useTextExtraction) {
@@ -311,24 +311,24 @@ export async function POST(request: NextRequest) {
         (async () => {
           try {
             if (useTextExtraction) {
-              const result = await extractWithOpenAIFromTextVersioned(extractedText, docType);
-              openaiSystemVersionId = result.systemVersionId;
-              openaiUserVersionId = result.userVersionId;
+              const result = await extractWithGeminiFromTextVersioned(extractedText, docType);
+              geminiSystemVersionId = result.systemVersionId;
+              geminiUserVersionId = result.userVersionId;
               return result.result;
             } else {
-              const result = await extractWithOpenAIVersioned(base64, docType);
-              openaiSystemVersionId = result.systemVersionId;
-              openaiUserVersionId = result.userVersionId;
+              const result = await extractWithGeminiVersioned(base64, docType);
+              geminiSystemVersionId = result.systemVersionId;
+              geminiUserVersionId = result.userVersionId;
               return result.result;
             }
           } catch (err) {
-            console.error('OpenAI extraction error:', err);
+            console.error('Gemini extraction error:', err);
             return null;
           }
         })(),
       ]);
 
-      if (!claudeExtraction || !openaiExtraction) {
+      if (!claudeExtraction || !geminiExtraction) {
         return NextResponse.json(
           { error: 'Failed to extract data from document' },
           { status: 500 }
@@ -336,9 +336,9 @@ export async function POST(request: NextRequest) {
       }
 
       claudeResult = claudeExtraction;
-      openaiResult = openaiExtraction;
+      geminiResult = geminiExtraction;
 
-      const specificResult = compareResults(claudeExtraction, openaiExtraction);
+      const specificResult = compareResults(claudeExtraction, geminiExtraction);
       consensus = specificResult.consensus;
       confidence = specificResult.confidence;
       discrepancies = specificResult.discrepancies;
@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
       .insert({
         document_id: document.id,
         claude_result: claudeResult,
-        openai_result: openaiResult,
+        gemini_result: geminiResult,
         consensus_result: consensus,
         confidence,
         discrepancies: discrepancies.length > 0 ? discrepancies : null,
@@ -374,12 +374,12 @@ export async function POST(request: NextRequest) {
             claudeUserVersionId
           );
         }
-        if (openaiSystemVersionId && openaiUserVersionId) {
+        if (geminiSystemVersionId && geminiUserVersionId) {
           await saveExtractionPromptVersions(
             extraction.id,
-            'openai',
-            openaiSystemVersionId,
-            openaiUserVersionId
+            'gemini',
+            geminiSystemVersionId,
+            geminiUserVersionId
           );
         }
       } catch (error) {

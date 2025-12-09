@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (model !== 'claude' && model !== 'openai') {
+    if (model !== 'claude' && model !== 'gemini') {
       return NextResponse.json(
-        { error: 'Model must be either "claude" or "openai"' },
+        { error: 'Model must be either "claude" or "gemini"' },
         { status: 400 }
       );
     }

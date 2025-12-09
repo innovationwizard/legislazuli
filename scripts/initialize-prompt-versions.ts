@@ -40,7 +40,7 @@ import {
 async function initialize() {
   const supabase = createServerClient();
   const docTypes = ['patente_empresa', 'patente_sociedad'];
-  const models = ['claude', 'openai'] as const;
+  const models = ['claude', 'gemini'] as const;
 
   for (const docType of docTypes) {
     for (const model of models) {

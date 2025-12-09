@@ -150,9 +150,9 @@ export function ExtractionResults({
                           <FieldFeedback
                             extractionId={extractionId}
                             fieldName={field.field_name}
-                            model="openai"
+                            model="gemini"
                             value={field.openai_value}
-                            existingFeedback={feedback[field.field_name]?.openai}
+                            existingFeedback={feedback[field.field_name]?.gemini}
                             onFeedbackSubmitted={handleFeedbackSubmitted}
                           />
                         )}

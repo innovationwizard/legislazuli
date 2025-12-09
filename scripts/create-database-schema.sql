@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS extractions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
   claude_result JSONB,
-  openai_result JSONB,
+  gemini_result JSONB,
   consensus_result JSONB,
   confidence TEXT,
   discrepancies JSONB,

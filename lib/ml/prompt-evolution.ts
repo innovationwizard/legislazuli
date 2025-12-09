@@ -13,7 +13,7 @@ const anthropic = new Anthropic({
 
 interface EvolutionContext {
   doc_type: string;
-  model: 'claude' | 'openai';
+  model: 'claude' | 'gemini';
   current_system_prompt: string;
   current_user_prompt: string;
   error_categories: Record<string, number>;
@@ -108,7 +108,7 @@ Return ONLY valid JSON in this exact format:
  */
 export async function triggerPromptEvolution(
   docType: string,
-  model: 'claude' | 'openai',
+  model: 'claude' | 'gemini',
   createdBy?: string
 ): Promise<{ systemVersionId: string; userVersionId: string }> {
   const supabase = createServerClient();
@@ -156,7 +156,7 @@ export async function triggerPromptEvolution(
         const extractionData = extraction as any;
         const result = model === 'claude' 
           ? extractionData.claude_result 
-          : extractionData.openai_result;
+          : extractionData.gemini_result;
         if (result) {
           const value = result[fb.field_name] || '';
           feedbackExamples.push({
@@ -254,7 +254,7 @@ export async function backtest(
   }
 
   const docType = systemVersion.doc_type;
-  const model = systemVersion.model as 'claude' | 'openai';
+  const model = systemVersion.model as 'claude' | 'gemini';
 
   // Get reviewed extractions with feedback
   const { data: feedbackData } = await supabase
@@ -313,7 +313,7 @@ export async function backtest(
     const extractionData = extraction as any;
     const extractionResult = model === 'claude' 
       ? extractionData.claude_result 
-      : extractionData.openai_result;
+      : extractionData.gemini_result;
     const doc = extractionData.documents as any;
 
     // Get feedback for this extraction

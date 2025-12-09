@@ -8,7 +8,7 @@ import { createServerClient } from '@/lib/db/supabase';
 export interface PromptVersion {
   id: string;
   doc_type: string;
-  model: 'claude' | 'openai';
+  model: 'claude' | 'gemini';
   prompt_type: 'system' | 'user';
   version_number: number;
   prompt_content: string;
@@ -27,7 +27,7 @@ export interface PromptVersion {
  */
 export async function getActivePrompts(
   docType: string,
-  model: 'claude' | 'openai'
+  model: 'claude' | 'gemini'
 ): Promise<{ system: PromptVersion | null; user: PromptVersion | null }> {
   const supabase = createServerClient();
 
@@ -73,7 +73,7 @@ export async function getPromptVersion(id: string): Promise<PromptVersion | null
  */
 export async function saveExtractionPromptVersions(
   extractionId: string,
-  model: 'claude' | 'openai',
+  model: 'claude' | 'gemini',
   systemPromptVersionId: string,
   userPromptVersionId: string
 ): Promise<void> {
@@ -101,7 +101,7 @@ export async function saveExtractionPromptVersions(
  */
 export async function initializePromptVersions(
   docType: string,
-  model: 'claude' | 'openai',
+  model: 'claude' | 'gemini',
   systemPrompt: string,
   userPrompt: string,
   createdBy?: string
@@ -164,7 +164,7 @@ export async function initializePromptVersions(
  */
 export async function createPromptVersion(
   docType: string,
-  model: 'claude' | 'openai',
+  model: 'claude' | 'gemini',
   promptType: 'system' | 'user',
   promptContent: string,
   parentVersionId: string,

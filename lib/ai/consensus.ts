@@ -94,28 +94,28 @@ function convertRawToStructured(raw: RawExtractionFields): Partial<PatenteComerc
 function compareField(
   fieldName: string,
   claudeValue: any,
-  openaiValue: any
+  geminiValue: any
 ): ConsensusResult {
   const c = typeof claudeValue === 'string' ? normalize(claudeValue) : String(claudeValue || '');
-  const o = typeof openaiValue === 'string' ? normalize(openaiValue) : String(openaiValue || '');
+  const g = typeof geminiValue === 'string' ? normalize(geminiValue) : String(geminiValue || '');
 
-  if (c === o) {
+  if (c === g) {
     return {
       field_name: fieldName,
       claude_value: c,
-      openai_value: o,
+      openai_value: g, // Keep field name for backward compatibility with database
       final_value: c,
       match: true,
       confidence: 1.0,
     };
   }
 
-  const similarity = fuzzyMatch(c, o);
+  const similarity = fuzzyMatch(c, g);
   if (similarity > 0.95) {
     return {
       field_name: fieldName,
       claude_value: c,
-      openai_value: o,
+      openai_value: g, // Keep field name for backward compatibility with database
       final_value: c,
       match: true,
       confidence: similarity,
@@ -125,7 +125,7 @@ function compareField(
   return {
     field_name: fieldName,
     claude_value: c,
-    openai_value: o,
+    openai_value: g, // Keep field name for backward compatibility with database
     final_value: null,
     match: false,
     confidence: similarity,
@@ -134,7 +134,7 @@ function compareField(
 
 export function compareResults(
   claudeRaw: RawExtractionFields,
-  openaiRaw: RawExtractionFields
+  geminiRaw: RawExtractionFields
 ): {
   consensus: PatenteComercionFields;
   results: ConsensusResult[];
@@ -142,7 +142,7 @@ export function compareResults(
   discrepancies: string[];
 } {
   const claude = convertRawToStructured(claudeRaw);
-  const openai = convertRawToStructured(openaiRaw);
+  const gemini = convertRawToStructured(geminiRaw);
 
   const results: ConsensusResult[] = [];
   const discrepancies: string[] = [];
@@ -175,10 +175,10 @@ export function compareResults(
     // Special handling for numero_expediente - combine parts if they're complementary
     if (field === 'numero_expediente') {
       const claudeValue = claude[field as keyof typeof claude] as string | undefined;
-      const openaiValue = openai[field as keyof typeof openai] as string | undefined;
+      const geminiValue = gemini[field as keyof typeof gemini] as string | undefined;
       
-      const combined = combineExpedienteParts(claudeValue, openaiValue);
-      const result = compareField(field, claudeValue, openaiValue);
+      const combined = combineExpedienteParts(claudeValue, geminiValue);
+      const result = compareField(field, claudeValue, geminiValue);
       
       // If we have both parts, consider it a match (both models contributed correctly)
       if (combined.number && combined.year) {
@@ -188,58 +188,58 @@ export function compareResults(
         result.match = true;
         result.confidence = 1.0;
         result.final_value = `${combined.number} ${combined.year}`;
+        } else {
+          // Standard handling if parts aren't complementary
+          if (result.match) {
+            consensus[field] = result.final_value || '';
+          } else {
+            consensus[field] = result.claude_value || result.openai_value || '';
+            discrepancies.push(field);
+          }
+        }
+        
+        results.push(result);
       } else {
-        // Standard handling if parts aren't complementary
+        const result = compareField(field, claude[field as keyof typeof claude], gemini[field as keyof typeof gemini]);
+        results.push(result);
+        
         if (result.match) {
-          consensus[field] = result.final_value || '';
+          consensus[field] = result.final_value;
         } else {
           consensus[field] = result.claude_value || result.openai_value || '';
           discrepancies.push(field);
         }
       }
-      
-      results.push(result);
-    } else {
-      const result = compareField(field, claude[field as keyof typeof claude], openai[field as keyof typeof openai]);
-      results.push(result);
-      
-      if (result.match) {
-        consensus[field] = result.final_value;
-      } else {
-        consensus[field] = result.claude_value || result.openai_value || '';
-        discrepancies.push(field);
-      }
     }
-  }
 
-  // Compare date fields
-  const fechaInscripcionResult = compareField(
-    'fecha_inscripcion',
-    claude.fecha_inscripcion?.numeric || '',
-    openai.fecha_inscripcion?.numeric || ''
-  );
-  results.push(fechaInscripcionResult);
-  
-  if (fechaInscripcionResult.match) {
-    consensus.fecha_inscripcion = claude.fecha_inscripcion || openai.fecha_inscripcion;
-  } else {
-    consensus.fecha_inscripcion = claude.fecha_inscripcion || openai.fecha_inscripcion;
-    discrepancies.push('fecha_inscripcion');
-  }
+    // Compare date fields
+    const fechaInscripcionResult = compareField(
+      'fecha_inscripcion',
+      claude.fecha_inscripcion?.numeric || '',
+      gemini.fecha_inscripcion?.numeric || ''
+    );
+    results.push(fechaInscripcionResult);
+    
+    if (fechaInscripcionResult.match) {
+      consensus.fecha_inscripcion = claude.fecha_inscripcion || gemini.fecha_inscripcion;
+    } else {
+      consensus.fecha_inscripcion = claude.fecha_inscripcion || gemini.fecha_inscripcion;
+      discrepancies.push('fecha_inscripcion');
+    }
 
-  const fechaEmisionResult = compareField(
-    'fecha_emision',
-    claude.fecha_emision?.numeric || '',
-    openai.fecha_emision?.numeric || ''
-  );
-  results.push(fechaEmisionResult);
-  
-  if (fechaEmisionResult.match) {
-    consensus.fecha_emision = claude.fecha_emision || openai.fecha_emision;
-  } else {
-    consensus.fecha_emision = claude.fecha_emision || openai.fecha_emision;
-    discrepancies.push('fecha_emision');
-  }
+    const fechaEmisionResult = compareField(
+      'fecha_emision',
+      claude.fecha_emision?.numeric || '',
+      gemini.fecha_emision?.numeric || ''
+    );
+    results.push(fechaEmisionResult);
+    
+    if (fechaEmisionResult.match) {
+      consensus.fecha_emision = claude.fecha_emision || gemini.fecha_emision;
+    } else {
+      consensus.fecha_emision = claude.fecha_emision || gemini.fecha_emision;
+      discrepancies.push('fecha_emision');
+    }
 
   // Determine confidence level
   const totalFields = results.length;
@@ -348,7 +348,7 @@ export function convertToExtractedFields(
  */
 export function compareGenericResults(
   claudeRaw: RawExtractionFields,
-  openaiRaw: RawExtractionFields
+  geminiRaw: RawExtractionFields
 ): {
   consensus: Record<string, any>;
   results: ConsensusResult[];
@@ -358,7 +358,7 @@ export function compareGenericResults(
   // Get all unique field names from both results
   const allFields = new Set<string>();
   Object.keys(claudeRaw).forEach(key => allFields.add(key));
-  Object.keys(openaiRaw).forEach(key => allFields.add(key));
+  Object.keys(geminiRaw).forEach(key => allFields.add(key));
 
   const results: ConsensusResult[] = [];
   const discrepancies: string[] = [];
@@ -367,10 +367,10 @@ export function compareGenericResults(
   // Compare all fields
   for (const fieldName of allFields) {
     const claudeValue = claudeRaw[fieldName];
-    const openaiValue = openaiRaw[fieldName];
+    const geminiValue = geminiRaw[fieldName];
 
     // Skip if both are empty/null/undefined
-    if (!claudeValue && !openaiValue) {
+    if (!claudeValue && !geminiValue) {
       continue;
     }
 
@@ -378,9 +378,9 @@ export function compareGenericResults(
     if (fieldName === 'numero_expediente' || fieldName.toLowerCase().includes('expediente')) {
       const combined = combineExpedienteParts(
         typeof claudeValue === 'string' ? claudeValue : String(claudeValue || ''),
-        typeof openaiValue === 'string' ? openaiValue : String(openaiValue || '')
+        typeof geminiValue === 'string' ? geminiValue : String(geminiValue || '')
       );
-      const result = compareField(fieldName, claudeValue, openaiValue);
+      const result = compareField(fieldName, claudeValue, geminiValue);
       
       // If we have both parts, consider it a match (both models contributed correctly)
       if (combined.number && combined.year) {
@@ -400,13 +400,13 @@ export function compareGenericResults(
       
       results.push(result);
     } else {
-      const result = compareField(fieldName, claudeValue, openaiValue);
+      const result = compareField(fieldName, claudeValue, geminiValue);
       results.push(result);
 
       if (result.match) {
         consensus[fieldName] = result.final_value;
       } else {
-        // Prefer Claude's value, fallback to OpenAI's
+        // Prefer Claude's value, fallback to Gemini's
         consensus[fieldName] = result.claude_value || result.openai_value || '';
         discrepancies.push(fieldName);
       }

@@ -3,19 +3,17 @@
  */
 
 import { extractWithClaude, extractWithClaudeFromText } from './claude';
-import { extractWithOpenAI, extractWithOpenAIFromText } from './openai';
+import { extractWithGemini, extractWithGeminiFromText } from './gemini';
 import { getActivePrompts } from '@/lib/ml/prompt-versioning';
 import { RawExtractionFields } from '@/types';
 import Anthropic from '@anthropic-ai/sdk';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
 
 /**
  * Extract with Claude using versioned prompts
@@ -140,54 +138,49 @@ export async function extractWithClaudeFromTextVersioned(
 }
 
 /**
- * Extract with OpenAI using versioned prompts
+ * Extract with Gemini using versioned prompts
  */
-export async function extractWithOpenAIVersioned(
+export async function extractWithGeminiVersioned(
   imageBase64: string,
   docType: string
 ): Promise<{ result: RawExtractionFields; systemVersionId: string; userVersionId: string }> {
-  const { system, user } = await getActivePrompts(docType, 'openai');
+  const { system, user } = await getActivePrompts(docType, 'gemini');
 
   const systemPrompt = system?.prompt_content || undefined;
   const userPrompt = user?.prompt_content || undefined;
 
   if (systemPrompt && userPrompt && system && user) {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: userPrompt,
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/png;base64,${imageBase64}`,
-                detail: 'high',
-              },
-            },
-          ],
-        },
-      ],
-      max_tokens: 4096,
-      temperature: 0.1,
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 4096,
+      },
     });
 
-    const responseContent = response.choices[0]?.message?.content;
-    if (!responseContent) {
-      throw new Error('No content in OpenAI response');
+    // Combine system and user prompts for Gemini
+    const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
+
+    const base64Data = imageBase64.split(',')[1] || imageBase64;
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: 'image/png',
+      },
+    };
+
+    const result = await model.generateContent([fullPrompt, imagePart]);
+    const response = await result.response;
+
+    const text = response.text();
+    if (!text) {
+      throw new Error('No content in Gemini response');
     }
 
-    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
+    const jsonStr = text.replace(/```json|```/g, '').trim();
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('No JSON found in OpenAI response');
+      throw new Error('No JSON found in Gemini response');
     }
 
     const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
@@ -197,7 +190,7 @@ export async function extractWithOpenAIVersioned(
       userVersionId: user.id,
     };
   } else {
-    const result = await extractWithOpenAI(imageBase64);
+    const result = await extractWithGemini(imageBase64);
     return {
       result,
       systemVersionId: '',
@@ -207,42 +200,40 @@ export async function extractWithOpenAIVersioned(
 }
 
 /**
- * Extract with OpenAI from text using versioned prompts
+ * Extract with Gemini from text using versioned prompts
  */
-export async function extractWithOpenAIFromTextVersioned(
+export async function extractWithGeminiFromTextVersioned(
   text: string,
   docType: string
 ): Promise<{ result: RawExtractionFields; systemVersionId: string; userVersionId: string }> {
-  const { system, user } = await getActivePrompts(docType, 'openai');
+  const { system, user } = await getActivePrompts(docType, 'gemini');
 
   const systemPrompt = system?.prompt_content || undefined;
   const userPrompt = user?.prompt_content || undefined;
 
   if (systemPrompt && userPrompt && system && user) {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: `${userPrompt}\n\nDocument text:\n${text}`,
-        },
-      ],
-      max_tokens: 4096,
-      temperature: 0.1,
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 4096,
+      },
     });
 
-    const responseContent = response.choices[0]?.message?.content;
-    if (!responseContent) {
-      throw new Error('No content in OpenAI response');
+    const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nDocument text:\n${text}`;
+
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+
+    const textResponse = response.text();
+    if (!textResponse) {
+      throw new Error('No content in Gemini response');
     }
 
-    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
+    const jsonStr = textResponse.replace(/```json|```/g, '').trim();
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error('No JSON found in OpenAI response');
+      throw new Error('No JSON found in Gemini response');
     }
 
     const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
@@ -252,7 +243,7 @@ export async function extractWithOpenAIFromTextVersioned(
       userVersionId: user.id,
     };
   } else {
-    const result = await extractWithOpenAIFromText(text);
+    const result = await extractWithGeminiFromText(text);
     return {
       result,
       systemVersionId: '',

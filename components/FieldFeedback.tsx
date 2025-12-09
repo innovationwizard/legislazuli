@@ -6,7 +6,7 @@ import { Button } from './ui/Button';
 interface FieldFeedbackProps {
   extractionId: string;
   fieldName: string;
-  model: 'claude' | 'openai';
+  model: 'claude' | 'gemini';
   value: string;
   existingFeedback?: {
     is_correct: boolean;
@@ -94,7 +94,7 @@ export function FieldFeedback({
   };
 
   const modelColor = model === 'claude' ? 'purple' : 'blue';
-  const modelLabel = model === 'claude' ? 'Claude' : 'OpenAI';
+  const modelLabel = model === 'claude' ? 'Claude' : 'Gemini';
 
   return (
     <div className="space-y-2">

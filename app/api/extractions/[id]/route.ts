@@ -62,19 +62,19 @@ export async function GET(
     let consensusResults: any = null;
     const isCondor = session.user.email === 'condor';
     
-    if (isCondor && extraction.claude_result && extraction.openai_result) {
+    if (isCondor && extraction.claude_result && extraction.gemini_result) {
       try {
         const claudeRaw = extraction.claude_result as RawExtractionFields;
-        const openaiRaw = extraction.openai_result as RawExtractionFields;
+        const geminiRaw = extraction.gemini_result as RawExtractionFields;
         
         // Check if this is a generic "otros" document or structured document
         const docType = (extraction.documents as any)?.doc_type;
         
         if (docType === 'otros') {
-          const genericResult = compareGenericResults(claudeRaw, openaiRaw);
+          const genericResult = compareGenericResults(claudeRaw, geminiRaw);
           consensusResults = genericResult.results;
         } else {
-          const specificResult = compareResults(claudeRaw, openaiRaw);
+          const specificResult = compareResults(claudeRaw, geminiRaw);
           consensusResults = specificResult.results;
         }
       } catch (error) {
