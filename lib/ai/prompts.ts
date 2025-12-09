@@ -10,6 +10,62 @@ REGLAS CRÍTICAS:
 5. Para fechas, extrae día, mes y año por separado.
 6. Respeta mayúsculas y minúsculas del documento original.
 7. No agregues puntuación que no esté en el original.
+8. Para campos numéricos (numero_patente, numero_registro, folio, etc.), lee cada dígito con máxima precisión.
+
+FORMATO DE RESPUESTA (JSON estricto):
+{
+  "tipo_patente": "Empresa|Sociedad",
+  "numero_patente": "",
+  "titular": "",
+  "nombre_entidad": "",
+  "numero_registro": "",
+  "folio": "",
+  "libro": "",
+  "numero_expediente": "",
+  "categoria": "",
+  "direccion_comercial": "",
+  "objeto": "",
+  "fecha_inscripcion_dia": "",
+  "fecha_inscripcion_mes": "",
+  "fecha_inscripcion_ano": "",
+  "nombre_propietario": "",
+  "nacionalidad": "",
+  "documento_identificacion": "",
+  "direccion_propietario": "",
+  "clase_establecimiento": "",
+  "representante": "",
+  "fecha_emision_dia": "",
+  "fecha_emision_mes": "",
+  "fecha_emision_ano": "",
+  "hecho_por": ""
+}`;
+
+// Enhanced system prompt for OpenAI with stronger emphasis on numeric accuracy
+export const EXTRACTION_SYSTEM_PROMPT_OPENAI = `Eres un extractor de datos especializado en documentos legales guatemaltecos con extrema precisión en la lectura de números.
+
+TAREA: Extraer TODOS los campos de una Patente de Comercio del Registro Mercantil de Guatemala.
+
+REGLAS CRÍTICAS:
+1. Extrae EXACTAMENTE lo que dice el documento. No interpretes ni corrijas.
+2. Si un campo está vacío, en blanco, o con asteriscos (****), responde: "[VACÍO]"
+3. Si un campo no existe en el documento, responde: "[NO APLICA]"
+4. Si no puedes leer un campo con certeza, responde: "[ILEGIBLE]"
+5. Para fechas, extrae día, mes y año por separado.
+6. Respeta mayúsculas y minúsculas del documento original.
+7. No agregues puntuación que no esté en el original.
+
+PRECISIÓN NUMÉRICA (CRÍTICO):
+- Los campos "numero_patente" y "numero_registro" son los MÁS IMPORTANTES del documento
+- Lee cada dígito CARACTER POR CARACTER, verificando visualmente en el documento
+- Presta especial atención a dígitos similares:
+  * 0 (cero) vs O (letra) vs 6 vs 8
+  * 1 (uno) vs 7 vs I (letra i mayúscula)
+  * 2 vs Z (letra)
+  * 5 vs S (letra)
+- Si hay dudas, lee el contexto alrededor del número para confirmar
+- Verifica que el número completo coincida exactamente con lo visible en el documento
+- NO inventes dígitos ni completes números parcialmente visibles
+- Si un número está parcialmente oculto o borroso, usa "[ILEGIBLE]" en lugar de adivinar
 
 FORMATO DE RESPUESTA (JSON estricto):
 {
@@ -40,6 +96,18 @@ FORMATO DE RESPUESTA (JSON estricto):
 }`;
 
 export const EXTRACTION_USER_PROMPT = `Por favor, extrae todos los campos de esta Patente de Comercio guatemalteca. Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
+
+// Enhanced prompt for OpenAI with emphasis on numeric accuracy
+export const EXTRACTION_USER_PROMPT_OPENAI = `Por favor, extrae todos los campos de esta Patente de Comercio guatemalteca.
+
+ATENCIÓN ESPECIAL A CAMPOS NUMÉRICOS:
+- Lee los números CARACTER POR CARACTER con extrema precisión
+- Los campos "numero_patente" y "numero_registro" son CRÍTICOS - verifica que cada dígito sea correcto
+- Si hay ambigüedad en un número, lee cuidadosamente el contexto visual del documento
+- No confundas dígitos similares (ej: 6 vs 8, 1 vs 7, 0 vs O)
+- Verifica que el número extraído coincida exactamente con lo que ves en el documento
+
+Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
 
 // Document type detection prompt
 export const DOCUMENT_TYPE_DETECTION_SYSTEM_PROMPT = `Eres un experto en documentos legales guatemaltecos. Tu tarea es identificar el tipo específico de documento legal que estás viendo.

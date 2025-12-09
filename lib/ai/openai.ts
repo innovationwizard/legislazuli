@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import { 
   EXTRACTION_SYSTEM_PROMPT, 
   EXTRACTION_USER_PROMPT,
+  EXTRACTION_SYSTEM_PROMPT_OPENAI,
+  EXTRACTION_USER_PROMPT_OPENAI,
   DOCUMENT_TYPE_DETECTION_SYSTEM_PROMPT,
   DOCUMENT_TYPE_DETECTION_USER_PROMPT,
   FULL_TEXT_EXTRACTION_SYSTEM_PROMPT,
@@ -24,25 +26,27 @@ export async function extractWithOpenAI(imageBase64: string): Promise<RawExtract
       messages: [
         {
           role: 'system',
-          content: EXTRACTION_SYSTEM_PROMPT,
+          content: EXTRACTION_SYSTEM_PROMPT_OPENAI,
         },
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: EXTRACTION_USER_PROMPT,
+              text: EXTRACTION_USER_PROMPT_OPENAI,
             },
             {
               type: 'image_url',
               image_url: {
                 url: `data:image/png;base64,${imageBase64}`,
+                detail: 'high', // Use high detail for better OCR accuracy
               },
             },
           ],
         },
       ],
       max_tokens: 4096,
+      temperature: 0.1, // Lower temperature for more deterministic, accurate results
     });
 
     const responseContent = response.choices[0]?.message?.content;
@@ -79,14 +83,15 @@ export async function extractWithOpenAIFromText(text: string): Promise<RawExtrac
       messages: [
         {
           role: 'system',
-          content: EXTRACTION_SYSTEM_PROMPT,
+          content: EXTRACTION_SYSTEM_PROMPT_OPENAI,
         },
         {
           role: 'user',
-          content: `${EXTRACTION_USER_PROMPT}\n\nDocument text:\n${text}`,
+          content: `${EXTRACTION_USER_PROMPT_OPENAI}\n\nDocument text:\n${text}`,
         },
       ],
       max_tokens: 4096,
+      temperature: 0.1, // Lower temperature for more deterministic, accurate results
     });
 
     const responseContent = response.choices[0]?.message?.content;
