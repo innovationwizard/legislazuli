@@ -6,7 +6,7 @@ Sistema de extracción de datos para documentos legales guatemaltecos mediante v
 
 - **Extracción de datos** de Patentes de Comercio guatemaltecas
 - **Consenso multi-API** entre Claude Sonnet 4 y GPT-4o para garantizar precisión
-- **Corrección automática de orientación** de PDFs para máxima precisión
+- **Detección automática de orientación** mediante AWS Textract
 - **Sistema de feedback ML** para evolución automática de prompts (usuario "condor")
 - **Versionado de prompts** con métricas de rendimiento
 - **Modo debug** para análisis detallado de extracciones
@@ -20,6 +20,7 @@ Sistema de extracción de datos para documentos legales guatemaltecos mediante v
 - Node.js 18+
 - Cuenta de Supabase
 - API keys de Anthropic (Claude) y OpenAI
+- Credenciales de AWS (para Textract)
 
 ## Instalación
 
@@ -40,6 +41,9 @@ Edita `.env.local` con tus credenciales:
 - `SUPABASE_SERVICE_ROLE_KEY`: Clave de servicio de Supabase
 - `ANTHROPIC_API_KEY`: API key de Anthropic
 - `OPENAI_API_KEY`: API key de OpenAI
+- `AWS_ACCESS_KEY_ID`: AWS Access Key ID (para Textract)
+- `AWS_SECRET_ACCESS_KEY`: AWS Secret Access Key (para Textract)
+- `AWS_REGION`: Región de AWS (opcional, por defecto: us-east-1)
 
 3. Configura la base de datos en Supabase:
 
@@ -208,8 +212,10 @@ legislazuli/
 │   ├── db/               # Cliente de Supabase
 │   └── utils/            # Utilidades generales
 │       ├── normalize.ts  # Normalización (preserva acentos)
-│       ├── pdf-orientation.ts # Corrección de orientación
-│       └── pdf-to-image.ts # Conversión PDF a imagen
+│       ├── pdf-orientation.ts # Utilidades de orientación (legacy)
+│       ├── pdf-to-image.ts # Conversión PDF a imagen
+│       ├── expediente-parser.ts # Parser para número de expediente
+│       └── textract.ts # Extracción de texto con AWS Textract
 ├── scripts/              # Scripts de utilidad
 │   ├── create-database-schema.sql # Schema base
 │   ├── create-ml-feedback-schema.sql # Schema ML
@@ -226,7 +232,7 @@ legislazuli/
 
 1. Inicia sesión con tus credenciales
 2. Sube un documento (PDF, PNG o JPG) de una Patente de Comercio
-   - **Nota**: El sistema corrige automáticamente la orientación de PDFs para máxima precisión
+   - **Nota**: AWS Textract detecta y corrige automáticamente la orientación de PDFs
 3. Selecciona el tipo de documento
 4. Espera a que se procese (puede tomar unos segundos)
 5. Revisa los resultados extraídos
@@ -260,12 +266,13 @@ node scripts/create-user.js usuario@example.com contraseña123
 
 ## Características Avanzadas
 
-### Corrección Automática de Orientación de PDFs
+### Detección Automática de Orientación de PDFs
 
-El sistema detecta y corrige automáticamente la orientación de PDFs antes de procesarlos:
-- Prueba múltiples orientaciones (0°, 90°, 180°, 270°)
-- Selecciona la orientación con mejor calidad de extracción
-- Garantiza 100% de precisión independientemente de cómo se suba el documento
+El sistema utiliza AWS Textract para detectar y corregir automáticamente la orientación de PDFs:
+- Textract tiene detección de orientación integrada y confiable
+- Maneja automáticamente documentos en cualquier orientación (0°, 90°, 180°, 270°)
+- Garantiza precisión óptima sin intervención manual
+- Más confiable que la corrección manual de orientación
 
 ### Sistema de Feedback ML
 
@@ -283,6 +290,30 @@ Sistema de aprendizaje automático que mejora los prompts basándose en feedback
 - Temperatura reducida (0.1) para resultados más determinísticos
 - Modo de alta resolución para mejor OCR
 
+### Manejo de Marcas de Agua y Texto Parcialmente Oculto
+
+El sistema puede leer a través de marcas de agua y texto parcialmente oculto:
+- **Lectura permisiva**: Infiere palabras cuando el 70%+ es visible
+- **Inferencia contextual**: Usa contexto para completar texto parcialmente visible
+- **Manejo de marcas de agua**: Lee a través de marcas decorativas (ej: "RM Registro MERCANTIL")
+- **Inferencia de fechas**: Completa meses parcialmente visibles (ej: "Ma_o" → "Mayo")
+- Solo marca como "[ILEGIBLE]" cuando menos del 50% es visible y no hay contexto
+
+### Guía de Ubicación Espacial para Campos
+
+Instrucciones específicas para localizar campos correctamente:
+- **numero_patente**: Busca únicamente en la esquina superior derecha, etiquetado como "No:"
+- Ignora números de sellos circulares y estampillas en la esquina superior izquierda
+- Puntos de referencia visual claros para cada campo crítico
+
+### Parsing de Número de Expediente
+
+El sistema parsea "Número de Expediente" en componentes separados:
+- **Número**: El número de expediente (ej: "28824")
+- **Año**: El año del expediente (ej: "2019")
+- Se muestran en líneas separadas con botones de copia individuales
+- Combina automáticamente partes complementarias de diferentes modelos
+
 ## Tecnologías
 
 - **Frontend**: Next.js 14, React, Tailwind CSS
@@ -291,7 +322,7 @@ Sistema de aprendizaje automático que mejora los prompts basándose en feedback
 - **Base de datos**: Supabase (PostgreSQL)
 - **Almacenamiento**: Supabase Storage
 - **IA**: Anthropic Claude Sonnet 4, OpenAI GPT-4o
-- **OCR**: AWS Textract (para PDFs)
+- **OCR**: AWS Textract (para PDFs, con detección automática de orientación)
 - **Procesamiento PDF**: pdf-lib, Puppeteer
 
 ## Requisitos Legales Críticos

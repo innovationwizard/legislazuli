@@ -32,6 +32,8 @@ import {
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
 import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
 import { extractTextFromPdf } from '@/lib/utils/textract';
+import { normalizePdfOrientation } from '@/lib/utils/normalize-orientation';
+import { TextractClient } from '@aws-sdk/client-textract';
 import { DocType } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -65,10 +67,41 @@ export async function POST(request: NextRequest) {
 
     // Get file buffer
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    let buffer = Buffer.from(arrayBuffer);
     
-    // Let AWS Textract handle orientation detection automatically
-    // Textract has built-in orientation detection and correction
+    // Normalize PDF orientation before processing
+    // Textract detects rotation but doesn't physically modify the file
+    // We need to physically rotate the PDF so LLMs receive correctly oriented documents
+    let processedBuffer = buffer;
+    if (isPdf) {
+      try {
+        // Create Textract client for orientation detection
+        const textractClient = new TextractClient({
+          region: process.env.AWS_REGION || 'us-east-1',
+          credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+            ? {
+                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+              }
+            : undefined,
+        });
+
+        // Normalize orientation based on Textract's detection
+        const { buffer: normalizedBuffer, wasRotated } = await normalizePdfOrientation(
+          buffer,
+          textractClient
+        );
+        processedBuffer = Buffer.from(normalizedBuffer);
+        
+        if (wasRotated) {
+          console.log('✓ PDF orientation normalized before LLM processing');
+        }
+      } catch (normalizationError) {
+        console.warn('Orientation normalization failed, using original PDF:', normalizationError);
+        // Continue with original buffer if normalization fails
+        processedBuffer = buffer;
+      }
+    }
     
     // Process PDFs with AWS Textract (better accuracy for legal documents)
     // Images are converted to base64 for vision APIs
@@ -79,15 +112,15 @@ export async function POST(request: NextRequest) {
     if (isPdf) {
       try {
         // Use AWS Textract for PDFs - purpose-built for legal/government forms
-        // Textract handles orientation detection automatically
-        extractedText = await extractTextFromPdf(buffer);
+        // Note: processedBuffer is now correctly oriented
+        extractedText = await extractTextFromPdf(processedBuffer);
         useTextExtraction = true;
       } catch (textractError) {
         console.error('Textract error, falling back to image conversion:', textractError);
         // Fallback to image conversion if Textract fails
-        // Buffer is ready for processing
+        // Use processedBuffer (correctly oriented) for image conversion
         try {
-          base64 = await convertPdfToImage(buffer);
+          base64 = await convertPdfToImage(processedBuffer);
         } catch (imageError) {
           console.error('PDF conversion error:', imageError);
           return NextResponse.json(
@@ -101,7 +134,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Image files can be used directly
-      base64 = buffer.toString('base64');
+      base64 = processedBuffer.toString('base64');
     }
 
     // Upload to Supabase Storage
@@ -113,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     const { error: uploadError } = await supabase.storage
       .from('documents')
-      .upload(filePath, buffer, {
+      .upload(filePath, processedBuffer, {
         contentType: file.type,
         upsert: false,
       });
