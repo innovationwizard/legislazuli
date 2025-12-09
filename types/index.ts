@@ -100,6 +100,9 @@ export interface ExtractedField {
   openai_value?: string;
   match?: boolean;
   confidence?: number;
+  // Special handling for "Número de Expediente" - can have separate number and year parts
+  expediente_number?: string | null;
+  expediente_year?: string | null;
 }
 
 export type DocType = 'patente_empresa' | 'patente_sociedad' | 'otros';

@@ -4,8 +4,12 @@ Sistema de extracción de datos para documentos legales guatemaltecos mediante v
 
 ## Características
 
-- Extracción de datos de Patentes de Comercio guatemaltecas
-- Consenso entre Claude Sonnet 4 y GPT-4o para garantizar precisión
+- **Extracción de datos** de Patentes de Comercio guatemaltecas
+- **Consenso multi-API** entre Claude Sonnet 4 y GPT-4o para garantizar precisión
+- **Corrección automática de orientación** de PDFs para máxima precisión
+- **Sistema de feedback ML** para evolución automática de prompts (usuario "condor")
+- **Versionado de prompts** con métricas de rendimiento
+- **Modo debug** para análisis detallado de extracciones
 - Interfaz web moderna con Next.js 14
 - Autenticación con NextAuth.js
 - Almacenamiento en Supabase
@@ -39,11 +43,15 @@ Edita `.env.local` con tus credenciales:
 
 3. Configura la base de datos en Supabase:
 
-Ejecuta el siguiente SQL en el SQL Editor de Supabase:
+Ejecuta los siguientes scripts SQL en el SQL Editor de Supabase en orden:
+
+**a) Schema base (obligatorio):**
+
+Ejecuta el contenido de `scripts/create-database-schema.sql` o el siguiente SQL:
 
 ```sql
 -- Usuarios
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
@@ -51,31 +59,33 @@ CREATE TABLE users (
 );
 
 -- Documentos subidos
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   filename TEXT NOT NULL,
   file_path TEXT NOT NULL,
   doc_type TEXT NOT NULL,
+  detected_document_type TEXT,
   uploaded_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Extracciones
-CREATE TABLE extractions (
+CREATE TABLE IF NOT EXISTS extractions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  document_id UUID REFERENCES documents(id),
+  document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
   claude_result JSONB,
   openai_result JSONB,
   consensus_result JSONB,
   confidence TEXT,
   discrepancies JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
 );
 
 -- Campos extraídos
-CREATE TABLE extracted_fields (
+CREATE TABLE IF NOT EXISTS extracted_fields (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  extraction_id UUID REFERENCES extractions(id),
+  extraction_id UUID REFERENCES extractions(id) ON DELETE CASCADE,
   field_name TEXT NOT NULL,
   field_value TEXT,
   field_value_words TEXT,
@@ -83,17 +93,40 @@ CREATE TABLE extracted_fields (
   needs_review BOOLEAN DEFAULT FALSE
 );
 
--- Nota: La autorización se maneja en las API routes de Next.js usando NextAuth
--- Por lo tanto, RLS puede estar deshabilitado o configurado para permitir todo
--- ya que las API routes verifican la autenticación antes de acceder a los datos
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
+CREATE INDEX IF NOT EXISTS idx_extractions_document_id ON extractions(document_id);
+CREATE INDEX IF NOT EXISTS idx_extracted_fields_extraction_id ON extracted_fields(extraction_id);
+CREATE INDEX IF NOT EXISTS idx_extractions_deleted_at ON extractions(deleted_at) WHERE deleted_at IS NULL;
 ```
+
+**b) Schema ML Feedback System (opcional, para usuario "condor"):**
+
+Si quieres usar el sistema de feedback ML, ejecuta:
+
+```bash
+# Ver el SQL de migración
+npx tsx scripts/run-migration.ts
+```
+
+Luego copia y ejecuta el SQL mostrado en el SQL Editor de Supabase, o ejecuta directamente el contenido de `scripts/create-ml-feedback-schema.sql`.
 
 4. Crea un bucket de almacenamiento en Supabase:
 - Ve a Storage en el panel de Supabase
 - Crea un bucket llamado `documents`
 - Configúralo como privado
 
-5. Crea un usuario de prueba:
+5. (Opcional) Inicializa el sistema de feedback ML:
+
+Si instalaste el schema ML, inicializa las versiones de prompts:
+
+```bash
+node scripts/initialize-prompt-versions.js
+```
+
+Esto crea la versión 1 de todos los prompts para ambos tipos de documentos y modelos.
+
+6. Crea un usuario de prueba:
 
 Necesitarás hashear una contraseña con bcrypt. Puedes usar Node.js:
 
@@ -157,23 +190,65 @@ legislazuli/
 │   ├── (auth)/            # Rutas de autenticación
 │   ├── (dashboard)/       # Rutas del dashboard
 │   └── api/               # API routes
+│       ├── extract/       # Extracción de documentos
+│       ├── feedback/      # Sistema de feedback ML
+│       └── evolution/      # Evolución de prompts
 ├── components/            # Componentes React
+│   ├── FieldFeedback.tsx # Componente de feedback
+│   └── ExtractionResults.tsx # Resultados con debug
 ├── lib/                   # Utilidades y lógica
 │   ├── ai/               # Integración con APIs de IA
+│   │   ├── claude.ts     # Claude API
+│   │   ├── openai.ts     # OpenAI API
+│   │   ├── prompts.ts    # Prompts versionados
+│   │   └── extract-with-prompts.ts # Extracción con versiones
+│   ├── ml/               # Sistema ML
+│   │   ├── prompt-versioning.ts # Versionado de prompts
+│   │   └── prompt-evolution.ts  # Evolución de prompts
 │   ├── db/               # Cliente de Supabase
 │   └── utils/            # Utilidades generales
+│       ├── normalize.ts  # Normalización (preserva acentos)
+│       ├── pdf-orientation.ts # Corrección de orientación
+│       └── pdf-to-image.ts # Conversión PDF a imagen
+├── scripts/              # Scripts de utilidad
+│   ├── create-database-schema.sql # Schema base
+│   ├── create-ml-feedback-schema.sql # Schema ML
+│   ├── initialize-prompt-versions.js # Inicialización
+│   └── run-migration.ts  # Helper de migración
+├── docs/                 # Documentación
+│   └── ML_FEEDBACK_SYSTEM.md # Docs del sistema ML
 └── types/                # Definiciones TypeScript
 ```
 
 ## Uso
 
+### Extracción Básica
+
 1. Inicia sesión con tus credenciales
 2. Sube un documento (PDF, PNG o JPG) de una Patente de Comercio
-   - **Nota**: Para PDFs, se recomienda convertirlos a imágenes (PNG/JPG) para mejor compatibilidad con las APIs de visión
+   - **Nota**: El sistema corrige automáticamente la orientación de PDFs para máxima precisión
 3. Selecciona el tipo de documento
 4. Espera a que se procese (puede tomar unos segundos)
 5. Revisa los resultados extraídos
+   - Los campos con discrepancias se marcan con "⚠ Revisar"
 6. Descarga los resultados en formato TXT o HTML
+
+### Modo Debug (Usuario "condor" únicamente)
+
+El usuario "condor" tiene acceso a información detallada:
+
+- **Behind the Scenes**: Muestra los valores extraídos por Claude y OpenAI para cada campo
+- **Feedback ML**: Permite marcar campos como correctos/incorrectos con explicaciones
+- **Evolución de Prompts**: El sistema aprende automáticamente de los feedbacks
+
+Para usar el sistema de feedback:
+1. Ve a una extracción con campos marcados como "⚠ Revisar"
+2. En la sección "Behind the Scenes", verás los valores de Claude y OpenAI
+3. Marca cada valor como "✓ Correct" o "✗ Wrong"
+4. Si está mal, proporciona una explicación breve (máx. 100 caracteres)
+5. El sistema evolucionará los prompts automáticamente después de 50 feedbacks
+
+Ver [docs/ML_FEEDBACK_SYSTEM.md](docs/ML_FEEDBACK_SYSTEM.md) para más detalles.
 
 ### Crear usuarios
 
@@ -183,6 +258,31 @@ Puedes crear usuarios usando el script incluido:
 node scripts/create-user.js usuario@example.com contraseña123
 ```
 
+## Características Avanzadas
+
+### Corrección Automática de Orientación de PDFs
+
+El sistema detecta y corrige automáticamente la orientación de PDFs antes de procesarlos:
+- Prueba múltiples orientaciones (0°, 90°, 180°, 270°)
+- Selecciona la orientación con mejor calidad de extracción
+- Garantiza 100% de precisión independientemente de cómo se suba el documento
+
+### Sistema de Feedback ML
+
+Sistema de aprendizaje automático que mejora los prompts basándose en feedback:
+- **Feedback de campo**: Marca campos individuales como correctos/incorrectos
+- **Explicaciones**: Proporciona razones cuando un campo está mal
+- **Evolución automática**: Los prompts se mejoran automáticamente usando LLM
+- **Backtesting**: Las nuevas versiones se prueban antes de activarse
+- **Versionado**: Todas las versiones de prompts se guardan con métricas
+
+### Precisión Numérica Mejorada
+
+- Prompts especializados para OpenAI con énfasis en precisión numérica
+- Instrucciones detalladas para distinguir dígitos similares (0/O, 1/7, 6/8)
+- Temperatura reducida (0.1) para resultados más determinísticos
+- Modo de alta resolución para mejor OCR
+
 ## Tecnologías
 
 - **Frontend**: Next.js 14, React, Tailwind CSS
@@ -191,6 +291,40 @@ node scripts/create-user.js usuario@example.com contraseña123
 - **Base de datos**: Supabase (PostgreSQL)
 - **Almacenamiento**: Supabase Storage
 - **IA**: Anthropic Claude Sonnet 4, OpenAI GPT-4o
+- **OCR**: AWS Textract (para PDFs)
+- **Procesamiento PDF**: pdf-lib, Puppeteer
+
+## Requisitos Legales Críticos
+
+⚠️ **IMPORTANTE**: Este sistema procesa documentos legales guatemaltecos. 
+
+- **Acentos españoles**: Los acentos (á, é, í, ó, ú, ñ, ü) DEBEN preservarse exactamente
+- **Modificar acentos** hace que los documentos sean INVÁLIDOS bajo la ley guatemalteca
+- Puede resultar en consecuencias legales, multas monetarias, y posiblemente tiempo en prisión
+
+El sistema está diseñado para preservar acentos en todas las operaciones.
+
+## Scripts Disponibles
+
+### Crear usuarios
+```bash
+node scripts/create-user.js email@example.com contraseña123
+```
+
+### Ejecutar migración ML
+```bash
+# Muestra el SQL para ejecutar manualmente
+npx tsx scripts/run-migration.ts
+```
+
+### Inicializar versiones de prompts
+```bash
+node scripts/initialize-prompt-versions.js
+```
+
+## Documentación Adicional
+
+- [Sistema de Feedback ML](docs/ML_FEEDBACK_SYSTEM.md) - Documentación completa del sistema ML
 
 ## Licencia
 

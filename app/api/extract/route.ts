@@ -70,70 +70,72 @@ export async function POST(request: NextRequest) {
     
     // Correct PDF orientation before processing for optimal OCR accuracy
     // This ensures 100% correctness regardless of how the user uploaded the document
-    // We test original orientation first, and only test rotations if extraction quality is poor
+    // ALWAYS test all orientations (0°, 90°, 180°, 270°) and pick the best result
     if (isPdf) {
       try {
-        // Quick test with original orientation
+        console.log('Testing all PDF orientations to find the best one...');
+        const { rotatePdfPage } = await import('@/lib/utils/pdf-orientation');
+        
         let bestBuffer: Buffer = buffer;
         let bestTextLength = 0;
         let bestHasKeywords = false;
-        let shouldTestRotations = false;
+        let bestAngle = 0;
         
-        try {
-          const originalText = await extractTextFromPdf(buffer);
-          const originalHasKeywords = /patente|registro|comercio|guatemala|inscripcion|numero|fecha/i.test(originalText);
-          bestTextLength = originalText.trim().length;
-          bestHasKeywords = originalHasKeywords;
-          
-          // Only test rotations if extraction is poor (low text or no keywords)
-          // This optimizes for the common case where orientation is correct
-          shouldTestRotations = bestTextLength < 200 || !bestHasKeywords;
-          
-          if (!shouldTestRotations) {
-            console.log(`Original orientation is good: ${bestTextLength} chars, keywords found`);
-          } else {
-            console.log(`Original orientation extraction poor (${bestTextLength} chars, keywords: ${bestHasKeywords}), testing rotations...`);
+        // Test all orientations: 0° (original), 90°, 180°, 270°
+        const orientations = [
+          { angle: 0, buffer: buffer, label: 'original' },
+        ];
+        
+        // Create rotated versions
+        for (const angle of [90, 180, 270]) {
+          try {
+            const rotatedBuffer = await rotatePdfPage(buffer, 0, angle);
+            orientations.push({ angle, buffer: Buffer.from(rotatedBuffer), label: `${angle}°` });
+          } catch (rotationError) {
+            console.warn(`Failed to create ${angle}° rotation:`, rotationError);
+            // Continue with other orientations
           }
-        } catch (originalError) {
-          // If extraction fails completely, definitely test rotations
-          console.log('Original orientation extraction failed, testing rotations...');
-          shouldTestRotations = true;
         }
         
-        // Only test rotations if needed (optimization for common case)
-        if (shouldTestRotations) {
-          const rotations = [90, 180, 270];
-          
-          for (const angle of rotations) {
-            try {
-              const { rotatePdfPage } = await import('@/lib/utils/pdf-orientation');
-              const rotatedBuffer = await rotatePdfPage(buffer, 0, angle);
-              const rotatedText = await extractTextFromPdf(rotatedBuffer);
-              const rotatedHasKeywords = /patente|registro|comercio|guatemala|inscripcion|numero|fecha/i.test(rotatedText);
-              const rotatedLength = rotatedText.trim().length;
-              
-              // Prefer orientation with keywords, or significantly more text
-              const isBetter = 
-                (rotatedHasKeywords && !bestHasKeywords) ||
-                (rotatedHasKeywords === bestHasKeywords && rotatedLength > bestTextLength * 1.15);
-              
-              if (isBetter) {
-                bestBuffer = Buffer.from(rotatedBuffer);
-                bestTextLength = rotatedLength;
-                bestHasKeywords = rotatedHasKeywords;
-                console.log(`Found better orientation at ${angle}°: ${rotatedLength} chars, keywords: ${rotatedHasKeywords}`);
-              }
-            } catch (rotationError) {
-              console.warn(`Failed to test ${angle}° rotation:`, rotationError);
-              // Continue with other rotations
+        // Test each orientation
+        for (const orientation of orientations) {
+          try {
+            const testText = await extractTextFromPdf(orientation.buffer);
+            const hasKeywords = /patente|registro|comercio|guatemala|inscripcion|numero|fecha/i.test(testText);
+            const textLength = testText.trim().length;
+            
+            console.log(`${orientation.label} orientation: ${textLength} chars, keywords: ${hasKeywords}`);
+            
+            // Determine if this is better:
+            // 1. Has keywords when previous best doesn't
+            // 2. Same keyword status but more text (at least 10% more)
+            // 3. No keywords in either, but this has significantly more text (20% more)
+            const isBetter = 
+              (hasKeywords && !bestHasKeywords) ||
+              (hasKeywords === bestHasKeywords && hasKeywords && textLength > bestTextLength * 1.1) ||
+              (!hasKeywords && !bestHasKeywords && textLength > bestTextLength * 1.2);
+            
+            if (isBetter) {
+              bestBuffer = orientation.buffer;
+              bestTextLength = textLength;
+              bestHasKeywords = hasKeywords;
+              bestAngle = orientation.angle;
+              console.log(`✓ New best orientation: ${orientation.label} (${textLength} chars, keywords: ${hasKeywords})`);
             }
+          } catch (testError) {
+            console.warn(`Failed to test ${orientation.label} orientation:`, testError);
+            // Continue with other orientations
           }
         }
         
+        // Apply the best orientation
         const originalBuffer = buffer;
         buffer = Buffer.from(bestBuffer);
-        if (bestBuffer !== originalBuffer) {
-          console.log(`Applied orientation correction: ${bestTextLength} chars extracted`);
+        
+        if (bestAngle !== 0) {
+          console.log(`✓ Applied orientation correction: rotated ${bestAngle}° (${bestTextLength} chars, keywords: ${bestHasKeywords})`);
+        } else {
+          console.log(`✓ Best orientation is original (${bestTextLength} chars, keywords: ${bestHasKeywords})`);
         }
       } catch (orientationError) {
         console.warn('Orientation correction failed, using original PDF:', orientationError);
@@ -266,6 +268,11 @@ export async function POST(request: NextRequest) {
     let extractedFields: any[];
     let claudeResult: any;
     let openaiResult: any;
+    // Prompt version IDs (for structured documents only)
+    let claudeSystemVersionId = '';
+    let claudeUserVersionId = '';
+    let openaiSystemVersionId = '';
+    let openaiUserVersionId = '';
 
     if (docType === 'otros') {
       // For "Otros", extract full text
@@ -323,11 +330,6 @@ export async function POST(request: NextRequest) {
       }];
     } else {
       // For specific document types, use structured extraction with versioned prompts
-      let claudeSystemVersionId = '';
-      let claudeUserVersionId = '';
-      let openaiSystemVersionId = '';
-      let openaiUserVersionId = '';
-
       const [claudeExtraction, openaiExtraction] = await Promise.all([
         (async () => {
           try {
@@ -377,7 +379,7 @@ export async function POST(request: NextRequest) {
       claudeResult = claudeExtraction;
       openaiResult = openaiExtraction;
 
-      const specificResult = compareResults(claudeStructured, openaiStructured);
+      const specificResult = compareResults(claudeExtraction, openaiExtraction);
       consensus = specificResult.consensus;
       confidence = specificResult.confidence;
       discrepancies = specificResult.discrepancies;

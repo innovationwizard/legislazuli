@@ -31,7 +31,7 @@ export async function extractWithClaudeVersioned(
   const systemPrompt = system?.prompt_content || undefined;
   const userPrompt = user?.prompt_content || undefined;
 
-  if (systemPrompt && userPrompt) {
+  if (systemPrompt && userPrompt && system && user) {
     // Use custom prompts
     const base64Data = imageBase64.split(',')[1] || imageBase64;
     const message = await anthropic.messages.create({
@@ -99,7 +99,7 @@ export async function extractWithClaudeFromTextVersioned(
   const systemPrompt = system?.prompt_content || undefined;
   const userPrompt = user?.prompt_content || undefined;
 
-  if (systemPrompt && userPrompt) {
+  if (systemPrompt && userPrompt && system && user) {
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
@@ -151,7 +151,7 @@ export async function extractWithOpenAIVersioned(
   const systemPrompt = system?.prompt_content || undefined;
   const userPrompt = user?.prompt_content || undefined;
 
-  if (systemPrompt && userPrompt) {
+  if (systemPrompt && userPrompt && system && user) {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
@@ -218,7 +218,7 @@ export async function extractWithOpenAIFromTextVersioned(
   const systemPrompt = system?.prompt_content || undefined;
   const userPrompt = user?.prompt_content || undefined;
 
-  if (systemPrompt && userPrompt) {
+  if (systemPrompt && userPrompt && system && user) {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [

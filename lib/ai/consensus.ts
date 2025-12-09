@@ -1,6 +1,7 @@
 import { RawExtractionFields, PatenteComercionFields, ConsensusResult, ExtractedField } from '@/types';
 import { normalize, fuzzyMatch } from '@/lib/utils/normalize';
 import { dateToWords, formatDateNumeric } from '@/lib/utils/numbers-to-words';
+import { combineExpedienteParts, parseExpediente } from '@/lib/utils/expediente-parser';
 
 const CRITICAL_FIELDS = [
   'numero_registro',
@@ -171,14 +172,43 @@ export function compareResults(
   ];
 
   for (const field of simpleFields) {
-    const result = compareField(field, claude[field as keyof typeof claude], openai[field as keyof typeof openai]);
-    results.push(result);
-    
-    if (result.match) {
-      consensus[field] = result.final_value;
+    // Special handling for numero_expediente - combine parts if they're complementary
+    if (field === 'numero_expediente') {
+      const claudeValue = claude[field as keyof typeof claude] as string | undefined;
+      const openaiValue = openai[field as keyof typeof openai] as string | undefined;
+      
+      const combined = combineExpedienteParts(claudeValue, openaiValue);
+      const result = compareField(field, claudeValue, openaiValue);
+      
+      // If we have both parts, consider it a match (both models contributed correctly)
+      if (combined.number && combined.year) {
+        // Create a combined value for storage
+        consensus[field] = `${combined.number} ${combined.year}`;
+        // Mark as match if both parts are present (complementary extraction)
+        result.match = true;
+        result.confidence = 1.0;
+        result.final_value = `${combined.number} ${combined.year}`;
+      } else {
+        // Standard handling if parts aren't complementary
+        if (result.match) {
+          consensus[field] = result.final_value || '';
+        } else {
+          consensus[field] = result.claude_value || result.openai_value || '';
+          discrepancies.push(field);
+        }
+      }
+      
+      results.push(result);
     } else {
-      consensus[field] = result.claude_value || result.openai_value || '';
-      discrepancies.push(field);
+      const result = compareField(field, claude[field as keyof typeof claude], openai[field as keyof typeof openai]);
+      results.push(result);
+      
+      if (result.match) {
+        consensus[field] = result.final_value;
+      } else {
+        consensus[field] = result.claude_value || result.openai_value || '';
+        discrepancies.push(field);
+      }
     }
   }
 
@@ -270,11 +300,23 @@ export function convertToExtractedFields(
   fieldOrder.forEach(({ key, label }, index) => {
     const value = consensus[key];
     if (value !== undefined && value !== null && value !== '') {
-      fields.push({
-        field_name: label,
-        field_value: String(value),
-        needs_review: discrepancies.includes(key as string),
-      });
+      // Special handling for numero_expediente - parse into parts
+      if (key === 'numero_expediente') {
+        const parts = parseExpediente(String(value));
+        fields.push({
+          field_name: label,
+          field_value: String(value),
+          needs_review: discrepancies.includes(key as string),
+          expediente_number: parts.number,
+          expediente_year: parts.year,
+        });
+      } else {
+        fields.push({
+          field_name: label,
+          field_value: String(value),
+          needs_review: discrepancies.includes(key as string),
+        });
+      }
     }
   });
 
@@ -332,15 +374,42 @@ export function compareGenericResults(
       continue;
     }
 
-    const result = compareField(fieldName, claudeValue, openaiValue);
-    results.push(result);
-
-    if (result.match) {
-      consensus[fieldName] = result.final_value;
+    // Special handling for numero_expediente - combine parts if they're complementary
+    if (fieldName === 'numero_expediente' || fieldName.toLowerCase().includes('expediente')) {
+      const combined = combineExpedienteParts(
+        typeof claudeValue === 'string' ? claudeValue : String(claudeValue || ''),
+        typeof openaiValue === 'string' ? openaiValue : String(openaiValue || '')
+      );
+      const result = compareField(fieldName, claudeValue, openaiValue);
+      
+      // If we have both parts, consider it a match (both models contributed correctly)
+      if (combined.number && combined.year) {
+        consensus[fieldName] = `${combined.number} ${combined.year}`;
+        result.match = true;
+        result.confidence = 1.0;
+        result.final_value = `${combined.number} ${combined.year}`;
+      } else {
+        // Standard handling if parts aren't complementary
+        if (result.match) {
+          consensus[fieldName] = result.final_value || '';
+        } else {
+          consensus[fieldName] = result.claude_value || result.openai_value || '';
+          discrepancies.push(fieldName);
+        }
+      }
+      
+      results.push(result);
     } else {
-      // Prefer Claude's value, fallback to OpenAI's
-      consensus[fieldName] = result.claude_value || result.openai_value || '';
-      discrepancies.push(fieldName);
+      const result = compareField(fieldName, claudeValue, openaiValue);
+      results.push(result);
+
+      if (result.match) {
+        consensus[fieldName] = result.final_value;
+      } else {
+        // Prefer Claude's value, fallback to OpenAI's
+        consensus[fieldName] = result.claude_value || result.openai_value || '';
+        discrepancies.push(fieldName);
+      }
     }
   }
 
@@ -396,11 +465,23 @@ export function convertGenericToExtractedFields(
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-      fields.push({
-        field_name: formattedName,
-        field_value: String(value),
-        needs_review: discrepancies.includes(fieldName),
-      });
+      // Special handling for expediente fields
+      if (fieldName.toLowerCase().includes('expediente')) {
+        const parts = parseExpediente(String(value));
+        fields.push({
+          field_name: formattedName,
+          field_value: String(value),
+          needs_review: discrepancies.includes(fieldName),
+          expediente_number: parts.number,
+          expediente_year: parts.year,
+        });
+      } else {
+        fields.push({
+          field_name: formattedName,
+          field_value: String(value),
+          needs_review: discrepancies.includes(fieldName),
+        });
+      }
     }
   });
 

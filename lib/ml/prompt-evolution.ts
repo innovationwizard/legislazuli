@@ -152,14 +152,19 @@ export async function triggerPromptEvolution(
         .eq('id', fb.extraction_id)
         .single();
 
-      if (extraction && extraction[`${model}_result`]) {
-        const result = extraction[`${model}_result`] as any;
-        const value = result[fb.field_name] || '';
-        feedbackExamples.push({
-          field_name: fb.field_name,
-          value: String(value),
-          why: fb.why || '',
-        });
+      if (extraction) {
+        const extractionData = extraction as any;
+        const result = model === 'claude' 
+          ? extractionData.claude_result 
+          : extractionData.openai_result;
+        if (result) {
+          const value = result[fb.field_name] || '';
+          feedbackExamples.push({
+            field_name: fb.field_name,
+            value: String(value),
+            why: fb.why || '',
+          });
+        }
       }
     }
   }
@@ -305,8 +310,11 @@ export async function backtest(
   let totalFields = 0;
 
   for (const extraction of extractions) {
-    const extractionResult = extraction[`${model}_result`] as any;
-    const doc = extraction.documents as any;
+    const extractionData = extraction as any;
+    const extractionResult = model === 'claude' 
+      ? extractionData.claude_result 
+      : extractionData.openai_result;
+    const doc = extractionData.documents as any;
 
     // Get feedback for this extraction
     const extractionFeedback = feedbackData.filter(f => f.extraction_id === extraction.id);

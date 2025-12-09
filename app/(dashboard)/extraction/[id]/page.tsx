@@ -8,6 +8,7 @@ import { ExtractionResults } from '@/components/ExtractionResults';
 import { ExtractedField, ConsensusResult } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { FIELD_NAME_MAP } from '@/lib/utils/field-names';
+import { parseExpediente } from '@/lib/utils/expediente-parser';
 
 export default function ExtractionPage() {
   const params = useParams();
@@ -75,6 +76,13 @@ export default function ExtractionPage() {
           field_value_words: f.field_value_words,
           needs_review: f.needs_review,
         };
+        
+        // Special handling for "Número de Expediente" - parse into parts
+        if (f.field_name === 'Número de Expediente') {
+          const parts = parseExpediente(f.field_value);
+          field.expediente_number = parts.number;
+          field.expediente_year = parts.year;
+        }
         
         // Add model outputs for user "condor" if consensus result exists
         if (consensusResult && session?.user?.email === 'condor') {

@@ -96,10 +96,28 @@ export function ExtractionResults({
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <p className="text-gray-700 whitespace-pre-line">{field.field_value}</p>
-                  <CopyButton value={field.field_value} />
-                </div>
+                {/* Special display for "Número de Expediente" with separate number and year */}
+                {field.field_name === 'Número de Expediente' && (field.expediente_number || field.expediente_year) ? (
+                  <div className="space-y-2 mb-2">
+                    {field.expediente_number && (
+                      <div className="flex items-center gap-2">
+                        <p className="text-gray-700">Número: {field.expediente_number}</p>
+                        <CopyButton value={field.expediente_number} />
+                      </div>
+                    )}
+                    {field.expediente_year && (
+                      <div className="flex items-center gap-2">
+                        <p className="text-gray-700">Del año: {field.expediente_year}</p>
+                        <CopyButton value={field.expediente_year} />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-gray-700 whitespace-pre-line">{field.field_value}</p>
+                    <CopyButton value={field.field_value} />
+                  </div>
+                )}
                 {field.field_value_words && (
                   <div className="flex items-center gap-2">
                     <p className="text-gray-600 italic text-sm">
