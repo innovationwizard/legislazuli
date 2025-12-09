@@ -1,3 +1,12 @@
+/**
+ * CRITICAL LEGAL REQUIREMENT:
+ * Spanish accents (á, é, í, ó, ú, ñ, ü) MUST be preserved exactly.
+ * Removing or modifying accents makes legal documents INVALID under
+ * Guatemalan law and can result in legal consequences, monetary penalties, and even possibly jail time.
+ * 
+ * This function normalizes for comparison ONLY (whitespace, case, punctuation)
+ * but NEVER modifies accent marks.
+ */
 export function normalize(value: string | null | undefined): string {
   if (!value || value === '[VACÍO]' || value === '[NO APLICA]' || value === '[ILEGIBLE]') {
     return '';

@@ -143,6 +143,7 @@ export default function ExtractionPage() {
       </div>
 
       <ExtractionResults
+        extractionId={extraction.id}
         fields={extraction.fields}
         confidence={extraction.confidence}
         discrepancies={extraction.discrepancies}

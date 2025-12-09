@@ -18,6 +18,13 @@ import {
   extractFullTextWithOpenAI,
   extractFullTextWithOpenAIFromText
 } from '@/lib/ai/openai';
+import {
+  extractWithClaudeVersioned,
+  extractWithClaudeFromTextVersioned,
+  extractWithOpenAIVersioned,
+  extractWithOpenAIFromTextVersioned,
+} from '@/lib/ai/extract-with-prompts';
+import { saveExtractionPromptVersions } from '@/lib/ml/prompt-versioning';
 import { 
   compareResults, 
   convertToExtractedFields
@@ -315,37 +322,60 @@ export async function POST(request: NextRequest) {
         needs_review: confidence === 'review_required',
       }];
     } else {
-      // For specific document types, use structured extraction
-      const [claudeStructured, openaiStructured] = await Promise.all([
-        useTextExtraction
-          ? extractWithClaudeFromText(extractedText).catch(err => {
-              console.error('Claude text extraction error:', err);
-              return null;
-            })
-          : extractWithClaude(base64).catch(err => {
-              console.error('Claude image extraction error:', err);
-              return null;
-            }),
-        useTextExtraction
-          ? extractWithOpenAIFromText(extractedText).catch(err => {
-              console.error('OpenAI text extraction error:', err);
-              return null;
-            })
-          : extractWithOpenAI(base64).catch(err => {
-              console.error('OpenAI image extraction error:', err);
-              return null;
-            }),
+      // For specific document types, use structured extraction with versioned prompts
+      let claudeSystemVersionId = '';
+      let claudeUserVersionId = '';
+      let openaiSystemVersionId = '';
+      let openaiUserVersionId = '';
+
+      const [claudeExtraction, openaiExtraction] = await Promise.all([
+        (async () => {
+          try {
+            if (useTextExtraction) {
+              const result = await extractWithClaudeFromTextVersioned(extractedText, docType);
+              claudeSystemVersionId = result.systemVersionId;
+              claudeUserVersionId = result.userVersionId;
+              return result.result;
+            } else {
+              const result = await extractWithClaudeVersioned(base64, docType);
+              claudeSystemVersionId = result.systemVersionId;
+              claudeUserVersionId = result.userVersionId;
+              return result.result;
+            }
+          } catch (err) {
+            console.error('Claude extraction error:', err);
+            return null;
+          }
+        })(),
+        (async () => {
+          try {
+            if (useTextExtraction) {
+              const result = await extractWithOpenAIFromTextVersioned(extractedText, docType);
+              openaiSystemVersionId = result.systemVersionId;
+              openaiUserVersionId = result.userVersionId;
+              return result.result;
+            } else {
+              const result = await extractWithOpenAIVersioned(base64, docType);
+              openaiSystemVersionId = result.systemVersionId;
+              openaiUserVersionId = result.userVersionId;
+              return result.result;
+            }
+          } catch (err) {
+            console.error('OpenAI extraction error:', err);
+            return null;
+          }
+        })(),
       ]);
 
-      if (!claudeStructured || !openaiStructured) {
+      if (!claudeExtraction || !openaiExtraction) {
         return NextResponse.json(
           { error: 'Failed to extract data from document' },
           { status: 500 }
         );
       }
 
-      claudeResult = claudeStructured;
-      openaiResult = openaiStructured;
+      claudeResult = claudeExtraction;
+      openaiResult = openaiExtraction;
 
       const specificResult = compareResults(claudeStructured, openaiStructured);
       consensus = specificResult.consensus;
@@ -370,6 +400,31 @@ export async function POST(request: NextRequest) {
 
     if (extractionError || !extraction) {
       return NextResponse.json({ error: 'Failed to save extraction' }, { status: 500 });
+    }
+
+    // Save prompt versions used (only for structured documents)
+    if (docType !== 'otros' && extraction.id) {
+      try {
+        if (claudeSystemVersionId && claudeUserVersionId) {
+          await saveExtractionPromptVersions(
+            extraction.id,
+            'claude',
+            claudeSystemVersionId,
+            claudeUserVersionId
+          );
+        }
+        if (openaiSystemVersionId && openaiUserVersionId) {
+          await saveExtractionPromptVersions(
+            extraction.id,
+            'openai',
+            openaiSystemVersionId,
+            openaiUserVersionId
+          );
+        }
+      } catch (error) {
+        console.error('Error saving prompt versions:', error);
+        // Don't fail the extraction if prompt versioning fails
+      }
     }
 
     // Save extracted fields
