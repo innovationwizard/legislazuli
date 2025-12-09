@@ -12,6 +12,14 @@ REGLAS CRÍTICAS:
 7. No agregues puntuación que no esté en el original.
 8. Para campos numéricos (numero_patente, numero_registro, folio, etc.), lee cada dígito con máxima precisión.
 
+UBICACIÓN ESPACIAL DE CAMPOS (CRÍTICO):
+- numero_patente: Busca ÚNICAMENTE en la esquina superior DERECHA del documento, en el campo explícitamente etiquetado como "No:" seguido del número.
+  * Este campo aparece en el encabezado del documento, ANTES del campo "Titular:"
+  * Típicamente es un número de 5 dígitos
+  * IGNORA completamente todos los números de sellos, estampillas circulares y números de timbres que aparecen en la esquina superior IZQUIERDA
+  * Los sellos circulares y estampillas NO son el número de patente - son elementos decorativos o de validación
+  * El número de patente está claramente etiquetado con "No:" en la parte superior derecha
+
 FORMATO DE RESPUESTA (JSON estricto):
 {
   "tipo_patente": "Empresa|Sociedad",
@@ -67,6 +75,15 @@ PRECISIÓN NUMÉRICA (CRÍTICO):
 - NO inventes dígitos ni completes números parcialmente visibles
 - Si un número está parcialmente oculto o borroso, usa "[ILEGIBLE]" en lugar de adivinar
 
+UBICACIÓN ESPACIAL DE CAMPOS (CRÍTICO):
+- numero_patente: Busca ÚNICAMENTE en la esquina superior DERECHA del documento, en el campo explícitamente etiquetado como "No:" seguido del número.
+  * Este campo aparece en el encabezado del documento, ANTES del campo "Titular:"
+  * Típicamente es un número de 5 dígitos
+  * IGNORA completamente todos los números de sellos, estampillas circulares y números de timbres que aparecen en la esquina superior IZQUIERDA
+  * Los sellos circulares y estampillas NO son el número de patente - son elementos decorativos o de validación
+  * El número de patente está claramente etiquetado con "No:" en la parte superior derecha
+  * PUNTOS DE REFERENCIA VISUAL: El número de patente aparece en el encabezado, en la esquina superior derecha, etiquetado como "No:", y aparece ANTES del campo "Titular:" en el documento
+
 FORMATO DE RESPUESTA (JSON estricto):
 {
   "tipo_patente": "Empresa|Sociedad",
@@ -95,7 +112,14 @@ FORMATO DE RESPUESTA (JSON estricto):
   "hecho_por": ""
 }`;
 
-export const EXTRACTION_USER_PROMPT = `Por favor, extrae todos los campos de esta Patente de Comercio guatemalteca. Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
+export const EXTRACTION_USER_PROMPT = `Por favor, extrae todos los campos de esta Patente de Comercio guatemalteca.
+
+ATENCIÓN ESPECIAL AL CAMPO "numero_patente":
+- Busca ÚNICAMENTE en la esquina superior DERECHA, en el campo etiquetado "No:"
+- IGNORA completamente cualquier número que aparezca en sellos circulares, estampillas o timbres (especialmente en la esquina superior izquierda)
+- El número de patente está claramente etiquetado con "No:" y aparece ANTES del campo "Titular:"
+
+Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
 
 // Enhanced prompt for OpenAI with emphasis on numeric accuracy
 export const EXTRACTION_USER_PROMPT_OPENAI = `Por favor, extrae todos los campos de esta Patente de Comercio guatemalteca.
@@ -106,6 +130,18 @@ ATENCIÓN ESPECIAL A CAMPOS NUMÉRICOS:
 - Si hay ambigüedad en un número, lee cuidadosamente el contexto visual del documento
 - No confundas dígitos similares (ej: 6 vs 8, 1 vs 7, 0 vs O)
 - Verifica que el número extraído coincida exactamente con lo que ves en el documento
+
+UBICACIÓN ESPACIAL CRÍTICA PARA "numero_patente":
+- Busca ÚNICAMENTE en la esquina superior DERECHA del documento
+- El campo está explícitamente etiquetado como "No:" seguido del número
+- Aparece en el encabezado del documento, ANTES del campo "Titular:"
+- Típicamente es un número de 5 dígitos
+- IGNORA COMPLETAMENTE todos los números que aparezcan en:
+  * Sellos circulares (especialmente en la esquina superior izquierda)
+  * Estampillas o timbres
+  * Cualquier elemento decorativo o de validación
+- Los números en sellos circulares NO son el número de patente - son elementos de validación o decorativos
+- PUNTO DE REFERENCIA: El número de patente está claramente etiquetado con "No:" en la parte superior derecha, antes de "Titular:"
 
 Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
 
