@@ -32,7 +32,7 @@ import {
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
 import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
 import { extractTextFromPdf } from '@/lib/utils/textract';
-import { normalizePdfOrientation } from '@/lib/utils/normalize-orientation';
+import { normalizeDocumentOrientation } from '@/lib/utils/normalize-orientation';
 import { TextractClient } from '@aws-sdk/client-textract';
 import { DocType } from '@/types';
 
@@ -69,38 +69,37 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     let buffer = Buffer.from(arrayBuffer);
     
-    // Normalize PDF orientation before processing
+    // Normalize document orientation before processing (for both PDFs and images)
     // Textract detects rotation but doesn't physically modify the file
-    // We need to physically rotate the PDF so LLMs receive correctly oriented documents
+    // We need to physically rotate documents so LLMs receive correctly oriented documents
     let processedBuffer = buffer;
-    if (isPdf) {
-      try {
-        // Create Textract client for orientation detection
-        const textractClient = new TextractClient({
-          region: process.env.AWS_REGION || 'us-east-1',
-          credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-            ? {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-              }
-            : undefined,
-        });
+    try {
+      // Create Textract client for orientation detection
+      const textractClient = new TextractClient({
+        region: process.env.AWS_REGION || 'us-east-1',
+        credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+          ? {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            }
+          : undefined,
+      });
 
-        // Normalize orientation based on Textract's detection
-        const { buffer: normalizedBuffer, wasRotated } = await normalizePdfOrientation(
-          buffer,
-          textractClient
-        );
-        processedBuffer = Buffer.from(normalizedBuffer);
-        
-        if (wasRotated) {
-          console.log('✓ PDF orientation normalized before LLM processing');
-        }
-      } catch (normalizationError) {
-        console.warn('Orientation normalization failed, using original PDF:', normalizationError);
-        // Continue with original buffer if normalization fails
-        processedBuffer = buffer;
+      // Normalize orientation based on Textract's detection (works for PDFs and images)
+      const { buffer: normalizedBuffer, wasRotated } = await normalizeDocumentOrientation(
+        buffer,
+        textractClient,
+        file.type
+      );
+      processedBuffer = Buffer.from(normalizedBuffer);
+      
+      if (wasRotated) {
+        console.log(`✓ ${isPdf ? 'PDF' : 'Image'} orientation normalized before LLM processing`);
       }
+    } catch (normalizationError) {
+      console.warn('Orientation normalization failed, using original document:', normalizationError);
+      // Continue with original buffer if normalization fails
+      processedBuffer = buffer;
     }
     
     // Process PDFs with AWS Textract (better accuracy for legal documents)
