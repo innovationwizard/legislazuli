@@ -1,5 +1,6 @@
 'use client';
 
+import { useSession } from 'next-auth/react';
 import { ExtractedField } from '@/types';
 import { CopyButton } from './ui/CopyButton';
 import { Card } from './ui/Card';
@@ -16,6 +17,9 @@ export function ExtractionResults({
   confidence,
   discrepancies,
 }: ExtractionResultsProps) {
+  const { data: session } = useSession();
+  const isCondor = session?.user?.email === 'condor';
+  
   const getConfidenceDisplay = () => {
     const displays = {
       full: { text: '✓ COMPLETA (100% consenso)', className: 'text-green-600' },
@@ -59,6 +63,56 @@ export function ExtractionResults({
                       {field.field_value_words}
                     </p>
                     <CopyButton value={field.field_value_words} />
+                  </div>
+                )}
+                {/* Debug section for user "condor" - shows model outputs */}
+                {isCondor && (field.claude_value !== undefined || field.openai_value !== undefined) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="text-xs font-semibold text-gray-500 mb-2">
+                      🔍 Behind the Scenes (Debug Info)
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium text-purple-700 min-w-[100px]">Claude:</span>
+                        <div className="flex-1">
+                          <p className="text-gray-700 break-words">
+                            {field.claude_value || '(empty)'}
+                          </p>
+                        </div>
+                        {field.claude_value && (
+                          <CopyButton value={field.claude_value} />
+                        )}
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium text-blue-700 min-w-[100px]">OpenAI:</span>
+                        <div className="flex-1">
+                          <p className="text-gray-700 break-words">
+                            {field.openai_value || '(empty)'}
+                          </p>
+                        </div>
+                        {field.openai_value && (
+                          <CopyButton value={field.openai_value} />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100">
+                        <span className="font-medium text-gray-600 min-w-[100px]">Match:</span>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          field.match 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {field.match ? '✓ Match' : '✗ No Match'}
+                        </span>
+                        {field.confidence !== undefined && (
+                          <>
+                            <span className="font-medium text-gray-600 ml-4">Confidence:</span>
+                            <span className="text-gray-700">
+                              {(field.confidence * 100).toFixed(1)}%
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

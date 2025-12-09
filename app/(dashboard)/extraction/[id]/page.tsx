@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { ExtractionResults } from '@/components/ExtractionResults';
-import { ExtractedField } from '@/types';
+import { ExtractedField, ConsensusResult } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { FIELD_NAME_MAP } from '@/lib/utils/field-names';
 
 export default function ExtractionPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [extraction, setExtraction] = useState<{
     id: string;
@@ -20,10 +23,10 @@ export default function ExtractionPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (params.id) {
+    if (params.id && session) {
       fetchExtraction(params.id as string);
     }
-  }, [params.id]);
+  }, [params.id, session]);
 
   const fetchExtraction = async (id: string) => {
     try {
@@ -33,13 +36,56 @@ export default function ExtractionPage() {
       }
       const data = await response.json();
       
+      // Create reverse mapping from display name to field key
+      const displayNameToKey: Record<string, string> = {};
+      Object.entries(FIELD_NAME_MAP).forEach(([key, displayName]) => {
+        displayNameToKey[displayName] = key;
+      });
+      
+      // Map consensus results to fields (for user "condor")
+      const consensusResultsMap: Record<string, ConsensusResult> = {};
+      if (data.consensus_results && Array.isArray(data.consensus_results)) {
+        data.consensus_results.forEach((result: ConsensusResult) => {
+          consensusResultsMap[result.field_name] = result;
+        });
+      }
+      
+      // Helper function to convert display name to field key
+      const getFieldKey = (displayName: string): string => {
+        // First try direct mapping
+        if (displayNameToKey[displayName]) {
+          return displayNameToKey[displayName];
+        }
+        // For date fields, check if it matches the pattern
+        if (displayName === 'Fecha de Inscripción') return 'fecha_inscripcion';
+        if (displayName === 'Fecha de Emisión') return 'fecha_emision';
+        // For generic fields, convert Title Case back to snake_case
+        // e.g., "Field Name" -> "field_name"
+        return displayName.toLowerCase().replace(/\s+/g, '_');
+      };
+      
       // Transform fields from database format
-      const fields: ExtractedField[] = (data.fields || []).map((f: any) => ({
-        field_name: f.field_name,
-        field_value: f.field_value,
-        field_value_words: f.field_value_words,
-        needs_review: f.needs_review,
-      }));
+      const fields: ExtractedField[] = (data.fields || []).map((f: any) => {
+        const fieldKey = getFieldKey(f.field_name);
+        const consensusResult = consensusResultsMap[fieldKey];
+        
+        const field: ExtractedField = {
+          field_name: f.field_name,
+          field_value: f.field_value,
+          field_value_words: f.field_value_words,
+          needs_review: f.needs_review,
+        };
+        
+        // Add model outputs for user "condor" if consensus result exists
+        if (consensusResult && session?.user?.email === 'condor') {
+          field.claude_value = consensusResult.claude_value;
+          field.openai_value = consensusResult.openai_value;
+          field.match = consensusResult.match;
+          field.confidence = consensusResult.confidence;
+        }
+        
+        return field;
+      });
 
       setExtraction({
         id: data.id,

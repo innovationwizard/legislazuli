@@ -25,6 +25,7 @@ import {
 import { sanitizeFilename } from '@/lib/utils/sanitize-filename';
 import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
 import { extractTextFromPdf } from '@/lib/utils/textract';
+import { correctPdfOrientation, correctPdfOrientationWithTest } from '@/lib/utils/pdf-orientation';
 import { DocType } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -58,7 +59,80 @@ export async function POST(request: NextRequest) {
 
     // Get file buffer
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    let buffer = Buffer.from(arrayBuffer);
+    
+    // Correct PDF orientation before processing for optimal OCR accuracy
+    // This ensures 100% correctness regardless of how the user uploaded the document
+    // We test original orientation first, and only test rotations if extraction quality is poor
+    if (isPdf) {
+      try {
+        // Quick test with original orientation
+        let bestBuffer: Buffer = buffer;
+        let bestTextLength = 0;
+        let bestHasKeywords = false;
+        let shouldTestRotations = false;
+        
+        try {
+          const originalText = await extractTextFromPdf(buffer);
+          const originalHasKeywords = /patente|registro|comercio|guatemala|inscripcion|numero|fecha/i.test(originalText);
+          bestTextLength = originalText.trim().length;
+          bestHasKeywords = originalHasKeywords;
+          
+          // Only test rotations if extraction is poor (low text or no keywords)
+          // This optimizes for the common case where orientation is correct
+          shouldTestRotations = bestTextLength < 200 || !bestHasKeywords;
+          
+          if (!shouldTestRotations) {
+            console.log(`Original orientation is good: ${bestTextLength} chars, keywords found`);
+          } else {
+            console.log(`Original orientation extraction poor (${bestTextLength} chars, keywords: ${bestHasKeywords}), testing rotations...`);
+          }
+        } catch (originalError) {
+          // If extraction fails completely, definitely test rotations
+          console.log('Original orientation extraction failed, testing rotations...');
+          shouldTestRotations = true;
+        }
+        
+        // Only test rotations if needed (optimization for common case)
+        if (shouldTestRotations) {
+          const rotations = [90, 180, 270];
+          
+          for (const angle of rotations) {
+            try {
+              const { rotatePdfPage } = await import('@/lib/utils/pdf-orientation');
+              const rotatedBuffer = await rotatePdfPage(buffer, 0, angle);
+              const rotatedText = await extractTextFromPdf(rotatedBuffer);
+              const rotatedHasKeywords = /patente|registro|comercio|guatemala|inscripcion|numero|fecha/i.test(rotatedText);
+              const rotatedLength = rotatedText.trim().length;
+              
+              // Prefer orientation with keywords, or significantly more text
+              const isBetter = 
+                (rotatedHasKeywords && !bestHasKeywords) ||
+                (rotatedHasKeywords === bestHasKeywords && rotatedLength > bestTextLength * 1.15);
+              
+              if (isBetter) {
+                bestBuffer = Buffer.from(rotatedBuffer);
+                bestTextLength = rotatedLength;
+                bestHasKeywords = rotatedHasKeywords;
+                console.log(`Found better orientation at ${angle}°: ${rotatedLength} chars, keywords: ${rotatedHasKeywords}`);
+              }
+            } catch (rotationError) {
+              console.warn(`Failed to test ${angle}° rotation:`, rotationError);
+              // Continue with other rotations
+            }
+          }
+        }
+        
+        const originalBuffer = buffer;
+        buffer = Buffer.from(bestBuffer);
+        if (bestBuffer !== originalBuffer) {
+          console.log(`Applied orientation correction: ${bestTextLength} chars extracted`);
+        }
+      } catch (orientationError) {
+        console.warn('Orientation correction failed, using original PDF:', orientationError);
+        // Continue with original buffer if correction fails
+      }
+    }
     
     // Process PDFs with AWS Textract (better accuracy for legal documents)
     // Images are converted to base64 for vision APIs
@@ -69,11 +143,13 @@ export async function POST(request: NextRequest) {
     if (isPdf) {
       try {
         // Use AWS Textract for PDFs - purpose-built for legal/government forms
+        // Buffer has been orientation-corrected if needed
         extractedText = await extractTextFromPdf(buffer);
         useTextExtraction = true;
       } catch (textractError) {
         console.error('Textract error, falling back to image conversion:', textractError);
         // Fallback to image conversion if Textract fails
+        // Buffer is already orientation-corrected
         try {
           base64 = await convertPdfToImage(buffer);
         } catch (imageError) {

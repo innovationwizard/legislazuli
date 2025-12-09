@@ -95,6 +95,11 @@ export interface ExtractedField {
   field_value: string;
   field_value_words?: string;
   needs_review: boolean;
+  // Debug fields for user "condor" - shows model outputs
+  claude_value?: string;
+  openai_value?: string;
+  match?: boolean;
+  confidence?: number;
 }
 
 export type DocType = 'patente_empresa' | 'patente_sociedad' | 'otros';
