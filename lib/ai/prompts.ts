@@ -12,6 +12,31 @@ REGLAS CRÍTICAS:
 7. No agregues puntuación que no esté en el original.
 8. Para campos numéricos (numero_patente, numero_registro, folio, etc.), lee cada dígito con máxima precisión.
 
+MANEJO DE MARCAS DE AGUA Y TEXTO PARCIALMENTE OCULTO (IMPORTANTE):
+- Este documento puede contener marcas de agua, sellos o texto superpuesto (como "Registro Mercantil", "RM", sellos gubernamentales)
+- Estos elementos son DECORATIVOS y NO ocultan el texto legal subyacente
+- LEE A TRAVÉS de las marcas de agua para extraer el contenido real del documento debajo de ellas
+- Separa mentalmente estas capas visuales:
+  * CAPA PRIMARIA: El texto legal real (texto negro sobre fondo crema)
+  * CAPA SUPERPUESTA: Marcas de agua, sellos, estampillas (típicamente grises, translúcidas o circulares)
+- SIEMPRE prioriza leer la CAPA PRIMARIA. Ignora los elementos superpuestos cuando intersectan con el texto del documento
+
+MODO DE LECTURA PERMISIVO:
+- Si el 70% o más de una palabra es visible, INFIERE la palabra completa
+- Usa pistas contextuales (ej: si día=01 y año=2019, el mes debe ser un mes válido en español)
+- Las marcas de agua típicamente no ocultan completamente el texto, solo lo superponen
+- SOLO usa "[ILEGIBLE]" cuando:
+  * Menos del 50% de los caracteres son visibles
+  * No es posible inferencia contextual
+  * El texto está genuinamente dañado, desvanecido o corrupto (NO solo con marca de agua)
+
+INFERENCIA PARA CAMPOS DE FECHA:
+- Para campos de fecha (fecha_inscripcion, fecha_emision):
+  * Si un componente está parcialmente oculto pero contextualmente inferible (ej: mes visible como "Ma_o" o "M_yo"), usa inferencia lógica
+  * Los meses se escriben típicamente en español: Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre
+  * SOLO marca como "[ILEGIBLE]" si el texto es completamente ilegible, NO si está parcialmente visible detrás de marcas de agua
+  * Usa el contexto de día y año para inferir el mes si está parcialmente visible
+
 UBICACIÓN ESPACIAL DE CAMPOS (CRÍTICO):
 - numero_patente: Busca ÚNICAMENTE en la esquina superior DERECHA del documento, en el campo explícitamente etiquetado como "No:" seguido del número.
   * Este campo aparece en el encabezado del documento, ANTES del campo "Titular:"
@@ -75,6 +100,32 @@ PRECISIÓN NUMÉRICA (CRÍTICO):
 - NO inventes dígitos ni completes números parcialmente visibles
 - Si un número está parcialmente oculto o borroso, usa "[ILEGIBLE]" en lugar de adivinar
 
+MANEJO DE MARCAS DE AGUA Y TEXTO PARCIALMENTE OCULTO (IMPORTANTE):
+- Este documento puede contener marcas de agua, sellos o texto superpuesto (como "Registro Mercantil", "RM", sellos gubernamentales)
+- Estos elementos son DECORATIVOS y NO ocultan el texto legal subyacente
+- LEE A TRAVÉS de las marcas de agua para extraer el contenido real del documento debajo de ellas
+- Separa mentalmente estas capas visuales:
+  * CAPA PRIMARIA: El texto legal real (texto negro sobre fondo crema)
+  * CAPA SUPERPUESTA: Marcas de agua, sellos, estampillas (típicamente grises, translúcidas o circulares)
+- SIEMPRE prioriza leer la CAPA PRIMARIA. Ignora los elementos superpuestos cuando intersectan con el texto del documento
+
+MODO DE LECTURA PERMISIVO:
+- Si el 70% o más de una palabra es visible, INFIERE la palabra completa
+- Usa pistas contextuales (ej: si día=01 y año=2019, el mes debe ser un mes válido en español)
+- Las marcas de agua típicamente no ocultan completamente el texto, solo lo superponen
+- SOLO usa "[ILEGIBLE]" cuando:
+  * Menos del 50% de los caracteres son visibles
+  * No es posible inferencia contextual
+  * El texto está genuinamente dañado, desvanecido o corrupto (NO solo con marca de agua)
+
+INFERENCIA PARA CAMPOS DE FECHA:
+- Para campos de fecha (fecha_inscripcion, fecha_emision):
+  * Si un componente está parcialmente oculto pero contextualmente inferible (ej: mes visible como "Ma_o" o "M_yo"), usa inferencia lógica
+  * Los meses se escriben típicamente en español: Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre
+  * SOLO marca como "[ILEGIBLE]" si el texto es completamente ilegible, NO si está parcialmente visible detrás de marcas de agua
+  * Usa el contexto de día y año para inferir el mes si está parcialmente visible
+  * Ejemplo: Si ves "Ma_o" o "M_yo" y el contexto indica una fecha válida, infiere "Mayo"
+
 UBICACIÓN ESPACIAL DE CAMPOS (CRÍTICO):
 - numero_patente: Busca ÚNICAMENTE en la esquina superior DERECHA del documento, en el campo explícitamente etiquetado como "No:" seguido del número.
   * Este campo aparece en el encabezado del documento, ANTES del campo "Titular:"
@@ -119,6 +170,14 @@ ATENCIÓN ESPECIAL AL CAMPO "numero_patente":
 - IGNORA completamente cualquier número que aparezca en sellos circulares, estampillas o timbres (especialmente en la esquina superior izquierda)
 - El número de patente está claramente etiquetado con "No:" y aparece ANTES del campo "Titular:"
 
+MANEJO DE MARCAS DE AGUA:
+- Este documento puede tener marcas de agua superpuestas (como "RM Registro MERCANTIL")
+- Estas marcas son DECORATIVAS y NO ocultan el texto legal
+- LEE A TRAVÉS de las marcas de agua para extraer el texto real debajo
+- Si un texto está parcialmente visible (70%+ visible), INFIERE la palabra completa
+- Para fechas: Si el mes está parcialmente visible (ej: "Ma_o" o "M_yo"), infiere el mes completo usando contexto
+- SOLO marca como "[ILEGIBLE]" si menos del 50% del texto es visible y no hay contexto para inferir
+
 Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
 
 // Enhanced prompt for OpenAI with emphasis on numeric accuracy
@@ -142,6 +201,33 @@ UBICACIÓN ESPACIAL CRÍTICA PARA "numero_patente":
   * Cualquier elemento decorativo o de validación
 - Los números en sellos circulares NO son el número de patente - son elementos de validación o decorativos
 - PUNTO DE REFERENCIA: El número de patente está claramente etiquetado con "No:" en la parte superior derecha, antes de "Titular:"
+
+MANEJO DE MARCAS DE AGUA Y TEXTO PARCIALMENTE OCULTO (CRÍTICO):
+- Este documento puede tener marcas de agua superpuestas (como "RM Registro MERCANTIL", "Registro Mercantil", sellos gubernamentales)
+- Estas marcas son DECORATIVAS y NO ocultan el texto legal subyacente
+- LEE A TRAVÉS de las marcas de agua para extraer el contenido real del documento
+- Separa mentalmente las capas visuales:
+  * CAPA PRIMARIA: Texto legal real (negro sobre fondo crema) - ESTO ES LO QUE DEBES LEER
+  * CAPA SUPERPUESTA: Marcas de agua, sellos (grises, translúcidas) - IGNORA ESTA CAPA
+- SIEMPRE prioriza leer la CAPA PRIMARIA, incluso cuando intersecta con marcas de agua
+
+MODO DE LECTURA PERMISIVO (USA INFERENCIA):
+- Si el 70% o más de una palabra es visible, INFIERE la palabra completa
+- Usa pistas contextuales para inferir texto parcialmente visible
+- Las marcas de agua típicamente NO ocultan completamente el texto, solo lo superponen
+- SOLO marca como "[ILEGIBLE]" cuando:
+  * Menos del 50% de los caracteres son visibles
+  * No hay contexto suficiente para inferir
+  * El texto está genuinamente dañado o corrupto (NO solo con marca de agua)
+
+INFERENCIA ESPECIAL PARA FECHAS:
+- Para campos de fecha (fecha_inscripcion, fecha_emision):
+  * Si un mes está parcialmente visible detrás de una marca de agua (ej: "Ma_o", "M_yo", "Ma__"), INFIERE el mes completo
+  * Los meses en español son: Enero, Febrero, Marzo, Abril, Mayo, Junio, Julio, Agosto, Septiembre, Octubre, Noviembre, Diciembre
+  * Usa el contexto: Si día=01 y año=2019, y ves "Ma_o", infiere "Mayo"
+  * Si ves "M_yo" o "Ma__" con contexto de fecha válida, infiere "Mayo"
+  * SOLO marca como "[ILEGIBLE]" si el texto es completamente ilegible (menos del 50% visible) Y no hay contexto para inferir
+  * NO uses "[ILEGIBLE]" solo porque hay una marca de agua superpuesta - LEE A TRAVÉS de ella
 
 Responde ÚNICAMENTE con el JSON solicitado, sin texto adicional.`;
 
