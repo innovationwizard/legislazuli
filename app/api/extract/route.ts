@@ -86,15 +86,15 @@ export async function POST(request: NextRequest) {
       });
 
       // Normalize orientation based on Textract's detection (works for PDFs and images)
-      const { buffer: normalizedBuffer, wasRotated } = await normalizeDocumentOrientation(
+      const result = await normalizeDocumentOrientation(
         buffer,
         textractClient,
         file.type
       );
-      processedBuffer = Buffer.from(normalizedBuffer);
+      processedBuffer = Buffer.from(result.buffer);
       
-      if (wasRotated) {
-        console.log(`✓ ${isPdf ? 'PDF' : 'Image'} orientation normalized before LLM processing`);
+      if (result.wasRotated) {
+        console.log(`✓ ${isPdf ? 'PDF' : 'Image'} orientation normalized before LLM processing (${result.detectedOrientation}, correction: ${result.appliedCorrection}°)`);
       }
     } catch (normalizationError) {
       console.warn('Orientation normalization failed, using original document:', normalizationError);

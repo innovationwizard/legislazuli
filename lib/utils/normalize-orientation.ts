@@ -6,83 +6,186 @@
  * so that LLMs (Claude/GPT-4o) receive correctly oriented documents.
  */
 
-import { TextractClient, AnalyzeDocumentCommand } from '@aws-sdk/client-textract';
+import { 
+  TextractClient, 
+  DetectDocumentTextCommand,
+  Block 
+} from '@aws-sdk/client-textract';
 import { PDFDocument, degrees } from 'pdf-lib';
 import sharp from 'sharp';
 
-// Map Textract's detected orientation to degrees required to FIX it
-// Textract returns how the page IS rotated, so we must rotate the OPPOSITE way
-const ROTATION_MAP: Record<string, number> = {
+// Textract orientation values and their correction angles
+// Textract returns how the document IS rotated, so we rotate the OPPOSITE direction
+type TextractOrientation = 'ROTATE_0' | 'ROTATE_90' | 'ROTATE_180' | 'ROTATE_270';
+
+const ROTATION_CORRECTION: Record<TextractOrientation, number> = {
   'ROTATE_0': 0,
-  'ROTATE_90': -90,   // Or 270
-  'ROTATE_180': -180, // Or 180
-  'ROTATE_270': -270, // Or 90
+  'ROTATE_90': -90,
+  'ROTATE_180': -180,
+  'ROTATE_270': -270,
 };
 
+interface OrientationResult {
+  buffer: Buffer;
+  wasRotated: boolean;
+  detectedOrientation?: string;
+  appliedCorrection?: number;
+}
+
 /**
- * Normalizes document orientation (PDF or image) based on Textract's detection
- * @param fileBuffer - The original file buffer (PDF or image)
- * @param textractClient - Textract client instance
- * @param mimeType - MIME type of the file (e.g., 'application/pdf', 'image/png')
- * @returns Normalized buffer and rotation status
+ * Detects document orientation using Textract's DetectDocumentText API
+ * This API has built-in orientation detection that's more reliable than AnalyzeDocument
+ */
+async function detectOrientation(
+  fileBuffer: Buffer,
+  textractClient: TextractClient
+): Promise<TextractOrientation> {
+  const command = new DetectDocumentTextCommand({
+    Document: { Bytes: fileBuffer },
+  });
+
+  const response = await textractClient.send(command);
+
+  // Find PAGE blocks - they contain orientation metadata
+  const pageBlocks = response.Blocks?.filter(
+    (block: Block) => block.BlockType === 'PAGE'
+  ) || [];
+
+  if (pageBlocks.length === 0) {
+    console.log('Textract: No PAGE blocks found, assuming ROTATE_0');
+    return 'ROTATE_0';
+  }
+
+  // Get orientation from first page block
+  // Textract stores this in custom fields depending on API version
+  const pageBlock = pageBlocks[0] as Block & { 
+    // Textract may return orientation in different fields
+    Orientation?: TextractOrientation;
+  };
+
+  // Check multiple possible locations for orientation data
+  // 1. Direct Orientation field (some API versions)
+  if (pageBlock.Orientation) {
+    return pageBlock.Orientation;
+  }
+
+  // 2. Check geometry for rotation hints
+  // If document is rotated, the bounding box polygon will be rotated
+  const geometry = pageBlock.Geometry;
+  if (geometry?.Polygon && geometry.Polygon.length >= 4) {
+    const polygon = geometry.Polygon;
+    
+    // Calculate the angle of the top edge
+    // For a correctly oriented document, top-left to top-right should be roughly horizontal
+    const topLeft = polygon[0];
+    const topRight = polygon[1];
+    
+    if (topLeft && topRight && topLeft.X !== undefined && topLeft.Y !== undefined &&
+        topRight.X !== undefined && topRight.Y !== undefined) {
+      const dx = topRight.X - topLeft.X;
+      const dy = topRight.Y - topLeft.Y;
+      const angleRad = Math.atan2(dy, dx);
+      const angleDeg = angleRad * (180 / Math.PI);
+      
+      // Classify angle into 90-degree buckets
+      // Normal: ~0°, Rotated 90° CW: ~90°, Upside down: ~180°/-180°, Rotated 270° CW: ~-90°
+      if (angleDeg > -45 && angleDeg <= 45) {
+        return 'ROTATE_0';
+      } else if (angleDeg > 45 && angleDeg <= 135) {
+        return 'ROTATE_90';
+      } else if (angleDeg > 135 || angleDeg <= -135) {
+        return 'ROTATE_180';
+      } else {
+        return 'ROTATE_270';
+      }
+    }
+  }
+
+  // 3. Analyze text line orientations as fallback
+  const lineBlocks = response.Blocks?.filter(
+    (block: Block) => block.BlockType === 'LINE'
+  ) || [];
+
+  if (lineBlocks.length > 0) {
+    // Sample first few lines to determine dominant orientation
+    const sampleLines = lineBlocks.slice(0, Math.min(10, lineBlocks.length));
+    const orientations: TextractOrientation[] = [];
+
+    for (const line of sampleLines) {
+      const poly = line.Geometry?.Polygon;
+      if (poly && poly.length >= 2) {
+        const p0 = poly[0];
+        const p1 = poly[1];
+        if (p0 && p1 && p0.X !== undefined && p0.Y !== undefined &&
+            p1.X !== undefined && p1.Y !== undefined) {
+          const dx = p1.X - p0.X;
+          const dy = p1.Y - p0.Y;
+          const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+          if (angle > -45 && angle <= 45) {
+            orientations.push('ROTATE_0');
+          } else if (angle > 45 && angle <= 135) {
+            orientations.push('ROTATE_90');
+          } else if (angle > 135 || angle <= -135) {
+            orientations.push('ROTATE_180');
+          } else {
+            orientations.push('ROTATE_270');
+          }
+        }
+      }
+    }
+
+    // Return most common orientation
+    if (orientations.length > 0) {
+      const counts = orientations.reduce((acc, o) => {
+        acc[o] = (acc[o] || 0) + 1;
+        return acc;
+      }, {} as Record<TextractOrientation, number>);
+
+      const dominant = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+      if (dominant) {
+        return dominant[0] as TextractOrientation;
+      }
+    }
+  }
+
+  return 'ROTATE_0';
+}
+
+/**
+ * Normalizes document orientation based on Textract's detection
  */
 export async function normalizeDocumentOrientation(
   fileBuffer: Buffer,
   textractClient: TextractClient,
   mimeType: string
-): Promise<{ buffer: Buffer; wasRotated: boolean }> {
+): Promise<OrientationResult> {
   const isPdf = mimeType === 'application/pdf';
-  
+
   try {
-    // 1. Ask Textract for the orientation (Lightweight check)
-    // We use "FORMS" just to trigger analysis, but we only care about Metadata
-    const command = new AnalyzeDocumentCommand({
-      Document: { Bytes: fileBuffer },
-      FeatureTypes: ['FORMS'],
-    });
-
-    const response = await textractClient.send(command);
-
-    // Guard clause: If Textract fails or finds nothing, return original
-    const metadataPages = response.DocumentMetadata?.Pages;
-    if (!metadataPages || !Array.isArray(metadataPages) || metadataPages.length === 0) {
-      console.log('Textract: No orientation metadata found, using original orientation');
-      return { buffer: fileBuffer, wasRotated: false };
-    }
-
-    // 2. Get the detected orientation
-    // Note: AWS returns the orientation of the INPUT.
-    // e.g., "ROTATE_90" means "This page is currently rotated 90 degrees clockwise."
-    const pageMetadata = metadataPages[0];
-    const detectedOrientation = 
-      (pageMetadata as any).DetectedDocumentOrientation || 
-      (pageMetadata as any).OrientationCorrection || 
-      'ROTATE_0';
-
-    if (detectedOrientation === 'ROTATE_0') {
-      console.log('Textract: Document is already correctly oriented');
-      return { buffer: fileBuffer, wasRotated: false };
-    }
-
+    // Detect orientation
+    const detectedOrientation = await detectOrientation(fileBuffer, textractClient);
+    
     console.log(`Textract detected orientation: ${detectedOrientation}`);
 
-    const rotationAdjustment = ROTATION_MAP[detectedOrientation] || 0;
-
-    if (rotationAdjustment === 0) {
-      console.log('Textract: No rotation adjustment needed');
-      return { buffer: fileBuffer, wasRotated: false };
+    if (detectedOrientation === 'ROTATE_0') {
+      return { 
+        buffer: fileBuffer, 
+        wasRotated: false,
+        detectedOrientation,
+      };
     }
 
-    // 3. Apply the physical rotation
+    const rotationCorrection = ROTATION_CORRECTION[detectedOrientation];
+
+    // Apply physical rotation
     if (isPdf) {
-      return await rotatePdf(fileBuffer, rotationAdjustment, detectedOrientation);
+      return await rotatePdf(fileBuffer, rotationCorrection, detectedOrientation);
     } else {
-      return await rotateImage(fileBuffer, rotationAdjustment, detectedOrientation, mimeType);
+      return await rotateImage(fileBuffer, rotationCorrection, detectedOrientation, mimeType);
     }
   } catch (error) {
     console.error('Orientation normalization error:', error);
-    // If normalization fails, return original buffer to avoid breaking the pipeline
-    console.warn('Returning original document due to orientation normalization error');
     return { buffer: fileBuffer, wasRotated: false };
   }
 }
@@ -92,26 +195,26 @@ export async function normalizeDocumentOrientation(
  */
 async function rotatePdf(
   fileBuffer: Buffer,
-  rotationAdjustment: number,
+  rotationCorrection: number,
   detectedOrientation: string
-): Promise<{ buffer: Buffer; wasRotated: boolean }> {
+): Promise<OrientationResult> {
   const pdfDoc = await PDFDocument.load(fileBuffer);
   const pages = pdfDoc.getPages();
 
-  pages.forEach((page) => {
-    // We add the adjustment to the existing rotation
+  for (const page of pages) {
     const currentRotation = page.getRotation().angle;
-    page.setRotation(degrees(currentRotation + rotationAdjustment));
-  });
+    page.setRotation(degrees(currentRotation + rotationCorrection));
+  }
 
-  // Save and return the corrected buffer
   const rotatedPdfBytes = await pdfDoc.save();
 
-  console.log(`✓ Applied PDF orientation correction: ${rotationAdjustment}° (from ${detectedOrientation})`);
+  console.log(`✓ PDF corrected: ${rotationCorrection}° (was ${detectedOrientation})`);
 
   return {
     buffer: Buffer.from(rotatedPdfBytes),
     wasRotated: true,
+    detectedOrientation,
+    appliedCorrection: rotationCorrection,
   };
 }
 
@@ -120,60 +223,54 @@ async function rotatePdf(
  */
 async function rotateImage(
   fileBuffer: Buffer,
-  rotationAdjustment: number,
+  rotationCorrection: number,
   detectedOrientation: string,
   mimeType: string
-): Promise<{ buffer: Buffer; wasRotated: boolean }> {
-  // Convert negative rotation to positive (sharp uses positive angles)
-  // -90 -> 270, -180 -> 180, -270 -> 90
-  let sharpRotation = rotationAdjustment;
-  if (sharpRotation < 0) {
-    sharpRotation = 360 + sharpRotation;
+): Promise<OrientationResult> {
+  // Convert negative to positive for sharp (e.g., -90 → 270)
+  const sharpRotation = rotationCorrection < 0 ? 360 + rotationCorrection : rotationCorrection;
+
+  let pipeline = sharp(fileBuffer, { failOn: 'none' })
+    .rotate(sharpRotation, {
+      background: mimeType === 'image/png' || mimeType === 'image/gif'
+        ? { r: 0, g: 0, b: 0, alpha: 0 }
+        : { r: 255, g: 255, b: 255 },
+    });
+
+  // Output format with max quality
+  switch (mimeType) {
+    case 'image/png':
+      pipeline = pipeline.png({ compressionLevel: 9 });
+      break;
+    case 'image/jpeg':
+    case 'image/jpg':
+      pipeline = pipeline.jpeg({ quality: 100, mozjpeg: true });
+      break;
+    case 'image/webp':
+      pipeline = pipeline.webp({ quality: 100, lossless: true });
+      break;
+    default:
+      pipeline = pipeline.png({ compressionLevel: 9 });
   }
 
-  // Determine output format based on input
-  let sharpInstance = sharp(fileBuffer);
-  
-  // Apply rotation (sharp can handle any angle)
-  sharpInstance = sharpInstance.rotate(sharpRotation);
+  const rotatedBuffer = await pipeline.toBuffer();
 
-  // Convert to appropriate format
-  if (mimeType === 'image/png') {
-    sharpInstance = sharpInstance.png();
-  } else if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
-    sharpInstance = sharpInstance.jpeg();
-  } else if (mimeType === 'image/webp') {
-    sharpInstance = sharpInstance.webp();
-  } else if (mimeType === 'image/gif') {
-    // GIF rotation - convert to PNG for better compatibility
-    sharpInstance = sharpInstance.png();
-  } else {
-    // Default to PNG
-    sharpInstance = sharpInstance.png();
-  }
-
-  const rotatedImageBuffer = await sharpInstance.toBuffer();
-
-  console.log(`✓ Applied image orientation correction: ${sharpRotation}° (from ${detectedOrientation})`);
+  console.log(`✓ Image corrected: ${sharpRotation}° (was ${detectedOrientation})`);
 
   return {
-    buffer: rotatedImageBuffer,
+    buffer: rotatedBuffer,
     wasRotated: true,
+    detectedOrientation,
+    appliedCorrection: rotationCorrection,
   };
 }
 
 /**
- * Legacy function name for backward compatibility
- * @deprecated Use normalizeDocumentOrientation instead
- */
-/**
- * Legacy function name for backward compatibility
  * @deprecated Use normalizeDocumentOrientation instead
  */
 export async function normalizePdfOrientation(
   fileBuffer: Buffer,
   textractClient: TextractClient
-): Promise<{ buffer: Buffer; wasRotated: boolean }> {
+): Promise<OrientationResult> {
   return normalizeDocumentOrientation(fileBuffer, textractClient, 'application/pdf');
 }
-
