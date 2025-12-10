@@ -103,6 +103,9 @@ export interface ExtractedField {
   // Special handling for "Número de Expediente" - can have separate number and year parts
   expediente_number?: string | null;
   expediente_year?: string | null;
+  // Textract verification status (The Deterministic Third Voter)
+  verification_status?: 'VERIFIED' | 'FUZZY_MATCH' | 'NOT_FOUND';
+  verification_confidence?: number;
 }
 
 export type DocType = 'patente_empresa' | 'patente_sociedad' | 'otros';

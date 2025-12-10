@@ -34,6 +34,7 @@ import { convertPdfToImage } from '@/lib/utils/pdf-to-image';
 import { extractTextFromPdf } from '@/lib/utils/textract';
 import { normalizeDocumentOrientation } from '@/lib/utils/normalize-orientation';
 import { TextractClient } from '@aws-sdk/client-textract';
+import { TextractVerifier } from '@/lib/verification/textract-verifier';
 import { DocType } from '@/types';
 
 export async function POST(request: NextRequest) {
@@ -86,15 +87,20 @@ export async function POST(request: NextRequest) {
       });
 
       // Normalize orientation based on Textract's detection (works for PDFs and images)
-      const result = await normalizeDocumentOrientation(
+      // This also returns the full Textract response for verification
+      const orientationResult = await normalizeDocumentOrientation(
         buffer,
         textractClient,
         file.type
       );
-      processedBuffer = Buffer.from(result.buffer);
+      processedBuffer = Buffer.from(orientationResult.buffer);
       
-      if (result.wasRotated) {
-        console.log(`✓ ${isPdf ? 'PDF' : 'Image'} orientation normalized before LLM processing (${result.detectedOrientation}, correction: ${result.appliedCorrection}°)`);
+      // Store Textract response for verification (will be used after LLM extraction)
+      // For PDFs, we can reuse this response; for images, we'll get it from text extraction
+      var textractResponseForVerification = orientationResult.textractResponse;
+      
+      if (orientationResult.wasRotated) {
+        console.log(`✓ ${isPdf ? 'PDF' : 'Image'} orientation normalized before LLM processing (${orientationResult.detectedOrientation}, correction: ${orientationResult.appliedCorrection}°)`);
       }
     } catch (normalizationError) {
       console.warn('Orientation normalization failed, using original document:', normalizationError);
@@ -112,8 +118,13 @@ export async function POST(request: NextRequest) {
       try {
         // Use AWS Textract for PDFs - purpose-built for legal/government forms
         // Note: processedBuffer is now correctly oriented
+        // For PDFs, we already have the Textract response from orientation normalization
+        // But we need to extract text separately
         extractedText = await extractTextFromPdf(processedBuffer);
         useTextExtraction = true;
+        
+        // For PDFs, textractResponseForVerification should already be set from orientation normalization
+        // If not (shouldn't happen), we'll handle verification gracefully
       } catch (textractError) {
         console.error('Textract error, falling back to image conversion:', textractError);
         // Fallback to image conversion if Textract fails
@@ -343,6 +354,84 @@ export async function POST(request: NextRequest) {
       confidence = specificResult.confidence;
       discrepancies = specificResult.discrepancies;
       extractedFields = convertToExtractedFields(consensus, discrepancies);
+      
+      // Run Textract verification (The Deterministic Third Voter)
+      // We're already in the structured document branch (not 'otros'), so verification applies
+      if (textractResponseForVerification) {
+        try {
+          const verifier = new TextractVerifier(textractResponseForVerification);
+          
+          // Define critical fields that should be verified
+          // These are fields where spatial location and exact text matching matter
+          const criticalFields: Array<{ fieldName: string; value: string; expectedLocation?: 'TOP_RIGHT' | 'TOP_LEFT' | 'BOTTOM' }> = [
+            { 
+              fieldName: 'numero_patente', 
+              value: consensus.numero_patente || '', 
+              expectedLocation: 'TOP_RIGHT' // Patent numbers are typically in top-right
+            },
+            { 
+              fieldName: 'numero_registro', 
+              value: consensus.numero_registro || '' 
+            },
+            { 
+              fieldName: 'fecha_inscripcion', 
+              value: consensus.fecha_inscripcion?.numeric || '' 
+            },
+          ];
+          
+          // Verify each critical field
+          const verificationResults = criticalFields
+            .filter(f => f.value && f.value !== '[VACÍO]' && f.value !== '[NO APLICA]' && f.value !== '[ILEGIBLE]')
+            .map(field => {
+              if (field.expectedLocation) {
+                return verifier.verifyFieldWithLocation(
+                  field.fieldName,
+                  field.value,
+                  field.expectedLocation
+                );
+              } else {
+                return verifier.verifyField(field.fieldName, field.value);
+              }
+            });
+          
+          // Flag fields that Textract couldn't verify
+          const unverifiedFields = verificationResults
+            .filter(r => r.status === 'NOT_FOUND')
+            .map(r => r.field);
+          
+          // If critical fields are not verified, escalate confidence level
+          if (unverifiedFields.length > 0) {
+            console.warn(`⚠ Textract verification failed for fields: ${unverifiedFields.join(', ')}`);
+            
+            // If critical field like numero_patente is not found, require review
+            if (unverifiedFields.includes('numero_patente')) {
+              confidence = 'review_required';
+              if (!discrepancies.includes('numero_patente')) {
+                discrepancies.push('numero_patente');
+              }
+            }
+            
+            // Add verification metadata to extracted fields
+            extractedFields = extractedFields.map(field => {
+              const verification = verificationResults.find(v => v.field === field.field_name);
+              if (verification) {
+                return {
+                  ...field,
+                  needs_review: field.needs_review || verification.status === 'NOT_FOUND',
+                  verification_status: verification.status,
+                  verification_confidence: verification.confidence,
+                };
+              }
+              return field;
+            });
+          } else {
+            console.log('✓ Textract verification passed for all critical fields');
+          }
+        } catch (verificationError) {
+          console.warn('Textract verification error (non-critical):', verificationError);
+          // Continue even if verification fails - it's a safety check, not a blocker
+        }
+      }
     }
 
     // Save extraction
