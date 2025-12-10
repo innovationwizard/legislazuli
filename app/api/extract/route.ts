@@ -372,19 +372,34 @@ export async function POST(request: NextRequest) {
           
           // Define critical fields that should be verified
           // These are fields where spatial location and exact text matching matter
-          const criticalFields: Array<{ fieldName: string; value: string; expectedLocation?: 'TOP_RIGHT' | 'TOP_LEFT' | 'BOTTOM' }> = [
+          // NUMERIC fields use strict verification (no Levenshtein on numbers)
+          // TEXT fields use fuzzy matching (Levenshtein distance)
+          const criticalFields: Array<{ 
+            fieldName: string; 
+            value: string; 
+            type: 'TEXT' | 'NUMERIC';
+            expectedLocation?: 'TOP_RIGHT' | 'TOP_LEFT' | 'BOTTOM' 
+          }> = [
             { 
               fieldName: 'numero_patente', 
               value: consensus.numero_patente || '', 
+              type: 'NUMERIC', // Strict verification - single digit difference is critical error
               expectedLocation: 'TOP_RIGHT' // Patent numbers are typically in top-right
             },
             { 
               fieldName: 'numero_registro', 
-              value: consensus.numero_registro || '' 
+              value: consensus.numero_registro || '',
+              type: 'NUMERIC' // Strict verification - registration numbers must be exact
             },
             { 
               fieldName: 'fecha_inscripcion', 
-              value: consensus.fecha_inscripcion?.numeric || '' 
+              value: consensus.fecha_inscripcion?.numeric || '',
+              type: 'TEXT' // Dates can have format variations, use fuzzy matching
+            },
+            { 
+              fieldName: 'numero_expediente', 
+              value: consensus.numero_expediente || '',
+              type: 'NUMERIC' // Strict verification - expediente numbers must be exact
             },
           ];
           
@@ -396,23 +411,34 @@ export async function POST(request: NextRequest) {
                 return verifier.verifyFieldWithLocation(
                   field.fieldName,
                   field.value,
-                  field.expectedLocation
+                  field.expectedLocation,
+                  field.type
                 );
               } else {
-                return verifier.verifyField(field.fieldName, field.value);
+                return verifier.verifyField(field.fieldName, field.value, field.type);
               }
             });
           
-          // Flag fields that Textract couldn't verify
+          // Flag fields that Textract couldn't verify or are suspicious
           const unverifiedFields = verificationResults
-            .filter(r => r.status === 'NOT_FOUND')
+            .filter(r => r.status === 'NOT_FOUND' || r.status === 'SUSPICIOUS')
             .map(r => r.field);
           
-          // If critical fields are not verified, escalate confidence level
+          const suspiciousFields = verificationResults
+            .filter(r => r.status === 'SUSPICIOUS')
+            .map(r => r.field);
+          
+          // If critical fields are not verified or suspicious, escalate confidence level
           if (unverifiedFields.length > 0) {
-            console.warn(`⚠ Textract verification failed for fields: ${unverifiedFields.join(', ')}`);
+            if (suspiciousFields.length > 0) {
+              console.warn(`⚠ Textract verification SUSPICIOUS for numeric fields: ${suspiciousFields.join(', ')} - digit differences detected`);
+            }
+            if (unverifiedFields.length > suspiciousFields.length) {
+              console.warn(`⚠ Textract verification failed for fields: ${unverifiedFields.filter(f => !suspiciousFields.includes(f)).join(', ')}`);
+            }
             
-            // If critical field like numero_patente is not found, require review
+            // If critical numeric field like numero_patente is suspicious or not found, require review
+            // SUSPICIOUS means a digit difference was detected (e.g., 76869 vs 76868) - critical error
             if (unverifiedFields.includes('numero_patente')) {
               confidence = 'review_required';
               if (!discrepancies.includes('numero_patente')) {
@@ -426,7 +452,11 @@ export async function POST(request: NextRequest) {
               if (verification) {
                 return {
                   ...field,
-                  needs_review: field.needs_review || verification.status === 'NOT_FOUND',
+                  // Mark for review if NOT_FOUND, SUSPICIOUS, or FUZZY_MATCH with low confidence
+                  needs_review: field.needs_review || 
+                    verification.status === 'NOT_FOUND' || 
+                    verification.status === 'SUSPICIOUS' ||
+                    (verification.status === 'FUZZY_MATCH' && verification.confidence < 0.9),
                   verification_status: verification.status,
                   verification_confidence: verification.confidence,
                 };

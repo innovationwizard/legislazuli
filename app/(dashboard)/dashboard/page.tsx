@@ -2,13 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { FileUpload } from '@/components/FileUpload';
 import { ExtractionList } from '@/components/ExtractionList';
 import { DocType } from '@/types';
+import { Button } from '@/components/ui/Button';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [uploading, setUploading] = useState(false);
+  const isCondor = session?.user?.email === 'condor';
 
   const handleUpload = async (file: File, docType: DocType) => {
     setUploading(true);
@@ -39,9 +44,18 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-gray-600">Sube un documento para extraer datos</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-gray-600">Sube un documento para extraer datos</p>
+        </div>
+        {isCondor && (
+          <Link href="/golden-set">
+            <Button variant="secondary">
+              🏆 Golden Set Management
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">

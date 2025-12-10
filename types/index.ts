@@ -104,7 +104,8 @@ export interface ExtractedField {
   expediente_number?: string | null;
   expediente_year?: string | null;
   // Textract verification status (The Deterministic Third Voter)
-  verification_status?: 'VERIFIED' | 'FUZZY_MATCH' | 'NOT_FOUND';
+  // SUSPICIOUS: For numeric fields, indicates a digit difference was detected (critical error)
+  verification_status?: 'VERIFIED' | 'FUZZY_MATCH' | 'NOT_FOUND' | 'SUSPICIOUS';
   verification_confidence?: number;
 }
 

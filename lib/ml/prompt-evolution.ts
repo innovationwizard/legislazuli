@@ -219,9 +219,10 @@ export async function triggerPromptEvolution(
     })
     .eq('id', queue.id);
 
-  // Trigger backtesting (async)
-  backtest(systemVersionId, userVersionId).catch(error => {
-    console.error('Backtesting error:', error);
+  // Trigger backtesting with Golden Set gatekeeper (async)
+  // This prevents "Catastrophic Forgetting" by testing against a curated set
+  backtestWithGoldenSet(docType, model, systemVersionId, userVersionId).catch(error => {
+    console.error('Backtesting with Golden Set error:', error);
   });
 
   return { systemVersionId, userVersionId };
@@ -361,5 +362,114 @@ export async function backtest(
   }
 
   return { accuracy, totalFields, correctFields };
+}
+
+/**
+ * Backtest with Golden Set gatekeeper
+ * 
+ * This function:
+ * 1. Tests new prompts against the Golden Set (regression test)
+ * 2. Only promotes if Golden Set performance is maintained or improved
+ * 3. Prevents "Catastrophic Forgetting" / Prompt Drift
+ */
+async function backtestWithGoldenSet(
+  docType: string,
+  model: 'claude' | 'gemini',
+  systemVersionId: string,
+  userVersionId: string
+): Promise<void> {
+  try {
+    // Import Golden Set tester
+    const { comparePromptVersionsOnGoldenSet } = await import('./golden-set-tester');
+    
+    console.log(`🧪 Testing new prompts against Golden Set for ${docType}/${model}...`);
+    
+    // Compare new prompts against current active prompts on Golden Set
+    const comparison = await comparePromptVersionsOnGoldenSet(
+      docType,
+      model,
+      systemVersionId,
+      userVersionId
+    );
+
+    const supabase = createServerClient();
+
+    // Update prompt versions with Golden Set metrics
+    await supabase
+      .from('prompt_versions')
+      .update({
+        accuracy_score: comparison.newAccuracy,
+        // Store Golden Set test results in evolution_reason for debugging
+        evolution_reason: JSON.stringify({
+          golden_set_accuracy: comparison.newAccuracy,
+          current_accuracy: comparison.currentAccuracy,
+          improvement: comparison.improvement,
+          passed: comparison.passed,
+          failed_documents_count: comparison.failedDocuments.length,
+        }),
+      })
+      .in('id', [systemVersionId, userVersionId]);
+
+    if (comparison.passed) {
+      console.log(`✅ Golden Set test PASSED: ${(comparison.newAccuracy * 100).toFixed(2)}% accuracy (${comparison.improvement >= 0 ? '+' : ''}${(comparison.improvement * 100).toFixed(2)}% vs current)`);
+      
+      // Now run regular backtest on feedback data
+      const regularBacktest = await backtest(systemVersionId, userVersionId);
+      
+      // Only activate if BOTH tests pass:
+      // 1. Golden Set performance maintained/improved
+      // 2. Regular backtest shows improvement
+      if (regularBacktest.accuracy > 0) {
+        const { data: currentPrompts } = await supabase
+          .from('prompt_versions')
+          .select('accuracy_score')
+          .eq('doc_type', docType)
+          .eq('model', model)
+          .eq('is_active', true)
+          .eq('prompt_type', 'system')
+          .single();
+
+        const currentAccuracy = currentPrompts?.accuracy_score || 0;
+
+        if (regularBacktest.accuracy > currentAccuracy + 0.01) {
+          await activatePromptVersions(systemVersionId, userVersionId);
+          console.log(`✅ Promoted new prompt versions for ${docType}/${model} (Golden Set: ${(comparison.newAccuracy * 100).toFixed(2)}%, Backtest: ${(regularBacktest.accuracy * 100).toFixed(2)}%)`);
+        } else {
+          console.log(`⚠️  Golden Set passed but regular backtest didn't show improvement. Keeping current prompts.`);
+        }
+      }
+    } else {
+      console.error(`❌ Golden Set test FAILED: ${(comparison.newAccuracy * 100).toFixed(2)}% accuracy (${(comparison.improvement * 100).toFixed(2)}% vs current)`);
+      console.error(`   Failed documents: ${comparison.failedDocuments.length}`);
+      comparison.failedDocuments.forEach((doc, idx) => {
+        console.error(`   ${idx + 1}. ${doc.filename}: ${doc.errors.length} errors`);
+      });
+      console.error(`   ⚠️  New prompts REJECTED - would cause regression on Golden Set`);
+      
+      // Mark versions as rejected
+      await supabase
+        .from('prompt_versions')
+        .update({
+          evolution_reason: JSON.stringify({
+            status: 'REJECTED',
+            reason: 'Golden Set regression detected',
+            golden_set_accuracy: comparison.newAccuracy,
+            current_accuracy: comparison.currentAccuracy,
+            failed_documents: comparison.failedDocuments.map(d => ({
+              filename: d.filename,
+              error_count: d.errors.length,
+            })),
+          }),
+        })
+        .in('id', [systemVersionId, userVersionId]);
+    }
+  } catch (error: any) {
+    console.error('Golden Set testing error:', error);
+    // If Golden Set testing fails (e.g., no Golden Set exists yet), fall back to regular backtest
+    console.log('Falling back to regular backtest...');
+    backtest(systemVersionId, userVersionId).catch(err => {
+      console.error('Regular backtest also failed:', err);
+    });
+  }
 }
 
