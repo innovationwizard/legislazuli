@@ -394,11 +394,17 @@ async function backtestWithGoldenSet(
 
     const supabase = createServerClient();
 
+    // Calculate regression count (fields that got worse)
+    const regressionCount = comparison.failedDocuments.reduce((sum, doc) => sum + doc.errors.length, 0);
+
     // Update prompt versions with Golden Set metrics
     await supabase
       .from('prompt_versions')
       .update({
-        accuracy_score: comparison.newAccuracy,
+        golden_set_accuracy: comparison.newAccuracy,
+        golden_set_run_at: new Date().toISOString(),
+        regression_count: regressionCount,
+        status: comparison.passed ? 'pending' : 'rejected',
         // Store Golden Set test results in evolution_reason for debugging
         evolution_reason: JSON.stringify({
           golden_set_accuracy: comparison.newAccuracy,
@@ -406,6 +412,7 @@ async function backtestWithGoldenSet(
           improvement: comparison.improvement,
           passed: comparison.passed,
           failed_documents_count: comparison.failedDocuments.length,
+          regression_count: regressionCount,
         }),
       })
       .in('id', [systemVersionId, userVersionId]);
@@ -432,7 +439,41 @@ async function backtestWithGoldenSet(
         const currentAccuracy = currentPrompts?.accuracy_score || 0;
 
         if (regularBacktest.accuracy > currentAccuracy + 0.01) {
+          // Mark old version as deprecated
+          const { data: oldSystem } = await supabase
+            .from('prompt_versions')
+            .select('id')
+            .eq('doc_type', docType)
+            .eq('model', model)
+            .eq('prompt_type', 'system')
+            .eq('is_active', true)
+            .single();
+
+          const { data: oldUser } = await supabase
+            .from('prompt_versions')
+            .select('id')
+            .eq('doc_type', docType)
+            .eq('model', model)
+            .eq('prompt_type', 'user')
+            .eq('is_active', true)
+            .single();
+
+          if (oldSystem && oldUser) {
+            await supabase
+              .from('prompt_versions')
+              .update({ status: 'deprecated' })
+              .in('id', [oldSystem.id, oldUser.id]);
+          }
+
+          // Activate new versions
           await activatePromptVersions(systemVersionId, userVersionId);
+          
+          // Update status to active
+          await supabase
+            .from('prompt_versions')
+            .update({ status: 'active' })
+            .in('id', [systemVersionId, userVersionId]);
+
           console.log(`✅ Promoted new prompt versions for ${docType}/${model} (Golden Set: ${(comparison.newAccuracy * 100).toFixed(2)}%, Backtest: ${(regularBacktest.accuracy * 100).toFixed(2)}%)`);
         } else {
           console.log(`⚠️  Golden Set passed but regular backtest didn't show improvement. Keeping current prompts.`);

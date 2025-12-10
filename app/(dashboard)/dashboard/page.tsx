@@ -50,11 +50,18 @@ export default function DashboardPage() {
           <p className="text-gray-600">Sube un documento para extraer datos</p>
         </div>
         {isCondor && (
-          <Link href="/golden-set">
-            <Button variant="secondary">
-              🏆 Golden Set Management
-            </Button>
-          </Link>
+          <div className="flex gap-3">
+            <Link href="/golden-set">
+              <Button variant="secondary">
+                🏆 Golden Set Management
+              </Button>
+            </Link>
+            <Link href="/prompts/leaderboard">
+              <Button variant="secondary">
+                📊 Prompt Leaderboard
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 

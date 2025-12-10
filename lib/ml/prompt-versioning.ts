@@ -182,7 +182,7 @@ export async function createPromptVersion(
 
   const versionNumber = (parentVersion?.version_number || 0) + 1;
 
-  // Create new version (inactive by default)
+  // Create new version (inactive by default, status = pending)
   const { data: newVersion, error } = await supabase
     .from('prompt_versions')
     .insert({
@@ -194,6 +194,7 @@ export async function createPromptVersion(
       parent_version_id: parentVersionId,
       evolution_reason: evolutionReason,
       is_active: false,
+      status: 'pending',
       created_by: createdBy,
     })
     .select()
@@ -229,14 +230,16 @@ export async function activatePromptVersions(
   // Deactivate all other versions for this doc_type and model
   await supabase
     .from('prompt_versions')
-    .update({ is_active: false })
+    .update({ is_active: false, status: 'deprecated' })
     .eq('doc_type', systemVersion.doc_type)
-    .eq('model', systemVersion.model);
+    .eq('model', systemVersion.model)
+    .neq('id', systemVersionId)
+    .neq('id', userVersionId);
 
   // Activate new versions
   await supabase
     .from('prompt_versions')
-    .update({ is_active: true })
+    .update({ is_active: true, status: 'active' })
     .in('id', [systemVersionId, userVersionId]);
 }
 

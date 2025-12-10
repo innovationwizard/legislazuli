@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS extraction_feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   extraction_id UUID NOT NULL,
   field_name TEXT NOT NULL,
-  model TEXT NOT NULL CHECK (model IN ('claude', 'openai')),
+  model TEXT NOT NULL CHECK (model IN ('claude', 'gemini')),
   is_correct BOOLEAN NOT NULL,
   why TEXT, -- 100 char explanation when incorrect
   reviewed_by UUID NOT NULL,
@@ -23,7 +23,7 @@ CREATE INDEX IF NOT EXISTS idx_extraction_feedback_reviewed_by ON extraction_fee
 CREATE TABLE IF NOT EXISTS prompt_versions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   doc_type TEXT NOT NULL CHECK (doc_type IN ('patente_empresa', 'patente_sociedad')),
-  model TEXT NOT NULL CHECK (model IN ('claude', 'openai')),
+  model TEXT NOT NULL CHECK (model IN ('claude', 'gemini')),
   prompt_type TEXT NOT NULL CHECK (prompt_type IN ('system', 'user')),
   version_number INTEGER NOT NULL,
   prompt_content TEXT NOT NULL,
@@ -52,7 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_prompt_versions_doc_model ON prompt_versions(doc_
 -- Tracks which prompt version was used for each extraction
 CREATE TABLE IF NOT EXISTS extraction_prompt_versions (
   extraction_id UUID NOT NULL,
-  model TEXT NOT NULL CHECK (model IN ('claude', 'openai')),
+  model TEXT NOT NULL CHECK (model IN ('claude', 'gemini')),
   system_prompt_version_id UUID NOT NULL,
   user_prompt_version_id UUID NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS extraction_prompt_versions (
 CREATE TABLE IF NOT EXISTS prompt_evolution_queue (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   doc_type TEXT NOT NULL CHECK (doc_type IN ('patente_empresa', 'patente_sociedad')),
-  model TEXT NOT NULL CHECK (model IN ('claude', 'openai')),
+  model TEXT NOT NULL CHECK (model IN ('claude', 'gemini')),
   feedback_count INTEGER DEFAULT 0,
   error_categories JSONB DEFAULT '{}'::jsonb,
   should_evolve BOOLEAN DEFAULT FALSE,
