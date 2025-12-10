@@ -10,6 +10,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Model ID configuration - use environment variable or default to current stable version
+// Default: gemini-2.5-pro (primary) - Pro quota is now active
 const GEMINI_MODEL_ID = process.env.GEMINI_MODEL_ID || 'gemini-2.5-pro';
 
 const anthropic = new Anthropic({

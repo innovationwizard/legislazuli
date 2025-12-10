@@ -22,6 +22,9 @@ let genAI: GoogleGenerativeAI | null = null;
 // Model ID configuration - use environment variable or default to current stable version
 // Best practice: Never hardcode model strings. Use GEMINI_MODEL_ID in .env.local
 // This allows upgrading models without redeploying when deprecation hits
+//
+// Default: gemini-2.5-pro (primary) with gemini-2.5-flash as fallback
+// Pro quota is now active - using Pro as default for best accuracy
 const GEMINI_MODEL_ID = process.env.GEMINI_MODEL_ID || 'gemini-2.5-pro';
 const GEMINI_FALLBACK_MODEL_ID = process.env.GEMINI_FALLBACK_MODEL_ID || 'gemini-2.5-flash';
 
@@ -46,9 +49,9 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
   }
 
   try {
-    // Use Gemini 2.5 Pro (current stable, released June 2025, active until 2026)
+    // Use Gemini 2.5 Pro as primary (best accuracy for legal document extraction)
     // Note: gemini-1.5-pro-002 was retired September 2025
-    // Fallback to gemini-2.5-flash if Pro is not available
+    // Fallback to Flash if Pro quota/billing issues occur
     // Model ID can be overridden via GEMINI_MODEL_ID environment variable
     let model;
     try {
@@ -61,8 +64,8 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
       });
       console.log(`✓ Using Gemini model: ${GEMINI_MODEL_ID}`);
     } catch (error) {
-      // Fallback to Flash if Pro is not available (may require specific billing tier)
-      console.warn(`⚠ ${GEMINI_MODEL_ID} not available, falling back to ${GEMINI_FALLBACK_MODEL_ID}`);
+      // Fallback to Flash if Pro is not available (quota/billing issues)
+      console.warn(`⚠ ${GEMINI_MODEL_ID} not available (quota/billing), falling back to ${GEMINI_FALLBACK_MODEL_ID}`);
       model = genAI.getGenerativeModel({ 
         model: GEMINI_FALLBACK_MODEL_ID,
         generationConfig: {
@@ -93,8 +96,28 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
       },
     };
 
-    const result = await model.generateContent([fullPrompt, imagePart]);
-    const response = await result.response;
+    let result;
+    let response;
+    try {
+      result = await model.generateContent([fullPrompt, imagePart]);
+      response = await result.response;
+    } catch (apiError: any) {
+      // Handle 429 quota errors - retry with fallback model
+      if (apiError?.message?.includes('429') || apiError?.message?.includes('quota')) {
+        console.warn(`⚠ ${GEMINI_MODEL_ID} quota exceeded, retrying with fallback ${GEMINI_FALLBACK_MODEL_ID}`);
+        const fallbackModel = genAI.getGenerativeModel({ 
+          model: GEMINI_FALLBACK_MODEL_ID,
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 4096,
+          },
+        });
+        result = await fallbackModel.generateContent([fullPrompt, imagePart]);
+        response = await result.response;
+      } else {
+        throw apiError;
+      }
+    }
 
     const text = response.text();
     if (!text) {

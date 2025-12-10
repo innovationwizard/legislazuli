@@ -40,9 +40,11 @@ Edita `.env.local` con tus credenciales:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Clave anónima de Supabase
 - `SUPABASE_SERVICE_ROLE_KEY`: Clave de servicio de Supabase
 - `ANTHROPIC_API_KEY`: API key de Anthropic
-- `GOOGLE_API_KEY`: API key de Google (para Gemini 2.5 Pro)
+- `GOOGLE_API_KEY`: API key de Google (para Gemini 2.5)
 - `GEMINI_MODEL_ID`: ID del modelo de Gemini (opcional, por defecto: gemini-2.5-pro)
 - `GEMINI_FALLBACK_MODEL_ID`: ID del modelo de fallback (opcional, por defecto: gemini-2.5-flash)
+
+**Nota sobre Gemini Pro:** El sistema usa `gemini-2.5-pro` como modelo principal (mejor precisión) con `gemini-2.5-flash` como fallback automático si hay problemas de cuota o facturación. El sistema detecta automáticamente errores 429 (quota exceeded) y cambia al modelo fallback.
 - `AWS_ACCESS_KEY_ID`: AWS Access Key ID (para Textract)
 - `AWS_SECRET_ACCESS_KEY`: AWS Secret Access Key (para Textract)
 - `AWS_REGION`: Región de AWS (opcional, por defecto: us-east-1)
