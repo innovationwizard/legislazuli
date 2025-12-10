@@ -340,8 +340,17 @@ export async function POST(request: NextRequest) {
       ]);
 
       if (!claudeExtraction || !geminiExtraction) {
+        const missing = [];
+        if (!claudeExtraction) missing.push('Claude');
+        if (!geminiExtraction) missing.push('Gemini');
+        
+        console.error(`Extraction failed: ${missing.join(' and ')} returned null`);
         return NextResponse.json(
-          { error: 'Failed to extract data from document' },
+          { 
+            error: `Failed to extract data from document: ${missing.join(' and ')} extraction failed`,
+            errorCode: 'EXTRACTION_FAILED',
+            details: `Missing extractions: ${missing.join(', ')}`
+          },
           { status: 500 }
         );
       }
@@ -502,9 +511,23 @@ export async function POST(request: NextRequest) {
       discrepancies: discrepancies.length > 0 ? discrepancies : undefined,
     });
   } catch (error) {
-    console.error('Extraction error:', error);
+    console.error('Extraction API error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    // Log full error details for debugging
+    console.error('Full error details:', {
+      message: errorMessage,
+      stack: errorStack,
+      error: error
+    });
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        errorCode: 'INTERNAL_ERROR',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
       { status: 500 }
     );
   }

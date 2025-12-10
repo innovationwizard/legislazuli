@@ -11,14 +11,32 @@ import {
 } from './prompts';
 import { RawExtractionFields } from '@/types';
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
+// Fail fast if key is missing at module load time
+if (!process.env.GOOGLE_API_KEY) {
+  console.warn('WARNING: GOOGLE_API_KEY is not set. Gemini extraction will fail.');
+}
+
+// Initialize Gemini client - fail gracefully if key is missing
+let genAI: GoogleGenerativeAI | null = null;
+
+if (process.env.GOOGLE_API_KEY) {
+  try {
+    genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+  } catch (error) {
+    console.error('Failed to initialize GoogleGenerativeAI:', error);
+  }
+} else {
+  console.warn('WARNING: GOOGLE_API_KEY is not set. Gemini extraction will fail.');
+}
 
 /**
  * Extract structured data from an image using Gemini 1.5 Pro vision API
  */
 export async function extractWithGemini(imageBase64: string): Promise<RawExtractionFields> {
-  if (!process.env.GOOGLE_API_KEY) {
-    throw new Error('GOOGLE_API_KEY is not set');
+  if (!process.env.GOOGLE_API_KEY || !genAI) {
+    const error = new Error('GOOGLE_API_KEY is not set');
+    console.error('Gemini extraction error:', error);
+    throw error;
   }
 
   try {
@@ -34,8 +52,17 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
     // Combine system and user prompts for Gemini (it doesn't have separate system messages)
     const fullPrompt = `${EXTRACTION_SYSTEM_PROMPT_OPENAI}\n\n${EXTRACTION_USER_PROMPT_OPENAI}`;
 
-    // Prepare image part
-    const base64Data = imageBase64.split(',')[1] || imageBase64;
+    // Prepare image part - handle both data URL format and raw base64
+    let base64Data = imageBase64;
+    if (imageBase64.includes(',')) {
+      // Remove data URL prefix if present (e.g., "data:image/png;base64,...")
+      base64Data = imageBase64.split(',')[1];
+    }
+
+    if (!base64Data || base64Data.length === 0) {
+      throw new Error('Invalid base64 image data');
+    }
+
     const imagePart = {
       inlineData: {
         data: base64Data,
@@ -57,13 +84,23 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
     // Extract JSON from response
     const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error('Gemini response text (no JSON found):', text.substring(0, 500));
       throw new Error('No JSON found in Gemini response');
     }
 
-    const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
-    return parsed;
+    try {
+      const parsed = JSON.parse(jsonMatch[0]) as RawExtractionFields;
+      return parsed;
+    } catch (parseError) {
+      console.error('JSON parse error. Raw text:', jsonMatch[0].substring(0, 500));
+      throw new Error(`Failed to parse Gemini JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+    }
   } catch (error) {
     console.error('Gemini extraction error:', error);
+    // Re-throw with more context
+    if (error instanceof Error) {
+      throw new Error(`Gemini extraction failed: ${error.message}`);
+    }
     throw error;
   }
 }
@@ -73,8 +110,10 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
  * Used when PDF text is extracted via AWS Textract
  */
 export async function extractWithGeminiFromText(text: string): Promise<RawExtractionFields> {
-  if (!process.env.GOOGLE_API_KEY) {
-    throw new Error('GOOGLE_API_KEY is not set');
+  if (!process.env.GOOGLE_API_KEY || !genAI) {
+    const error = new Error('GOOGLE_API_KEY is not set');
+    console.error('Gemini text extraction error:', error);
+    throw error;
   }
 
   try {
@@ -118,8 +157,10 @@ export async function extractWithGeminiFromText(text: string): Promise<RawExtrac
  * Detect document type from an image using Gemini
  */
 export async function detectDocumentTypeWithGemini(imageBase64: string): Promise<{ document_type: string; confidence: string; description?: string }> {
-  if (!process.env.GOOGLE_API_KEY) {
-    throw new Error('GOOGLE_API_KEY is not set');
+  if (!process.env.GOOGLE_API_KEY || !genAI) {
+    const error = new Error('GOOGLE_API_KEY is not set');
+    console.error('Gemini document type detection error:', error);
+    throw error;
   }
 
   try {
@@ -167,8 +208,10 @@ export async function detectDocumentTypeWithGemini(imageBase64: string): Promise
  * Detect document type from text using Gemini
  */
 export async function detectDocumentTypeWithGeminiFromText(text: string): Promise<{ document_type: string; confidence: string; description?: string }> {
-  if (!process.env.GOOGLE_API_KEY) {
-    throw new Error('GOOGLE_API_KEY is not set');
+  if (!process.env.GOOGLE_API_KEY || !genAI) {
+    const error = new Error('GOOGLE_API_KEY is not set');
+    console.error('Gemini document type detection error:', error);
+    throw error;
   }
 
   try {
@@ -208,8 +251,10 @@ export async function detectDocumentTypeWithGeminiFromText(text: string): Promis
  * Extract full text from document using Gemini (for "Otros" type)
  */
 export async function extractFullTextWithGemini(imageBase64: string): Promise<{ full_text: string }> {
-  if (!process.env.GOOGLE_API_KEY) {
-    throw new Error('GOOGLE_API_KEY is not set');
+  if (!process.env.GOOGLE_API_KEY || !genAI) {
+    const error = new Error('GOOGLE_API_KEY is not set');
+    console.error('Gemini full text extraction error:', error);
+    throw error;
   }
 
   try {
