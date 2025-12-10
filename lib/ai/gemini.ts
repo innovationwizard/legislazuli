@@ -96,9 +96,27 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
       throw new Error(`Failed to parse Gemini JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
     }
   } catch (error) {
-    console.error('Gemini extraction error:', error);
-    // Re-throw with more context
+    // Log the full error details for debugging
+    console.error('Gemini extraction error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      error: error,
+      apiKeySet: !!process.env.GOOGLE_API_KEY,
+      apiKeyLength: process.env.GOOGLE_API_KEY?.length || 0,
+    });
+    
+    // Re-throw with more context, preserving original error message
     if (error instanceof Error) {
+      // Check for common API errors
+      if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
+        throw new Error(`Gemini API key is invalid. Please check your GOOGLE_API_KEY in .env.local`);
+      }
+      if (error.message.includes('429') || error.message.includes('quota')) {
+        throw new Error(`Gemini API quota exceeded. Please check your Google Cloud Console.`);
+      }
+      if (error.message.includes('403')) {
+        throw new Error(`Gemini API access forbidden. Please check API key permissions.`);
+      }
       throw new Error(`Gemini extraction failed: ${error.message}`);
     }
     throw error;
