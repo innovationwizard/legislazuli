@@ -40,8 +40,13 @@ if (process.env.GOOGLE_API_KEY) {
 
 /**
  * Extract structured data from an image using Gemini 1.5 Pro vision API
+ * @param imageBase64 - Base64 encoded image
+ * @param promptOverrides - Optional object with systemPrompt and userPrompt to override defaults
  */
-export async function extractWithGemini(imageBase64: string): Promise<RawExtractionFields> {
+export async function extractWithGemini(
+  imageBase64: string,
+  promptOverrides?: { systemPrompt?: string; userPrompt?: string }
+): Promise<RawExtractionFields> {
   if (!process.env.GOOGLE_API_KEY || !genAI) {
     const error = new Error('GOOGLE_API_KEY is not set');
     console.error('Gemini extraction error:', error);
@@ -76,7 +81,10 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
     }
 
     // Combine system and user prompts for Gemini (it doesn't have separate system messages)
-    const fullPrompt = `${EXTRACTION_SYSTEM_PROMPT_OPENAI}\n\n${EXTRACTION_USER_PROMPT_OPENAI}`;
+    // Use overrides if provided, otherwise use defaults
+    const systemPrompt = promptOverrides?.systemPrompt || EXTRACTION_SYSTEM_PROMPT_OPENAI;
+    const userPrompt = promptOverrides?.userPrompt || EXTRACTION_USER_PROMPT_OPENAI;
+    const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
 
     // Prepare image part - handle both data URL format and raw base64
     let base64Data = imageBase64;
@@ -173,7 +181,10 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
  * Extract structured data from text using Gemini
  * Used when PDF text is extracted via AWS Textract
  */
-export async function extractWithGeminiFromText(text: string): Promise<RawExtractionFields> {
+export async function extractWithGeminiFromText(
+  text: string,
+  promptOverrides?: { systemPrompt?: string; userPrompt?: string }
+): Promise<RawExtractionFields> {
   if (!process.env.GOOGLE_API_KEY || !genAI) {
     const error = new Error('GOOGLE_API_KEY is not set');
     console.error('Gemini text extraction error:', error);
@@ -190,7 +201,10 @@ export async function extractWithGeminiFromText(text: string): Promise<RawExtrac
     });
 
     // Combine system and user prompts
-    const fullPrompt = `${EXTRACTION_SYSTEM_PROMPT_OPENAI}\n\n${EXTRACTION_USER_PROMPT_OPENAI}\n\nDocument text:\n${text}`;
+    // Use overrides if provided, otherwise use defaults
+    const systemPrompt = promptOverrides?.systemPrompt || EXTRACTION_SYSTEM_PROMPT_OPENAI;
+    const userPrompt = promptOverrides?.userPrompt || EXTRACTION_USER_PROMPT_OPENAI;
+    const fullPrompt = `${systemPrompt}\n\n${userPrompt}\n\nDocument text:\n${text}`;
 
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;

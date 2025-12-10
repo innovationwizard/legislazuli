@@ -45,6 +45,16 @@ export default function PromptLeaderboardPage() {
   const [diffVersion2, setDiffVersion2] = useState<string | null>(null);
   const [diffData, setDiffData] = useState<any>(null);
   const [error, setError] = useState('');
+  const [simulatorOpen, setSimulatorOpen] = useState(false);
+  const [simulatorCandidate, setSimulatorCandidate] = useState<PromptVersion | null>(null);
+  const [simulatorSystemId, setSimulatorSystemId] = useState<string | null>(null);
+  const [simulatorUserId, setSimulatorUserId] = useState<string | null>(null);
+  const [simulatorGroup, setSimulatorGroup] = useState<LeaderboardGroup | null>(null);
+  const [simulatorActiveResult, setSimulatorActiveResult] = useState<any>(null);
+  const [simulatorCandidateResult, setSimulatorCandidateResult] = useState<any>(null);
+  const [simulatorLoading, setSimulatorLoading] = useState(false);
+  const [simulatorFile, setSimulatorFile] = useState<File | null>(null);
+  const [simulatorFailureDocs, setSimulatorFailureDocs] = useState<any[]>([]);
 
   useEffect(() => {
     if (session?.user?.email !== 'condor') {
@@ -79,6 +89,104 @@ export default function PromptLeaderboardPage() {
       setDiffData(data);
     } catch (err: any) {
       setError(err.message || 'Error loading diff');
+    }
+  };
+
+  const openSimulator = (candidate: PromptVersion, systemId: string, userId: string, group: LeaderboardGroup) => {
+    setSimulatorCandidate(candidate);
+    setSimulatorSystemId(systemId);
+    setSimulatorUserId(userId);
+    setSimulatorGroup(group);
+    setSimulatorOpen(true);
+    setSimulatorActiveResult(null);
+    setSimulatorCandidateResult(null);
+    setSimulatorFile(null);
+    fetchFailureDocs();
+  };
+
+  const fetchFailureDocs = async () => {
+    try {
+      const response = await fetch('/api/golden-set/failures');
+      if (response.ok) {
+        const data = await response.json();
+        setSimulatorFailureDocs(data.documents || []);
+      }
+    } catch (err) {
+      console.error('Error fetching failure docs:', err);
+    }
+  };
+
+  const runSimulation = async () => {
+    if (!simulatorFile || !simulatorSystemId || !simulatorUserId || !simulatorGroup) return;
+
+    setSimulatorLoading(true);
+    setError('');
+
+    try {
+      // First, get active result
+      const activeSystemVersion = simulatorGroup.active;
+      if (!activeSystemVersion) {
+        throw new Error('No active version found');
+      }
+
+      // Find active system and user versions
+      const systemGroup = leaderboards.find(
+        g => g.doc_type === simulatorGroup.doc_type && 
+        g.model === simulatorGroup.model && 
+        g.prompt_type === 'system'
+      );
+      const userGroup = leaderboards.find(
+        g => g.doc_type === simulatorGroup.doc_type && 
+        g.model === simulatorGroup.model && 
+        g.prompt_type === 'user'
+      );
+
+      const activeSystem = systemGroup?.active;
+      const activeUser = userGroup?.active;
+
+      if (!activeSystem || !activeUser) {
+        throw new Error('Active versions not found');
+      }
+
+      // Run active extraction
+      const activeFormData = new FormData();
+      activeFormData.append('file', simulatorFile);
+      activeFormData.append('systemPromptVersionId', activeSystem.id);
+      activeFormData.append('userPromptVersionId', activeUser.id);
+      activeFormData.append('modelProvider', simulatorGroup.model);
+
+      const activeResponse = await fetch('/api/extract/simulate', {
+        method: 'POST',
+        body: activeFormData,
+      });
+
+      if (!activeResponse.ok) {
+        throw new Error('Active extraction failed');
+      }
+      const activeData = await activeResponse.json();
+      setSimulatorActiveResult(activeData.result);
+
+      // Run candidate extraction
+      const candidateFormData = new FormData();
+      candidateFormData.append('file', simulatorFile);
+      candidateFormData.append('systemPromptVersionId', simulatorSystemId);
+      candidateFormData.append('userPromptVersionId', simulatorUserId);
+      candidateFormData.append('modelProvider', simulatorGroup.model);
+
+      const candidateResponse = await fetch('/api/extract/simulate', {
+        method: 'POST',
+        body: candidateFormData,
+      });
+
+      if (!candidateResponse.ok) {
+        throw new Error('Candidate extraction failed');
+      }
+      const candidateData = await candidateResponse.json();
+      setSimulatorCandidateResult(candidateData.result);
+    } catch (err: any) {
+      setError(err.message || 'Simulation failed');
+    } finally {
+      setSimulatorLoading(false);
     }
   };
 
@@ -213,18 +321,68 @@ export default function PromptLeaderboardPage() {
                               Version {candidate.version_number}
                             </span>
                             {getStatusBadge(candidate)}
-                            {group.active && (
+                            <div className="flex gap-2">
+                              {group.active && (
+                                <button
+                                  className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+                                  onClick={() => {
+                                    setDiffVersion1(candidate.id);
+                                    setDiffVersion2(group.active!.id);
+                                    fetchDiff(candidate.id, group.active!.id);
+                                  }}
+                                >
+                                  Compare with Active
+                                </button>
+                              )}
                               <button
-                                className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+                                className="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors font-semibold"
                                 onClick={() => {
-                                  setDiffVersion1(candidate.id);
-                                  setDiffVersion2(group.active!.id);
-                                  fetchDiff(candidate.id, group.active!.id);
+                                  // Find system and user prompt versions for this candidate
+                                  // They should have the same version_number
+                                  const systemGroup = leaderboards.find(
+                                    g => g.doc_type === group.doc_type && 
+                                    g.model === group.model && 
+                                    g.prompt_type === 'system'
+                                  );
+                                  const userGroup = leaderboards.find(
+                                    g => g.doc_type === group.doc_type && 
+                                    g.model === group.model && 
+                                    g.prompt_type === 'user'
+                                  );
+                                  
+                                  let systemVersionId: string | null = null;
+                                  let userVersionId: string | null = null;
+                                  
+                                  if (group.prompt_type === 'system') {
+                                    systemVersionId = candidate.id;
+                                    // Find matching user version by version_number
+                                    const matchingUser = userGroup?.candidates.find(
+                                      v => v.version_number === candidate.version_number
+                                    );
+                                    if (matchingUser) {
+                                      userVersionId = matchingUser.id;
+                                    }
+                                  } else {
+                                    userVersionId = candidate.id;
+                                    // Find matching system version by version_number
+                                    const matchingSystem = systemGroup?.candidates.find(
+                                      v => v.version_number === candidate.version_number
+                                    );
+                                    if (matchingSystem) {
+                                      systemVersionId = matchingSystem.id;
+                                    }
+                                  }
+                                  
+                                  if (systemVersionId && userVersionId) {
+                                    openSimulator(candidate, systemVersionId, userVersionId, group);
+                                  } else {
+                                    setError('Could not find matching system and user prompt versions');
+                                  }
                                 }}
                               >
-                                Compare with Active
+                                🧪 Simulate
                               </button>
-                            )}
+                            </div>
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-bold text-yellow-700">
@@ -344,6 +502,222 @@ export default function PromptLeaderboardPage() {
                 </div>
               ))}
             </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Simulator Modal */}
+      {simulatorOpen && simulatorCandidate && simulatorGroup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <Card className="max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900">
+                🧪 Simulator: Version {simulatorCandidate.version_number} vs Active
+              </h3>
+              <Button variant="secondary" onClick={() => {
+                setSimulatorOpen(false);
+                setSimulatorCandidate(null);
+                setSimulatorSystemId(null);
+                setSimulatorUserId(null);
+                setSimulatorGroup(null);
+                setSimulatorActiveResult(null);
+                setSimulatorCandidateResult(null);
+                setSimulatorFile(null);
+              }}>
+                Cerrar
+              </Button>
+            </div>
+
+            {/* File Input Section */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Document for Testing
+              </label>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setSimulatorFile(file);
+                    }}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Or select from Golden Set Failures:
+                  </label>
+                  <select
+                    className="block w-full text-sm border-gray-300 rounded-md"
+                    onChange={(e) => {
+                      const docId = e.target.value;
+                      if (docId) {
+                        // TODO: Fetch document file from storage
+                        // For now, user must upload manually
+                      }
+                    }}
+                  >
+                    <option value="">Select a failure case...</option>
+                    {simulatorFailureDocs.map((doc: any) => (
+                      <option key={doc.id} value={doc.id}>
+                        {doc.filename} ({doc.doc_type})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  onClick={runSimulation}
+                  disabled={!simulatorFile || simulatorLoading}
+                >
+                  {simulatorLoading ? 'Running...' : 'Run Simulation'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Results: Split Screen with Diff Focusing */}
+            {simulatorActiveResult && simulatorCandidateResult && (
+              <div className="space-y-4">
+                {/* Diff Focus Toggle */}
+                <div className="flex items-center gap-2 p-2 bg-gray-100 rounded">
+                  <input
+                    type="checkbox"
+                    id="diffFocus"
+                    defaultChecked={true}
+                    onChange={(e) => {
+                      const showAll = !e.target.checked;
+                      const checkboxes = document.querySelectorAll('.diff-field');
+                      checkboxes.forEach((cb: any) => {
+                        if (showAll) {
+                          cb.closest('.diff-row')?.classList.remove('opacity-30');
+                        } else {
+                          const isDifferent = cb.dataset.different === 'true';
+                          if (!isDifferent) {
+                            cb.closest('.diff-row')?.classList.add('opacity-30');
+                          }
+                        }
+                      });
+                    }}
+                    className="rounded"
+                  />
+                  <label htmlFor="diffFocus" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    Show only differences (dim identical fields)
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Active Result */}
+                  <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
+                    <h4 className="font-bold text-green-800 mb-3">
+                      ✅ Active Version {simulatorGroup.active?.version_number || 'N/A'}
+                    </h4>
+                    <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                      {Object.entries(simulatorActiveResult).map(([key, value]) => {
+                        const candidateValue = (simulatorCandidateResult as any)[key];
+                        const activeStr = String(value || '[empty]').trim();
+                        const candidateStr = String(candidateValue || '[empty]').trim();
+                        const isDifferent = activeStr !== candidateStr;
+                        return (
+                          <div
+                            key={key}
+                            className={`diff-row p-2 rounded text-sm transition-opacity ${
+                              isDifferent 
+                                ? 'bg-yellow-100 border-2 border-yellow-400 shadow-sm' 
+                                : 'bg-white border border-gray-200'
+                            }`}
+                          >
+                            <div className="font-semibold text-gray-700">{key}:</div>
+                            <div className={`text-gray-900 ${isDifferent ? 'font-medium' : ''}`}>
+                              {activeStr}
+                            </div>
+                            <input
+                              type="checkbox"
+                              className="diff-field hidden"
+                              data-different={isDifferent}
+                              defaultChecked={true}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Candidate Result */}
+                  <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                    <h4 className="font-bold text-blue-800 mb-3">
+                      🧪 Candidate Version {simulatorCandidate.version_number}
+                    </h4>
+                    <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                      {Object.entries(simulatorCandidateResult).map(([key, value]) => {
+                        const activeValue = (simulatorActiveResult as any)[key];
+                        const candidateStr = String(value || '[empty]').trim();
+                        const activeStr = String(activeValue || '[empty]').trim();
+                        const isDifferent = candidateStr !== activeStr;
+                        return (
+                          <div
+                            key={key}
+                            className={`diff-row p-2 rounded text-sm transition-opacity ${
+                              isDifferent 
+                                ? 'bg-yellow-100 border-2 border-yellow-400 shadow-sm' 
+                                : 'bg-white border border-gray-200'
+                            }`}
+                          >
+                            <div className="font-semibold text-gray-700">{key}:</div>
+                            <div className={`text-gray-900 ${isDifferent ? 'font-medium' : ''}`}>
+                              {candidateStr}
+                            </div>
+                            <input
+                              type="checkbox"
+                              className="diff-field hidden"
+                              data-different={isDifferent}
+                              defaultChecked={true}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Summary Stats */}
+                {(() => {
+                  const allKeys = new Set([
+                    ...Object.keys(simulatorActiveResult),
+                    ...Object.keys(simulatorCandidateResult),
+                  ]);
+                  let differentCount = 0;
+                  let identicalCount = 0;
+                  allKeys.forEach((key) => {
+                    const activeStr = String((simulatorActiveResult as any)[key] || '[empty]').trim();
+                    const candidateStr = String((simulatorCandidateResult as any)[key] || '[empty]').trim();
+                    if (activeStr !== candidateStr) {
+                      differentCount++;
+                    } else {
+                      identicalCount++;
+                    }
+                  });
+                  return (
+                    <div className="p-3 bg-gray-50 rounded-lg text-sm">
+                      <div className="flex gap-4">
+                        <span className="font-semibold text-yellow-700">
+                          ⚠️ {differentCount} field{differentCount !== 1 ? 's' : ''} differ
+                        </span>
+                        <span className="text-gray-600">
+                          ✓ {identicalCount} field{identicalCount !== 1 ? 's' : ''} identical
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {error && (
+              <div className="mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
           </Card>
         </div>
       )}

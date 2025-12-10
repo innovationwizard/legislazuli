@@ -119,6 +119,18 @@ npx tsx scripts/run-migration.ts
 
 Luego copia y ejecuta el SQL mostrado en el SQL Editor de Supabase, o ejecuta directamente el contenido de `scripts/create-ml-feedback-schema.sql`.
 
+**c) Row Level Security (RLS) para tablas críticas (RECOMENDADO):**
+
+Para proteger las tablas críticas (`golden_set_truths`, `prompt_versions`, `prompt_evolution_queue`) de acceso no autorizado, ejecuta:
+
+```sql
+-- Ver scripts/enable-rls-critical-tables.sql
+```
+
+**IMPORTANTE**: Este sistema usa NextAuth.js para autenticación. Las políticas RLS requieren Supabase Auth para funcionar completamente. Ver `docs/RLS_SECURITY.md` para más detalles sobre las opciones de configuración.
+
+**OPCIONAL - Hardening Avanzado**: Para activar RLS sin migrar de NextAuth, implementa el "Bridge Token Pattern". Ver `docs/BRIDGE_TOKEN_PATTERN.md` para la guía de implementación completa.
+
 4. Crea un bucket de almacenamiento en Supabase:
 - Ve a Storage en el panel de Supabase
 - Crea un bucket llamado `documents`

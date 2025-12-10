@@ -15,19 +15,26 @@ const anthropic = new Anthropic({
 
 /**
  * Extract structured data from an image using Claude vision API
+ * @param imageBase64 - Base64 encoded image
+ * @param promptOverrides - Optional object with systemPrompt and userPrompt to override defaults
  */
-export async function extractWithClaude(imageBase64: string): Promise<RawExtractionFields> {
+export async function extractWithClaude(
+  imageBase64: string,
+  promptOverrides?: { systemPrompt?: string; userPrompt?: string }
+): Promise<RawExtractionFields> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not set');
   }
 
   try {
     const base64Data = imageBase64.split(',')[1] || imageBase64; // Remove data URL prefix if present
+    const systemPrompt = promptOverrides?.systemPrompt || EXTRACTION_SYSTEM_PROMPT;
+    const userPrompt = promptOverrides?.userPrompt || EXTRACTION_USER_PROMPT;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
-      system: EXTRACTION_SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [
         {
           role: 'user',
@@ -42,7 +49,7 @@ export async function extractWithClaude(imageBase64: string): Promise<RawExtract
             },
             {
               type: 'text',
-              text: EXTRACTION_USER_PROMPT,
+              text: userPrompt,
             },
           ],
         },
@@ -72,21 +79,29 @@ export async function extractWithClaude(imageBase64: string): Promise<RawExtract
 /**
  * Extract structured data from text using Claude
  * Used when PDF text is extracted via AWS Textract
+ * @param text - Extracted text from document
+ * @param promptOverrides - Optional object with systemPrompt and userPrompt to override defaults
  */
-export async function extractWithClaudeFromText(text: string): Promise<RawExtractionFields> {
+export async function extractWithClaudeFromText(
+  text: string,
+  promptOverrides?: { systemPrompt?: string; userPrompt?: string }
+): Promise<RawExtractionFields> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not set');
   }
 
   try {
+    const systemPrompt = promptOverrides?.systemPrompt || EXTRACTION_SYSTEM_PROMPT;
+    const userPrompt = promptOverrides?.userPrompt || EXTRACTION_USER_PROMPT;
+
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
-      system: EXTRACTION_SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [
         {
           role: 'user',
-          content: `${EXTRACTION_USER_PROMPT}\n\nDocument text:\n${text}`,
+          content: `${userPrompt}\n\nDocument text:\n${text}`,
         },
       ],
     });

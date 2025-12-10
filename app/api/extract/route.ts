@@ -37,6 +37,12 @@ import { TextractClient } from '@aws-sdk/client-textract';
 import { TextractVerifier } from '@/lib/verification/textract-verifier';
 import { DocType } from '@/types';
 
+// Vercel Serverless Timeout Configuration
+// Extraction performs heavy operations: Textract, dual LLM inference, consensus, verification
+// Set to maximum allowed duration to prevent 504 Gateway Timeout errors
+export const maxDuration = 60; // 60 seconds (Vercel Pro plan max, Hobby is 10s)
+export const dynamic = 'force-dynamic'; // Prevent static caching
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

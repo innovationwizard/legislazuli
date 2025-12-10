@@ -243,3 +243,45 @@ export async function activatePromptVersions(
     .in('id', [systemVersionId, userVersionId]);
 }
 
+/**
+ * Get prompt content by version ID
+ * Used for simulation mode to test specific prompt versions
+ */
+export async function getPromptContent(versionId: string): Promise<string | null> {
+  const supabase = createServerClient();
+
+  const { data: version, error } = await supabase
+    .from('prompt_versions')
+    .select('prompt_content')
+    .eq('id', versionId)
+    .single();
+
+  if (error || !version) {
+    console.error('Error fetching prompt content:', error);
+    return null;
+  }
+
+  return version.prompt_content;
+}
+
+/**
+ * Get both system and user prompts for a specific version ID
+ * Returns the prompt content and metadata
+ */
+export async function getPromptVersionById(versionId: string): Promise<PromptVersion | null> {
+  const supabase = createServerClient();
+
+  const { data: version, error } = await supabase
+    .from('prompt_versions')
+    .select('*')
+    .eq('id', versionId)
+    .single();
+
+  if (error || !version) {
+    console.error('Error fetching prompt version:', error);
+    return null;
+  }
+
+  return version as PromptVersion;
+}
+
