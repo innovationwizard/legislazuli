@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { createServerClient } from '@/lib/db/supabase';
+import { triggerPromptEvolution } from '@/lib/ml/prompt-evolution';
 
 /**
  * POST /api/feedback
@@ -102,7 +103,8 @@ export async function POST(request: NextRequest) {
         documentData.doc_type,
         model,
         is_correct,
-        why
+        why,
+        session.user.id
       );
     }
 
@@ -177,7 +179,8 @@ async function updateEvolutionQueue(
   doc_type: string,
   model: string,
   is_correct: boolean,
-  why?: string
+  why?: string,
+  userId?: string
 ) {
   try {
     // Get or create queue entry
@@ -237,10 +240,20 @@ async function updateEvolutionQueue(
 
     // Trigger evolution if needed
     if (shouldEvolve) {
-      // This will be handled by a background job or cron
-      // For now, we'll trigger it synchronously (can be moved to queue later)
+      // For first 50 feedbacks, evolve on any error with "why"
+      // After 50, evolve only on significant error patterns
       console.log(`Triggering prompt evolution for ${doc_type}/${model}`);
-      // Evolution will be triggered asynchronously
+      
+      // Trigger evolution asynchronously (don't block the response)
+      if (userId) {
+        triggerPromptEvolution(doc_type, model as 'claude' | 'gemini', userId)
+          .then((result) => {
+            console.log(`✓ Prompt evolution completed for ${doc_type}/${model}:`, result);
+          })
+          .catch((error) => {
+            console.error(`✗ Prompt evolution failed for ${doc_type}/${model}:`, error);
+          });
+      }
     }
   } catch (error) {
     console.error('Evolution queue update error:', error);
