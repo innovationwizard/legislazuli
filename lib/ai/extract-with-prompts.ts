@@ -9,6 +9,9 @@ import { RawExtractionFields } from '@/types';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Model ID configuration - use environment variable or default to current stable version
+const GEMINI_MODEL_ID = process.env.GEMINI_MODEL_ID || 'gemini-2.5-pro';
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
@@ -151,7 +154,7 @@ export async function extractWithGeminiVersioned(
 
   if (systemPrompt && userPrompt && system && user) {
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: GEMINI_MODEL_ID,
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 4096,
@@ -213,7 +216,7 @@ export async function extractWithGeminiFromTextVersioned(
 
   if (systemPrompt && userPrompt && system && user) {
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: GEMINI_MODEL_ID,
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 4096,

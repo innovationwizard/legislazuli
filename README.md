@@ -40,7 +40,9 @@ Edita `.env.local` con tus credenciales:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Clave anónima de Supabase
 - `SUPABASE_SERVICE_ROLE_KEY`: Clave de servicio de Supabase
 - `ANTHROPIC_API_KEY`: API key de Anthropic
-- `GOOGLE_API_KEY`: API key de Google (para Gemini 1.5 Pro)
+- `GOOGLE_API_KEY`: API key de Google (para Gemini 2.5 Pro)
+- `GEMINI_MODEL_ID`: ID del modelo de Gemini (opcional, por defecto: gemini-2.5-pro)
+- `GEMINI_FALLBACK_MODEL_ID`: ID del modelo de fallback (opcional, por defecto: gemini-2.5-flash)
 - `AWS_ACCESS_KEY_ID`: AWS Access Key ID (para Textract)
 - `AWS_SECRET_ACCESS_KEY`: AWS Secret Access Key (para Textract)
 - `AWS_REGION`: Región de AWS (opcional, por defecto: us-east-1)

@@ -19,6 +19,12 @@ if (!process.env.GOOGLE_API_KEY) {
 // Initialize Gemini client - fail gracefully if key is missing
 let genAI: GoogleGenerativeAI | null = null;
 
+// Model ID configuration - use environment variable or default to current stable version
+// Best practice: Never hardcode model strings. Use GEMINI_MODEL_ID in .env.local
+// This allows upgrading models without redeploying when deprecation hits
+const GEMINI_MODEL_ID = process.env.GEMINI_MODEL_ID || 'gemini-2.5-pro';
+const GEMINI_FALLBACK_MODEL_ID = process.env.GEMINI_FALLBACK_MODEL_ID || 'gemini-2.5-flash';
+
 if (process.env.GOOGLE_API_KEY) {
   try {
     genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
@@ -40,14 +46,31 @@ export async function extractWithGemini(imageBase64: string): Promise<RawExtract
   }
 
   try {
-    // Use gemini-1.5-pro for maximum reasoning/OCR accuracy
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
-      generationConfig: {
-        temperature: 0.1, // Lower temperature for more deterministic, accurate results
-        maxOutputTokens: 4096,
-      },
-    });
+    // Use Gemini 2.5 Pro (current stable, released June 2025, active until 2026)
+    // Note: gemini-1.5-pro-002 was retired September 2025
+    // Fallback to gemini-2.5-flash if Pro is not available
+    // Model ID can be overridden via GEMINI_MODEL_ID environment variable
+    let model;
+    try {
+      model = genAI.getGenerativeModel({ 
+        model: GEMINI_MODEL_ID,
+        generationConfig: {
+          temperature: 0.1, // Lower temperature for more deterministic, accurate results
+          maxOutputTokens: 4096,
+        },
+      });
+      console.log(`✓ Using Gemini model: ${GEMINI_MODEL_ID}`);
+    } catch (error) {
+      // Fallback to Flash if Pro is not available (may require specific billing tier)
+      console.warn(`⚠ ${GEMINI_MODEL_ID} not available, falling back to ${GEMINI_FALLBACK_MODEL_ID}`);
+      model = genAI.getGenerativeModel({ 
+        model: GEMINI_FALLBACK_MODEL_ID,
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 4096,
+        },
+      });
+    }
 
     // Combine system and user prompts for Gemini (it doesn't have separate system messages)
     const fullPrompt = `${EXTRACTION_SYSTEM_PROMPT_OPENAI}\n\n${EXTRACTION_USER_PROMPT_OPENAI}`;
@@ -136,7 +159,7 @@ export async function extractWithGeminiFromText(text: string): Promise<RawExtrac
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: GEMINI_MODEL_ID,
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 4096,
@@ -183,7 +206,7 @@ export async function detectDocumentTypeWithGemini(imageBase64: string): Promise
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: GEMINI_MODEL_ID,
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 1024,
@@ -234,7 +257,7 @@ export async function detectDocumentTypeWithGeminiFromText(text: string): Promis
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: GEMINI_MODEL_ID,
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 1024,
@@ -277,7 +300,7 @@ export async function extractFullTextWithGemini(imageBase64: string): Promise<{ 
 
   try {
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: GEMINI_MODEL_ID,
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 8192,
