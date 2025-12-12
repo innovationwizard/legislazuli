@@ -95,6 +95,9 @@ Resources:
         # Required for Textract OutputConfig to write results
         - S3CrudPolicy:
             BucketName: !Ref DocumentBucket
+        # DynamoDBCrudPolicy allows storing initial job record
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ResultsTable
         - Statement:
             - Effect: Allow
               Action: textract:StartDocumentAnalysis
