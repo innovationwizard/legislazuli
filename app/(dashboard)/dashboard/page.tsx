@@ -139,7 +139,7 @@ export default function DashboardPage() {
                           </button>
                         </div>
                         <div className="space-y-4">
-                          {Object.keys(result.textByPage)
+                          {Object.keys(result.textByPage || {})
                             .sort((a, b) => parseInt(a) - parseInt(b))
                             .map((pageNum) => (
                               <div key={pageNum} className="bg-white border border-gray-300 rounded p-3">
