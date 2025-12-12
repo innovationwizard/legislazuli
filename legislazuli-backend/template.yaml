@@ -91,21 +91,10 @@ Resources:
       CodeUri: handlers/
       Handler: start-analysis.handler
       Policies:
-        # Use explicit S3 policy to avoid circular dependency
-        # Reference the actual bucket created by CloudFormation
-        # Textract needs Read/Write access for OutputConfig
-        - Statement:
-            - Effect: Allow
-              Action:
-                - s3:GetObject
-                - s3:PutObject
-                - s3:DeleteObject
-              Resource: !Sub '${DocumentBucket.Arn}/*'
-            - Effect: Allow
-              Action:
-                - s3:ListBucket
-                - s3:GetBucketLocation
-              Resource: !GetAtt DocumentBucket.Arn
+        # S3CrudPolicy provides full CRUD operations on the bucket
+        # Required for Textract OutputConfig to write results
+        - S3CrudPolicy:
+            BucketName: !Ref DocumentBucket
         - Statement:
             - Effect: Allow
               Action: textract:StartDocumentAnalysis
