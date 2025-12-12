@@ -105,8 +105,9 @@ async function parseLegalDeed(fullText) {
 
   try {
     // Claude 3.5 Sonnet model ID for Bedrock
-    // Note: Ensure this model is enabled in your AWS Bedrock account
-    const modelId = process.env.BEDROCK_MODEL_ID || "anthropic.claude-3-5-sonnet-20241022-v2:0";
+    // Note: Use cross-region inference profile (us.*) for us-east-2 region
+    // Ensure this model is enabled in your AWS Bedrock account
+    const modelId = process.env.BEDROCK_MODEL_ID || "us.anthropic.claude-3-5-sonnet-20241022-v2:0";
     
     console.log(`Invoking Bedrock model: ${modelId}`);
     
@@ -326,6 +327,9 @@ exports.handler = async (event) => {
     // 3. Transform: Linearize Text
     // Concatenate lines to create a searchable "blob" for AI analysis
     const fullText = linearizeTextractBlocks(textractData.Blocks);
+    
+    // Also group text by page for paginated display
+    const textByPage = groupTextByPage(textractData.Blocks);
 
     // 4. Run Domain-Specific Logic: AI-Powered Gap Detection via Bedrock
     const analysis = await parseLegalDeed(fullText);
@@ -370,6 +374,9 @@ exports.handler = async (event) => {
       // DynamoDB item limit warning: 400KB max item size
       // Truncate text to ensure we have room for AI analysis
       rawText: fullText.substring(0, 200000), // Reduced to ~200KB to leave room for AI analysis
+      // Store paginated text (object with page numbers as keys)
+      // This allows frontend to display text organized by page
+      textByPage: JSON.stringify(textByPage),
       pages: textractData.DocumentMetadata?.Pages || 0,
     };
 

@@ -119,6 +119,7 @@ export function useLegislazuli() {
                 immediateAvailability: data.immediateAvailability,
                 instrumentNumber: data.instrumentNumber,
                 rawText: data.rawText,
+                textByPage: data.textByPage,
                 aiAnalysis: data.aiAnalysis,
               });
               return;

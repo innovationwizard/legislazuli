@@ -129,7 +129,8 @@ Resources:
           RESULTS_TABLE_NAME: !Ref ResultsTable
           S3_BUCKET_NAME: !Ref DocumentBucket
           # Note: AWS_REGION is reserved, Lambda automatically provides it
-          BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20241022-v2:0"
+          # Use cross-region inference profile (us.*) for us-east-2 region
+          BEDROCK_MODEL_ID: "us.anthropic.claude-3-5-sonnet-20241022-v2:0"
       Policies:
         # Use explicit policies to avoid circular dependencies
         - Statement:
@@ -159,7 +160,7 @@ Resources:
             - Effect: Allow
               Action:
                 - bedrock:InvokeModel
-              Resource: "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
+              Resource: "arn:aws:bedrock:*::foundation-model/us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
   # ------------------------------------------------------------------
   # 4. PERMISSIONS GLUE
