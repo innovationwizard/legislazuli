@@ -15,16 +15,22 @@ const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
 
 // AWS_REGION is automatically provided by Lambda runtime
+const REGION = process.env.AWS_REGION || 'us-east-2';
+
 const s3 = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-2',
+  region: REGION,
+});
+
+const textract = new TextractClient({
+  region: REGION,
 });
 
 const dynamodb = new DynamoDBClient({
-  region: process.env.AWS_REGION || 'us-east-2',
+  region: REGION,
 });
 
 const bedrock = new BedrockRuntimeClient({
-  region: process.env.AWS_REGION || 'us-east-2',
+  region: REGION,
 });
 
 /**
@@ -222,147 +228,70 @@ exports.handler = async (event) => {
       };
     }
 
-    // 2. Extract: Fetch Textract Result from S3
-    // IMPORTANT: The SNS message contains DocumentLocation pointing to the ORIGINAL PDF
-    // But because we used OutputConfig in StartDocumentAnalysis, Textract saves results
-    // to a different location: processed/{jobId}/output.json
-    // We must construct the correct path based on the JobId
+    // 2. Extract: Fetch Textract Result using GetDocumentAnalysis API
+    // This is more reliable than reading from S3 - handles pagination automatically
+    // and doesn't depend on S3 file structure. Always gets blocks even if S3 output is mislocated.
     
-    // Get bucket from SNS message or environment
-    const documentLocation = message.DocumentLocation;
-    const bucket = documentLocation?.S3Bucket || process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME;
+    console.log(`Fetching Textract results using GetDocumentAnalysis API for JobId: ${jobId}`);
     
-    if (!bucket) {
-      throw new Error('S3 bucket name not found in environment variables or SNS message');
-    }
-    
-    // Textract stores results as numbered files: processed/{jobId}/1, processed/{jobId}/2, etc.
-    // Each file contains the results for one page. We need to read all pages and combine them.
-    // IMPORTANT: Textract creates paths with double slashes: processed//{jobId}/
-    // We need to try both patterns to find the files
-    const prefixes = [
-      `processed/${jobId}/`,      // Normal path
-      `processed//${jobId}/`,      // Double slash (Textract's actual format)
-    ];
-    
-    console.log(`Fetching Textract results for JobId: ${jobId}, Bucket: ${bucket}`);
-    
-    let resultFiles = [];
-    let listResponse = null;
-    
-    // Try each prefix until we find files
-    for (const prefix of prefixes) {
-      console.log(`Trying prefix: ${prefix}`);
-      try {
-        const listCommand = new ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: prefix,
-        });
-        
-        listResponse = await s3.send(listCommand);
-        
-        // Filter out the .s3_access_check file and get only numbered result files
-        const files = (listResponse.Contents || [])
-          .map(obj => obj.Key)
-          .filter(key => {
-            // Get filename (last part after /)
-            const filename = key.split('/').pop();
-            // Include files that are numeric (page numbers) or 'output.json'
-            // Exclude .s3_access_check and other metadata files
-            return filename && 
-                   filename !== '.s3_access_check' && 
-                   (filename.match(/^\d+$/) || filename === 'output.json');
-          })
-          .sort((a, b) => {
-            // Sort by filename (numeric order for numbered files)
-            const aNum = parseInt(a.split('/').pop()) || 0;
-            const bNum = parseInt(b.split('/').pop()) || 0;
-            return aNum - bNum;
-          });
-        
-        if (files.length > 0) {
-          resultFiles = files;
-          console.log(`Found ${resultFiles.length} result file(s) using prefix: ${prefix}`);
-          break; // Found files, exit loop
-        } else {
-          console.log(`No result files found with prefix: ${prefix}`);
-        }
-      } catch (err) {
-        console.warn(`Error listing with prefix ${prefix}:`, err.message);
-        // Continue to next prefix
-      }
-    }
-    
-    if (resultFiles.length === 0) {
-      // Log what we actually found for debugging
-      const debugPrefix = prefixes[0];
-      try {
-        const debugList = new ListObjectsV2Command({
-          Bucket: bucket,
-          Prefix: debugPrefix,
-        });
-        const debugResponse = await s3.send(debugList);
-        console.error(`Debug: Listed ${debugResponse.Contents?.length || 0} objects with prefix ${debugPrefix}`);
-        if (debugResponse.Contents && debugResponse.Contents.length > 0) {
-          console.error(`Debug: Found keys:`, debugResponse.Contents.map(obj => obj.Key).slice(0, 10));
-        }
-      } catch (debugErr) {
-        console.error(`Debug listing error:`, debugErr);
-      }
-      throw new Error(`No Textract result files found in s3://${bucket}/processed/{jobId}/. Tried prefixes: ${prefixes.join(', ')}`);
-    }
-    
-    console.log(`Found ${resultFiles.length} result file(s): ${resultFiles.join(', ')}`);
-    
-    // Read and combine all result files
+    // Fetch all pages of results using pagination
     const allBlocks = [];
-    const allDocumentMetadata = [];
+    let nextToken = null;
+    let documentMetadata = null;
+    let pageCount = 0;
     
-    for (const fileKey of resultFiles) {
-      try {
-        const getObj = new GetObjectCommand({ Bucket: bucket, Key: fileKey });
-        const s3Response = await s3.send(getObj);
-        const jsonBody = await streamToString(s3Response.Body);
-        
-        // Validate it's JSON (not PDF)
-        if (jsonBody.trim().startsWith('%PDF')) {
-          console.warn(`Skipping ${fileKey} - appears to be PDF, not JSON`);
-          continue;
-        }
-        
-        const pageData = JSON.parse(jsonBody);
-        
-        // Combine blocks from all pages
-        if (pageData.Blocks && Array.isArray(pageData.Blocks)) {
-          allBlocks.push(...pageData.Blocks);
-        }
-        
-        // Collect document metadata (usually same across pages, but keep all)
-        if (pageData.DocumentMetadata) {
-          allDocumentMetadata.push(pageData.DocumentMetadata);
-        }
-        
-        console.log(`Loaded ${pageData.Blocks?.length || 0} blocks from ${fileKey}`);
-      } catch (err) {
-        console.error(`Error reading ${fileKey}:`, err);
-        // Continue with other files
+    do {
+      const getAnalysisCommand = new GetDocumentAnalysisCommand({
+        JobId: jobId,
+        MaxResults: 1000, // Maximum results per page
+        NextToken: nextToken,
+      });
+      
+      console.log(`Fetching page ${pageCount + 1}${nextToken ? ' (with NextToken)' : ''}...`);
+      
+      const response = await textract.send(getAnalysisCommand);
+      
+      // Check job status
+      if (response.JobStatus === 'FAILED') {
+        throw new Error(`Textract job failed: ${response.StatusMessage || 'Unknown error'}`);
       }
-    }
+      
+      // Collect blocks
+      if (response.Blocks && Array.isArray(response.Blocks)) {
+        allBlocks.push(...response.Blocks);
+        console.log(`Received ${response.Blocks.length} blocks (total: ${allBlocks.length})`);
+      }
+      
+      // Store document metadata (usually same across pages)
+      if (response.DocumentMetadata && !documentMetadata) {
+        documentMetadata = response.DocumentMetadata;
+      }
+      
+      // Get next token for pagination
+      nextToken = response.NextToken;
+      pageCount++;
+      
+      // Safety limit to prevent infinite loops
+      if (pageCount > 100) {
+        console.warn(`Reached pagination limit (100 pages), stopping`);
+        break;
+      }
+      
+    } while (nextToken);
     
     if (allBlocks.length === 0) {
-      throw new Error(`No valid Textract blocks found in result files`);
+      throw new Error(`No Textract blocks found for job ${jobId}`);
     }
     
     // Combine into a single Textract response structure
     const textractData = {
       Blocks: allBlocks,
-      DocumentMetadata: allDocumentMetadata[0] || { Pages: resultFiles.length },
-      // Include other metadata if present
+      DocumentMetadata: documentMetadata || { Pages: pageCount },
       JobStatus: 'SUCCEEDED',
       JobId: jobId,
     };
     
-    console.log(`Combined ${allBlocks.length} total blocks from ${resultFiles.length} file(s)`);
+    console.log(`Fetched ${allBlocks.length} total blocks across ${pageCount} page(s) using GetDocumentAnalysis API`);
 
     // 3. Transform: Linearize Text
     // Concatenate lines to create a searchable "blob" for AI analysis

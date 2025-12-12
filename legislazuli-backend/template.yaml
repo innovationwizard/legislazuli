@@ -147,9 +147,14 @@ Resources:
                 - dynamodb:DescribeTable
               Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/LegislazuliResults'
         # S3CrudPolicy provides full CRUD operations on the bucket
-        # Required for reading Textract output files
+        # Required for reading Textract output files (if needed as fallback)
         - S3CrudPolicy:
             BucketName: !Ref DocumentBucket
+        - Statement:
+            - Effect: Allow
+              Action:
+                - textract:GetDocumentAnalysis
+              Resource: "*"
         - Statement:
             - Effect: Allow
               Action:
