@@ -143,18 +143,10 @@ Resources:
               Action:
                 - dynamodb:DescribeTable
               Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/LegislazuliResults'
-        - Statement:
-            - Effect: Allow
-              Action:
-                - s3:GetObject
-                - s3:PutObject
-                - s3:DeleteObject
-              Resource: !Sub '${DocumentBucket.Arn}/*'
-            - Effect: Allow
-              Action:
-                - s3:ListBucket
-                - s3:GetBucketLocation
-              Resource: !GetAtt DocumentBucket.Arn
+        # S3CrudPolicy provides full CRUD operations on the bucket
+        # Required for reading Textract output files
+        - S3CrudPolicy:
+            BucketName: !Ref DocumentBucket
         - Statement:
             - Effect: Allow
               Action:
