@@ -50,10 +50,25 @@ During guided deployment, you'll be prompted for:
 ### 3. Get Output Values
 
 After deployment, note the output values:
-- `BucketName`: The S3 bucket name (set this as `AWS_S3_BUCKET_NAME` in Vercel)
-- `SNSTopicArn`: The SNS topic ARN (set this as `AWS_SNS_TOPIC_ARN` in Vercel)
+- `BucketName`: The S3 bucket name (set this as `AWS_BUCKET_NAME` or `AWS_S3_BUCKET_NAME` in Vercel)
+- `SNSTopicArn`: The SNS topic ARN
+- `StartAnalysisFunctionName`: Lambda function name for S3 trigger
+- `ProcessResultsFunctionName`: Lambda function name for SNS trigger
 
-### 4. Enable Bedrock Model Access
+### 4. Post-Deployment Configuration
+
+**IMPORTANT**: After deploying the stack, you must configure S3 bucket notifications and SNS triggers. See [POST_DEPLOYMENT.md](./POST_DEPLOYMENT.md) for detailed CLI commands.
+
+Quick setup script:
+```bash
+cd legislazuli-backend
+# Edit the script with your stack name and AWS profile
+./configure-pipeline.sh
+```
+
+Or follow the manual steps in [POST_DEPLOYMENT.md](./POST_DEPLOYMENT.md).
+
+### 5. Enable Bedrock Model Access
 
 **IMPORTANT**: Before deploying, you must enable Claude 3.5 Sonnet in Bedrock:
 
@@ -63,7 +78,7 @@ After deployment, note the output values:
 
 Without this step, the Lambda function will fail when trying to invoke Bedrock.
 
-### 5. Configure Vercel Environment Variables
+### 6. Configure Vercel Environment Variables
 
 Add these to your Vercel project:
 
