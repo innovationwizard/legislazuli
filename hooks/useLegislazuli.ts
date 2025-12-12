@@ -55,14 +55,37 @@ export function useLegislazuli() {
       // 3. Poll for Results (The "LegislazuliResults" DynamoDB Table)
       // The S3 Key effectively becomes the tracking ID
       // We'll use the Textract JobId as stored in DynamoDB, but for now use the S3 key
-      const pollInterval = setInterval(async () => {
+      let pollInterval: NodeJS.Timeout | null = null;
+      
+      const pollForResults = async () => {
+        // Use requestIdleCallback or setTimeout to avoid blocking main thread
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          window.requestIdleCallback(async () => {
+            await performPoll();
+          }, { timeout: 5000 });
+        } else {
+          // Fallback: use setTimeout to defer execution
+          setTimeout(async () => {
+            await performPoll();
+          }, 0);
+        }
+      };
+
+      const performPoll = async () => {
         try {
-          const pollRes = await fetch(`/api/status?key=${encodeURIComponent(key)}`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout for fetch
+          
+          const pollRes = await fetch(`/api/status?key=${encodeURIComponent(key)}`, {
+            signal: controller.signal,
+          });
+          
+          clearTimeout(timeoutId);
           
           if (pollRes.status === 200) {
             const data = await pollRes.json();
             if (data.status === 'COMPLETED') {
-              clearInterval(pollInterval);
+              if (pollInterval) clearInterval(pollInterval);
               setIsProcessing(false);
               setResult({
                 jobId: data.jobId || key,
@@ -75,14 +98,16 @@ export function useLegislazuli() {
                 rawText: data.rawText,
                 aiAnalysis: data.aiAnalysis,
               });
+              return;
             } else if (data.status === 'FAILED') {
-              clearInterval(pollInterval);
+              if (pollInterval) clearInterval(pollInterval);
               setIsProcessing(false);
               setResult({ 
                 jobId: data.jobId || key, 
                 status: 'FAILED',
                 error: data.error || 'Processing failed'
               });
+              return;
             }
             // If status is still PROCESSING, continue polling
           } else if (pollRes.status === 404) {
@@ -90,31 +115,40 @@ export function useLegislazuli() {
             // This is expected during the initial processing phase
           } else {
             // Unexpected error
-            clearInterval(pollInterval);
+            if (pollInterval) clearInterval(pollInterval);
             setIsProcessing(false);
             setResult({ 
               jobId: key, 
               status: 'FAILED',
               error: 'Failed to check job status'
             });
+            return;
           }
-        } catch (pollError) {
-          console.error('Polling error:', pollError);
+        } catch (pollError: any) {
+          // Ignore abort errors (timeout)
+          if (pollError.name !== 'AbortError') {
+            console.error('Polling error:', pollError);
+          }
           // Continue polling on network errors
         }
-      }, 3000); // Poll every 3 seconds
+      };
+
+      pollInterval = setInterval(pollForResults, 10000); // Poll every 10 seconds
 
       // Cleanup: Stop polling after 10 minutes (safety timeout)
       setTimeout(() => {
-        clearInterval(pollInterval);
-        if (result?.status === 'PROCESSING') {
-          setIsProcessing(false);
-          setResult({ 
-            jobId: key, 
-            status: 'FAILED',
-            error: 'Processing timeout - job may still be running'
-          });
-        }
+        if (pollInterval) clearInterval(pollInterval);
+        setIsProcessing(false);
+        setResult((prev) => {
+          if (prev?.status === 'PROCESSING') {
+            return { 
+              jobId: key, 
+              status: 'FAILED',
+              error: 'Processing timeout - job may still be running'
+            };
+          }
+          return prev;
+        });
       }, 10 * 60 * 1000); // 10 minutes
 
     } catch (err: any) {

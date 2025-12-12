@@ -84,16 +84,14 @@ export default function DashboardPage() {
                   {result.status === 'UPLOADING' ? 'Subiendo archivo...' : 'Procesando documento...'}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {result.status === 'PROCESSING' && result.jobId 
-                    ? `Job ID: ${result.jobId.substring(0, 20)}...`
-                    : 'Esto puede tardar varios minutos'}
+                  Esto puede tardar varios minutos
                 </p>
               </div>
             </div>
             {result.status === 'PROCESSING' && (
               <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
                 <p className="text-sm text-blue-800">
-                  El documento se está procesando de forma asíncrona. Esta página se actualizará automáticamente cuando termine.
+                  El documento se está procesando. Esta página se actualizará automáticamente cuando esté listo.
                 </p>
               </div>
             )}
