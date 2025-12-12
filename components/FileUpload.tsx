@@ -139,7 +139,7 @@ export function FileUpload({ onUpload, processing = false }: FileUploadProps) {
                 PDF, PNG o JPG
               </p>
               <p className="text-xs text-gray-400 mt-2">
-                Nota: PDFs mayores a 1MB se procesarán de forma asíncrona (2-5 minutos)
+                Nota: PDFs mayores a 1MB pueden tardar varios minutos
               </p>
               <button
                 onClick={() => fileInputRef.current?.click()}

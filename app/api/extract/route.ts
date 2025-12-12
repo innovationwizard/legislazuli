@@ -258,8 +258,30 @@ export async function POST(request: NextRequest) {
             );
           }
           
-          // Fall through to sync processing if async setup fails for other reasons
-          console.warn('Falling back to synchronous processing due to async setup failure');
+          // Check if it's an unsupported format error from Textract
+          const isUnsupportedFormat = asyncError?.__type === 'UnsupportedDocumentException' || 
+                                     asyncError?.message?.includes('unsupported document format');
+          
+          if (isUnsupportedFormat) {
+            // Textract doesn't support this format - convert to images and process those
+            // This ensures we can process ANY document, regardless of Textract support
+            console.warn('Large PDF has unsupported format for Textract, converting to images for processing');
+            try {
+              // Convert PDF to image and process with vision APIs
+              base64 = await convertPdfToImage(processedBuffer);
+              // Skip Textract extraction, use image-based processing
+              useTextExtraction = false;
+              // Continue to LLM processing with the image
+            } catch (imageError: any) {
+              console.error('PDF to image conversion failed:', imageError);
+              // If image conversion also fails, fall through to sync processing
+              // which will attempt image conversion again
+              console.warn('Image conversion failed, falling back to sync processing');
+            }
+          } else {
+            // For other async errors, fall through to sync processing
+            console.warn('Falling back to synchronous processing due to async setup failure');
+          }
         }
       }
 
@@ -285,58 +307,61 @@ export async function POST(request: NextRequest) {
         
         if (isUnsupportedFormat) {
           console.warn('Textract: Unsupported document format, attempting image conversion fallback');
-          
-          // For unsupported formats, try image conversion
-          // But first check if this is a large PDF that should use async
-          if (processedBuffer.length > ASYNC_PROCESSING_THRESHOLD) {
-            return NextResponse.json(
-              {
-                error: 'El formato del PDF no es compatible con Textract. PDFs grandes (>1MB) requieren un formato estándar sin encriptación. Por favor, intenta: 1) Guardar el PDF como un nuevo archivo sin protección, 2) Convertir a imágenes (PNG/JPG), o 3) Usar un PDF más pequeño.',
-                errorCode: 'UNSUPPORTED_PDF_FORMAT_LARGE',
-                details: 'Textract UnsupportedDocumentException - PDF may be encrypted or in unsupported format'
-              },
-              { status: 400 }
-            );
-          }
+          // Continue to image conversion fallback for all PDFs, regardless of size
         }
         
         // Fallback to image conversion if Textract fails
         // Use processedBuffer (correctly oriented) for image conversion
+        // This ensures we can process ANY document, even if Textract doesn't support it
         try {
           base64 = await convertPdfToImage(processedBuffer);
+          console.log('Successfully converted PDF to image for processing');
         } catch (imageError: any) {
           console.error('PDF conversion error:', imageError);
           
-          // Check if it's a Chromium path error
+          // Check if it's a Chromium path error (configuration issue, not document issue)
           const isChromiumError = imageError?.message?.includes('chromium') || 
                                  imageError?.message?.includes('brotli') ||
                                  imageError?.message?.includes('executablePath') ||
                                  imageError?.message?.includes('ERR_ABORTED');
           
           if (isChromiumError) {
-            return NextResponse.json(
-              { 
-                error: 'Error al procesar el PDF: el formato no es compatible con el sistema de conversión. Por favor, intenta convertir el PDF a imágenes (PNG/JPG) manualmente o usa un PDF en formato estándar.',
-                errorCode: 'PDF_CONVERSION_CONFIG_ERROR',
-                details: 'Chromium/PDF conversion error - PDF format may be unsupported'
-              },
-              { status: 400 }
-            );
+            // Configuration error - this is a system issue, not a document issue
+            // Try one more time with original buffer in case orientation processing caused issues
+            try {
+              console.warn('Retrying PDF conversion with original buffer');
+              base64 = await convertPdfToImage(buffer);
+              console.log('Successfully converted PDF to image on retry');
+            } catch (retryError: any) {
+              console.error('PDF conversion retry also failed:', retryError);
+              return NextResponse.json(
+                { 
+                  error: 'Error de configuración del sistema de conversión. Por favor, contacta al soporte técnico.',
+                  errorCode: 'PDF_CONVERSION_CONFIG_ERROR',
+                  details: 'System configuration issue - Chromium/PDF conversion unavailable'
+                },
+                { status: 500 }
+              );
+            }
+          } else {
+            // Document-level error - try with original buffer
+            try {
+              console.warn('Retrying PDF conversion with original buffer');
+              base64 = await convertPdfToImage(buffer);
+              console.log('Successfully converted PDF to image on retry');
+            } catch (retryError: any) {
+              console.error('PDF conversion retry also failed:', retryError);
+              // Last resort: return a generic error that doesn't blame the user's document
+              return NextResponse.json(
+                { 
+                  error: 'No se pudo procesar el documento. Por favor, intenta convertir el PDF a imágenes (PNG/JPG) y sube las imágenes directamente.',
+                  errorCode: 'PDF_PROCESSING_FAILED',
+                  details: 'All processing methods failed - document may require manual conversion'
+                },
+                { status: 400 }
+              );
+            }
           }
-          
-          // Provide helpful error message
-          const errorDetails = isUnsupportedFormat 
-            ? 'Document format not supported by Textract. PDF may be encrypted, password-protected, or in an unsupported format.'
-            : imageError?.message || 'Unknown error';
-          
-          return NextResponse.json(
-            { 
-              error: 'Error al procesar el PDF. El formato puede no ser compatible. Por favor, intenta: 1) Guardar el PDF como un nuevo archivo sin protección, 2) Convertir a imágenes (PNG/JPG), o 3) Verificar que el PDF no esté corrupto.',
-              errorCode: 'PDF_CONVERSION_ERROR',
-              details: errorDetails
-            },
-            { status: 400 }
-          );
         }
       }
     } else {
