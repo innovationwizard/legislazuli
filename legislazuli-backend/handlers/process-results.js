@@ -222,29 +222,27 @@ exports.handler = async (event) => {
     }
 
     // 2. Extract: Fetch Textract Result from S3
-    // Textract stores results in the bucket/prefix defined in StartDocumentAnalysis OutputConfig
-    // The SNS message may contain DocumentLocation with S3Bucket and S3ObjectName
-    const outputLocation = message.DocumentLocation;
+    // IMPORTANT: The SNS message contains DocumentLocation pointing to the ORIGINAL PDF
+    // But because we used OutputConfig in StartDocumentAnalysis, Textract saves results
+    // to a different location: processed/{jobId}/output.json
+    // We must construct the correct path based on the JobId
     
-    let bucket, key;
+    // Get bucket from SNS message or environment
+    const documentLocation = message.DocumentLocation;
+    const bucket = documentLocation?.S3Bucket || process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME;
     
-    if (outputLocation && outputLocation.S3Bucket && outputLocation.S3ObjectName) {
-      // Use DocumentLocation from SNS message (preferred)
-      bucket = outputLocation.S3Bucket;
-      key = outputLocation.S3ObjectName;
-    } else {
-      // Fallback: Construct the key from jobId
-      // Textract stores results as: processed/{jobId}/output.json
-      // The bucket should be the same one used in StartDocumentAnalysis
-      bucket = process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME;
-      key = `processed/${jobId}/output.json`;
-      
-      if (!bucket) {
-        throw new Error('S3 bucket name not found in environment variables or SNS message');
-      }
+    if (!bucket) {
+      throw new Error('S3 bucket name not found in environment variables or SNS message');
     }
-
+    
+    // Textract stores results in: processed/{jobId}/output.json
+    // The jobId format is a hex string, and Textract creates a folder structure
+    // Common patterns: processed/{jobId}/output.json or processed/{jobId}/1/output.json
+    // Let's try the most common pattern first
+    let key = `processed/${jobId}/output.json`;
+    
     console.log(`Fetching Textract result from s3://${bucket}/${key}`);
+    console.log(`JobId: ${jobId}, Bucket: ${bucket}`);
 
     const getObj = new GetObjectCommand({ Bucket: bucket, Key: key });
     const s3Response = await s3.send(getObj);
