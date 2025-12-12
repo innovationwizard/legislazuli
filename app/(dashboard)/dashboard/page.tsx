@@ -159,12 +159,12 @@ export default function DashboardPage() {
                                 </div>
                                 <textarea
                                   readOnly
-                                  value={result.textByPage[pageNum]}
+                                  value={result.textByPage?.[pageNum] || ''}
                                   className="w-full h-48 p-2 text-xs font-mono bg-gray-50 border border-gray-200 rounded resize-none"
                                   style={{ fontSize: '10px', lineHeight: '1.4' }}
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
-                                  {(result.textByPage[pageNum]?.length || 0).toLocaleString()} caracteres
+                                  {(result.textByPage?.[pageNum]?.length || 0).toLocaleString()} caracteres
                                 </p>
                               </div>
                             ))}
