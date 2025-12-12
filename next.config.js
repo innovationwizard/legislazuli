@@ -29,8 +29,6 @@ const nextConfig = {
     }
     return config;
   },
-  // Ensure output is standalone for better Vercel compatibility
-  output: process.env.VERCEL ? 'standalone' : undefined,
 };
 
 module.exports = nextConfig;

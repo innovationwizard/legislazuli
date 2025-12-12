@@ -4,7 +4,6 @@
       "maxDuration": 60,
       "memory": 3008
     }
-  },
-  "outputDirectory": ".next"
+  }
 }
 
