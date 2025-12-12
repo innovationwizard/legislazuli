@@ -223,7 +223,27 @@ aws s3api put-bucket-policy \
 
 **Note**: This step requires `s3:PutBucketPolicy` permission. If you don't have this permission, the IAM role permissions should be sufficient for Textract to access objects.
 
-## Step 5: Update Vercel Environment Variables
+## Step 5: Create CloudWatch Log Groups
+
+Create log groups for Lambda functions (optional, but recommended for monitoring):
+
+```bash
+# Create log group for StartAnalysisFunction
+aws logs create-log-group \
+  --log-group-name "/aws/lambda/${START_LAMBDA_NAME}" \
+  --region $REGION \
+  --profile $AWS_PROFILE
+
+# Create log group for ProcessResultsFunction
+aws logs create-log-group \
+  --log-group-name "/aws/lambda/${PROCESS_LAMBDA_NAME}" \
+  --region $REGION \
+  --profile $AWS_PROFILE
+```
+
+**Note**: Log groups are automatically created when Lambda functions are first invoked, but creating them manually ensures they exist for monitoring from the start.
+
+## Step 6: Update Vercel Environment Variables
 
 Update your Vercel project with the new bucket name:
 
