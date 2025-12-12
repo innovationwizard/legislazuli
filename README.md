@@ -5,14 +5,15 @@ Sistema de extracción de datos para documentos legales guatemaltecos mediante v
 ## Características
 
 - **Extracción de datos** de Patentes de Comercio guatemaltecas
-- **Consenso multi-API** entre Claude Sonnet 4 y GPT-4o para garantizar precisión
+- **Consenso multi-API** entre Claude Sonnet 4 y Gemini 2.5 para garantizar precisión
+- **Procesamiento asíncrono** para PDFs grandes (>1MB) usando S3 + Textract async
 - **Detección automática de orientación** mediante AWS Textract
 - **Sistema de feedback ML** para evolución automática de prompts (usuario "condor")
 - **Versionado de prompts** con métricas de rendimiento
 - **Modo debug** para análisis detallado de extracciones
-- Interfaz web moderna con Next.js 14
+- Interfaz web moderna con Next.js 14 con seguimiento de progreso en tiempo real
 - Autenticación con NextAuth.js
-- Almacenamiento en Supabase
+- Almacenamiento en Supabase y AWS S3
 - Descarga de resultados en formato TXT y HTML
 
 ## Requisitos
@@ -45,9 +46,12 @@ Edita `.env.local` con tus credenciales:
 - `GEMINI_FALLBACK_MODEL_ID`: ID del modelo de fallback (opcional, por defecto: gemini-2.5-flash)
 
 **Nota sobre Gemini Pro:** El sistema usa `gemini-2.5-pro` como modelo principal (mejor precisión) con `gemini-2.5-flash` como fallback automático si hay problemas de cuota o facturación. El sistema detecta automáticamente errores 429 (quota exceeded) y cambia al modelo fallback.
-- `AWS_ACCESS_KEY_ID`: AWS Access Key ID (para Textract)
-- `AWS_SECRET_ACCESS_KEY`: AWS Secret Access Key (para Textract)
+- `AWS_ACCESS_KEY_ID`: AWS Access Key ID (para Textract y S3)
+- `AWS_SECRET_ACCESS_KEY`: AWS Secret Access Key (para Textract y S3)
 - `AWS_REGION`: Región de AWS (opcional, por defecto: us-east-1)
+- `AWS_S3_BUCKET_NAME`: Nombre del bucket S3 para procesamiento asíncrono (requerido para PDFs >1MB)
+- `AWS_SNS_TOPIC_ARN`: ARN del topic SNS para webhooks (opcional, para notificaciones automáticas)
+- `AWS_SNS_ROLE_ARN`: ARN del rol IAM para Textract → SNS (opcional, requerido si usas SNS)
 
 3. Configura la base de datos en Supabase:
 
@@ -119,7 +123,18 @@ npx tsx scripts/run-migration.ts
 
 Luego copia y ejecuta el SQL mostrado en el SQL Editor de Supabase, o ejecuta directamente el contenido de `scripts/create-ml-feedback-schema.sql`.
 
-**c) Row Level Security (RLS) para tablas críticas (RECOMENDADO):**
+**c) Schema Async Jobs (requerido para procesamiento asíncrono):**
+
+Para procesar PDFs grandes de forma asíncrona, ejecuta:
+
+```bash
+# Ver el SQL de migración
+npx tsx scripts/run-async-jobs-migration.ts
+```
+
+Luego copia y ejecuta el SQL mostrado en el SQL Editor de Supabase, o ejecuta directamente el contenido de `scripts/create-async-jobs-schema.sql`.
+
+**d) Row Level Security (RLS) para tablas críticas (RECOMENDADO):**
 
 Para proteger las tablas críticas (`golden_set_truths`, `prompt_versions`, `prompt_evolution_queue`) de acceso no autorizado, ejecuta:
 
@@ -131,10 +146,23 @@ Para proteger las tablas críticas (`golden_set_truths`, `prompt_versions`, `pro
 
 **OPCIONAL - Hardening Avanzado**: Para activar RLS sin migrar de NextAuth, implementa el "Bridge Token Pattern". Ver `docs/BRIDGE_TOKEN_PATTERN.md` para la guía de implementación completa.
 
-4. Crea un bucket de almacenamiento en Supabase:
+4. Crea buckets de almacenamiento:
+
+**Supabase Storage:**
 - Ve a Storage en el panel de Supabase
 - Crea un bucket llamado `documents`
 - Configúralo como privado
+
+**AWS S3 (requerido para PDFs >1MB):**
+- Crea un bucket S3 en AWS
+- Configura permisos para que tu aplicación pueda escribir
+- El nombre del bucket debe coincidir con `AWS_S3_BUCKET_NAME` en tus variables de entorno
+
+**AWS SNS (opcional, para webhooks):**
+- Crea un topic SNS en AWS
+- Suscribe tu endpoint webhook: `https://your-domain.com/api/textract/webhook`
+- Protocolo: HTTPS
+- Configura el rol IAM para que Textract pueda publicar a SNS
 
 5. (Opcional) Inicializa el sistema de feedback ML:
 
@@ -211,33 +239,47 @@ legislazuli/
 │   ├── (dashboard)/       # Rutas del dashboard
 │   └── api/               # API routes
 │       ├── extract/       # Extracción de documentos
+│       ├── jobs/          # Estado de trabajos asíncronos
+│       ├── textract/      # Webhook de Textract
 │       ├── feedback/      # Sistema de feedback ML
 │       └── evolution/      # Evolución de prompts
 ├── components/            # Componentes React
+│   ├── FileUpload.tsx    # Componente de subida de archivos
+│   ├── JobStatus.tsx     # Componente de estado de trabajos asíncronos
 │   ├── FieldFeedback.tsx # Componente de feedback
 │   └── ExtractionResults.tsx # Resultados con debug
 ├── lib/                   # Utilidades y lógica
 │   ├── ai/               # Integración con APIs de IA
 │   │   ├── claude.ts     # Claude API
-│   │   ├── openai.ts     # OpenAI API
+│   │   ├── gemini.ts     # Gemini API
 │   │   ├── prompts.ts    # Prompts versionados
 │   │   └── extract-with-prompts.ts # Extracción con versiones
+│   ├── aws/              # Servicios AWS
+│   │   ├── s3.ts         # Upload a S3
+│   │   └── textract-async.ts # Textract async API
+│   ├── jobs/             # Procesamiento de trabajos
+│   │   └── extraction-processor.ts # Procesador de extracciones
 │   ├── ml/               # Sistema ML
 │   │   ├── prompt-versioning.ts # Versionado de prompts
 │   │   └── prompt-evolution.ts  # Evolución de prompts
 │   ├── db/               # Cliente de Supabase
 │   └── utils/            # Utilidades generales
 │       ├── normalize.ts  # Normalización (preserva acentos)
-│       ├── pdf-orientation.ts # Utilidades de orientación (legacy)
 │       ├── pdf-to-image.ts # Conversión PDF a imagen
 │       ├── expediente-parser.ts # Parser para número de expediente
-│       └── textract.ts # Extracción de texto con AWS Textract
+│       ├── textract.ts   # Extracción de texto con AWS Textract
+│       └── normalize-orientation.ts # Normalización de orientación
 ├── scripts/              # Scripts de utilidad
 │   ├── create-database-schema.sql # Schema base
+│   ├── create-async-jobs-schema.sql # Schema async jobs
 │   ├── create-ml-feedback-schema.sql # Schema ML
 │   ├── initialize-prompt-versions.js # Inicialización
-│   └── run-migration.ts  # Helper de migración
+│   ├── run-migration.ts  # Helper de migración ML
+│   └── run-async-jobs-migration.ts # Helper de migración async
 ├── docs/                 # Documentación
+│   ├── ASYNC_ARCHITECTURE.md # Arquitectura asíncrona
+│   ├── TEXTRACT_API_FIX.md # Fix de API Textract
+│   ├── VERCEL_PLAN_REQUIREMENTS.md # Requisitos de Vercel
 │   └── ML_FEEDBACK_SYSTEM.md # Docs del sistema ML
 └── types/                # Definiciones TypeScript
 ```
@@ -249,8 +291,12 @@ legislazuli/
 1. Inicia sesión con tus credenciales
 2. Sube un documento (PDF, PNG o JPG) de una Patente de Comercio
    - **Nota**: AWS Textract detecta y corrige automáticamente la orientación de PDFs
+   - **PDFs pequeños (≤1MB)**: Procesamiento inmediato
+   - **PDFs grandes (>1MB)**: Procesamiento asíncrono (2-5 minutos)
 3. Selecciona el tipo de documento
-4. Espera a que se procese (puede tomar unos segundos)
+4. Espera a que se procese
+   - Para archivos pequeños: procesamiento inmediato
+   - Para archivos grandes: verás una barra de progreso con el estado
 5. Revisa los resultados extraídos
    - Los campos con discrepancias se marcan con "⚠ Revisar"
 6. Descarga los resultados en formato TXT o HTML
@@ -336,10 +382,11 @@ El sistema parsea "Número de Expediente" en componentes separados:
 - **Backend**: Next.js API Routes
 - **Autenticación**: NextAuth.js
 - **Base de datos**: Supabase (PostgreSQL)
-- **Almacenamiento**: Supabase Storage
-- **IA**: Anthropic Claude Sonnet 4, OpenAI GPT-4o
+- **Almacenamiento**: Supabase Storage, AWS S3
+- **IA**: Anthropic Claude Sonnet 4, Google Gemini 2.5
 - **OCR**: AWS Textract (para PDFs, con detección automática de orientación)
-- **Procesamiento PDF**: pdf-lib, Puppeteer
+- **Procesamiento PDF**: pdf-lib, Puppeteer, Chromium
+- **Notificaciones**: AWS SNS (opcional, para webhooks)
 
 ## Requisitos Legales Críticos
 
@@ -364,6 +411,12 @@ node scripts/create-user.js email@example.com contraseña123
 npx tsx scripts/run-migration.ts
 ```
 
+### Ejecutar migración Async Jobs
+```bash
+# Muestra el SQL para ejecutar manualmente
+npx tsx scripts/run-async-jobs-migration.ts
+```
+
 ### Inicializar versiones de prompts
 ```bash
 node scripts/initialize-prompt-versions.js
@@ -371,7 +424,10 @@ node scripts/initialize-prompt-versions.js
 
 ## Documentación Adicional
 
+- [Arquitectura Asíncrona](docs/ASYNC_ARCHITECTURE.md) - Procesamiento asíncrono para PDFs grandes
 - [Sistema de Feedback ML](docs/ML_FEEDBACK_SYSTEM.md) - Documentación completa del sistema ML
+- [Fix de API Textract](docs/TEXTRACT_API_FIX.md) - Corrección crítica de API Textract
+- [Requisitos de Vercel](docs/VERCEL_PLAN_REQUIREMENTS.md) - Configuración de planes Vercel
 
 ## Licencia
 

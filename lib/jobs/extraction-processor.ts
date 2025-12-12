@@ -11,6 +11,7 @@ import {
 import { compareResults, convertToExtractedFields } from '@/lib/ai/consensus';
 import { TextractVerifier } from '@/lib/verification/textract-verifier';
 import { saveExtractionPromptVersions } from '@/lib/ml/prompt-versioning';
+import { AnalyzeDocumentCommandOutput } from '@aws-sdk/client-textract';
 
 /**
  * Processes an extraction job after Textract completes
@@ -98,7 +99,15 @@ export async function processExtractionJob(
     // Run Textract verification if available
     if (textractBlocks && textractBlocks.length > 0) {
       try {
-        const verifier = new TextractVerifier({ Blocks: textractBlocks });
+        // Create a proper Textract response object for verification
+        const textractResponse: AnalyzeDocumentCommandOutput = {
+          Blocks: textractBlocks,
+          $metadata: {
+            httpStatusCode: 200,
+            requestId: '',
+          },
+        };
+        const verifier = new TextractVerifier(textractResponse);
         
         const criticalFields = [
           { fieldName: 'numero_patente', value: consensusResult.consensus.numero_patente || '', type: 'NUMERIC' as const },

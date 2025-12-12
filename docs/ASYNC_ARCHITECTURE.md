@@ -2,12 +2,14 @@
 
 ## Overview
 
-For large PDFs (>5MB), the system uses an asynchronous processing pipeline that decouples heavy Textract processing from the HTTP response loop. This prevents timeouts and allows processing of 30+ page legal documents.
+For large PDFs (>1MB), the system uses an asynchronous processing pipeline that decouples heavy Textract processing from the HTTP response loop. This prevents timeouts and allows processing of 30+ page legal documents.
+
+The frontend automatically detects async processing and shows a progress tracker with real-time status updates.
 
 ## Architecture Flow
 
 ```
-1. User uploads PDF (>5MB)
+1. User uploads PDF (>1MB)
    ↓
 2. Upload PDF to S3
    ↓
@@ -15,15 +17,17 @@ For large PDFs (>5MB), the system uses an asynchronous processing pipeline that 
    ↓
 4. Return job ID immediately (202 Accepted)
    ↓
-5. Frontend polls /api/jobs/[id]/status
+5. Frontend shows JobStatus component with progress bar
    ↓
-6. AWS Textract completes → SNS webhook → /api/textract/webhook
+6. Frontend polls /api/jobs/[id]/status every 3 seconds
    ↓
-7. Webhook triggers LLM processing
+7. AWS Textract completes → SNS webhook → /api/textract/webhook
    ↓
-8. Job status updates to COMPLETED
+8. Webhook triggers LLM processing
    ↓
-9. Frontend receives results
+9. Job status updates to COMPLETED
+   ↓
+10. Frontend auto-redirects to results page
 ```
 
 ## Components
@@ -120,6 +124,22 @@ AWS_SNS_ROLE_ARN=arn:aws:iam::account:role/textract-sns-role
 
 ### Frontend Integration
 
+The frontend automatically handles async processing. The `JobStatus` component manages polling and progress display.
+
+**Dashboard (`app/(dashboard)/dashboard/page.tsx`):**
+- Detects 202 Accepted responses
+- Shows `JobStatus` component for async jobs
+- Auto-redirects when complete
+
+**JobStatus Component (`components/JobStatus.tsx`):**
+- Polls `/api/jobs/[id]/status` every 3 seconds
+- Shows progress bar (0-100%)
+- Displays status messages
+- Handles errors gracefully
+- Auto-redirects to results when complete
+
+**Manual Integration (if needed):**
+
 ```typescript
 // Upload file
 const response = await fetch('/api/extract', {
@@ -131,28 +151,16 @@ if (response.status === 202) {
   // Async processing
   const { jobId } = await response.json();
   
-  // Poll for status
-  const pollStatus = async () => {
-    const statusResponse = await fetch(`/api/jobs/${jobId}/status`);
-    const status = await statusResponse.json();
-    
-    if (status.status === 'COMPLETED') {
-      // Redirect to results
-      window.location.href = `/extraction/${status.extractionId}`;
-    } else if (status.status === 'FAILED') {
-      // Show error
-      console.error(status.error);
-    } else {
-      // Continue polling
-      setTimeout(pollStatus, 5000); // Poll every 5 seconds
-    }
-  };
-  
-  pollStatus();
+  // Use JobStatus component
+  <JobStatus 
+    jobId={jobId} 
+    onComplete={(extractionId) => router.push(`/extraction/${extractionId}`)}
+    onError={(error) => alert(error)}
+  />
 } else {
   // Synchronous processing (small files)
   const result = await response.json();
-  // Handle immediately
+  router.push(`/extraction/${result.extraction_id}`);
 }
 ```
 
@@ -167,6 +175,28 @@ if (response.status === 202) {
 2. **Scalability**: Can process 30+ page documents
 3. **Reliability**: S3 + Textract async is more reliable than sync API
 4. **User Experience**: Immediate response, progress tracking
+
+## Frontend Components
+
+### JobStatus Component
+
+The `JobStatus` component provides:
+- **Progress Bar**: Visual progress indicator (0-100%)
+- **Status Messages**: Real-time status updates
+- **Textract Status**: Shows Textract processing state
+- **Error Handling**: Displays errors clearly
+- **Auto-redirect**: Automatically navigates to results when complete
+
+### User Experience
+
+**Small Files (≤1MB):**
+- Upload → Immediate processing → Redirect to results
+
+**Large Files (>1MB):**
+- Upload → Shows "Processing asynchronously..." → JobStatus component appears
+- Progress bar shows: Pending (10%) → Textract (40%) → LLM (80%) → Completed (100%)
+- Auto-redirects to results when done
+- User can cancel and go back
 
 ## Fallback
 
