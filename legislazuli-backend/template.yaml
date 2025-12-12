@@ -46,7 +46,7 @@ Resources:
   TextractCompleteTopic:
     Type: AWS::SNS::Topic
 
-  # Role that allows Textract Service to publish to our SNS Topic
+  # Role that allows Textract Service to publish to our SNS Topic and read S3 objects
   TextractServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -65,6 +65,14 @@ Resources:
               - Effect: Allow
                 Action: sns:Publish
                 Resource: !Ref TextractCompleteTopic
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}/*'
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}'
 
   # ------------------------------------------------------------------
   # 3. COMPUTE LAYER (Lambdas)
