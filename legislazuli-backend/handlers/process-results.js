@@ -235,19 +235,94 @@ exports.handler = async (event) => {
       throw new Error('S3 bucket name not found in environment variables or SNS message');
     }
     
-    // Textract stores results in: processed/{jobId}/output.json
-    // The jobId format is a hex string, and Textract creates a folder structure
-    // Common patterns: processed/{jobId}/output.json or processed/{jobId}/1/output.json
-    // Let's try the most common pattern first
-    let key = `processed/${jobId}/output.json`;
+    // Textract stores results as numbered files: processed/{jobId}/1, processed/{jobId}/2, etc.
+    // Each file contains the results for one page. We need to read all pages and combine them.
+    // Note: Textract may create paths with double slashes, so we normalize
+    const prefix = `processed/${jobId}/`.replace(/\/+/g, '/');
     
-    console.log(`Fetching Textract result from s3://${bucket}/${key}`);
+    console.log(`Fetching Textract results from s3://${bucket}/${prefix}`);
     console.log(`JobId: ${jobId}, Bucket: ${bucket}`);
 
-    const getObj = new GetObjectCommand({ Bucket: bucket, Key: key });
-    const s3Response = await s3.send(getObj);
-    const jsonBody = await streamToString(s3Response.Body);
-    const textractData = JSON.parse(jsonBody);
+    // List all files in the processed/{jobId}/ folder
+    const { ListObjectsV2Command } = require("@aws-sdk/client-s3");
+    const listCommand = new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: prefix,
+    });
+    
+    const listResponse = await s3.send(listCommand);
+    
+    // Filter out the .s3_access_check file and get only numbered result files
+    const resultFiles = (listResponse.Contents || [])
+      .map(obj => obj.Key)
+      .filter(key => {
+        // Get filename (last part after /)
+        const filename = key.split('/').pop();
+        // Include files that are numeric (page numbers) or 'output.json'
+        return filename && (filename.match(/^\d+$/) || filename === 'output.json');
+      })
+      .sort((a, b) => {
+        // Sort by filename (numeric order for numbered files)
+        const aNum = parseInt(a.split('/').pop()) || 0;
+        const bNum = parseInt(b.split('/').pop()) || 0;
+        return aNum - bNum;
+      });
+    
+    if (resultFiles.length === 0) {
+      throw new Error(`No Textract result files found in s3://${bucket}/${prefix}`);
+    }
+    
+    console.log(`Found ${resultFiles.length} result file(s): ${resultFiles.join(', ')}`);
+    
+    // Read and combine all result files
+    const allBlocks = [];
+    const allDocumentMetadata = [];
+    
+    for (const fileKey of resultFiles) {
+      try {
+        const getObj = new GetObjectCommand({ Bucket: bucket, Key: fileKey });
+        const s3Response = await s3.send(getObj);
+        const jsonBody = await streamToString(s3Response.Body);
+        
+        // Validate it's JSON (not PDF)
+        if (jsonBody.trim().startsWith('%PDF')) {
+          console.warn(`Skipping ${fileKey} - appears to be PDF, not JSON`);
+          continue;
+        }
+        
+        const pageData = JSON.parse(jsonBody);
+        
+        // Combine blocks from all pages
+        if (pageData.Blocks && Array.isArray(pageData.Blocks)) {
+          allBlocks.push(...pageData.Blocks);
+        }
+        
+        // Collect document metadata (usually same across pages, but keep all)
+        if (pageData.DocumentMetadata) {
+          allDocumentMetadata.push(pageData.DocumentMetadata);
+        }
+        
+        console.log(`Loaded ${pageData.Blocks?.length || 0} blocks from ${fileKey}`);
+      } catch (err) {
+        console.error(`Error reading ${fileKey}:`, err);
+        // Continue with other files
+      }
+    }
+    
+    if (allBlocks.length === 0) {
+      throw new Error(`No valid Textract blocks found in result files`);
+    }
+    
+    // Combine into a single Textract response structure
+    const textractData = {
+      Blocks: allBlocks,
+      DocumentMetadata: allDocumentMetadata[0] || { Pages: resultFiles.length },
+      // Include other metadata if present
+      JobStatus: 'SUCCEEDED',
+      JobId: jobId,
+    };
+    
+    console.log(`Combined ${allBlocks.length} total blocks from ${resultFiles.length} file(s)`);
 
     // 3. Transform: Linearize Text
     // Concatenate lines to create a searchable "blob" for AI analysis
