@@ -25,8 +25,40 @@ Resources:
             AllowedMethods: ['GET', 'PUT', 'POST', 'HEAD']
             AllowedOrigins: ['*'] # LOCK THIS DOWN to your Vercel domain in prod
             ExposedHeaders: ['ETag']
+      # Bucket policy to allow Textract to read objects
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       # Note: S3 notification will be configured after deployment via AWS CLI
       # to avoid circular dependency with Lambda function
+
+  DocumentBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: TextractServiceRole
+    Properties:
+      Bucket: !Ref DocumentBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          # Allow Textract service role to read objects
+          - Sid: AllowTextractAccess
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt TextractServiceRole.Arn
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+            Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}/*'
+          # Allow Textract service role to list bucket
+          - Sid: AllowTextractListBucket
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt TextractServiceRole.Arn
+            Action:
+              - s3:ListBucket
+            Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}'
 
   ResultsTable:
     Type: AWS::DynamoDB::Table
