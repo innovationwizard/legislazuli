@@ -7,12 +7,16 @@ const { TextractClient, StartDocumentAnalysisCommand } = require("@aws-sdk/clien
 const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall } = require("@aws-sdk/util-dynamodb");
 
+// Explicitly set region - AWS_REGION is automatically provided by Lambda runtime
+// But we ensure it's set to us-east-2 for consistency
+const REGION = process.env.AWS_REGION || 'us-east-2';
+
 const textract = new TextractClient({
-  region: process.env.AWS_REGION || 'us-east-2',
+  region: REGION,
 });
 
 const dynamodb = new DynamoDBClient({
-  region: process.env.AWS_REGION || 'us-east-2',
+  region: REGION,
 });
 
 exports.handler = async (event) => {

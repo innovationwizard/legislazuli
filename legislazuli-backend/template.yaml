@@ -89,13 +89,14 @@ Resources:
       Handler: start-analysis.handler
       Policies:
         # Use explicit S3 policy to avoid circular dependency
+        # Reference the actual bucket created by CloudFormation
         - Statement:
             - Effect: Allow
               Action: s3:GetObject
-              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}/*'
+              Resource: !Sub '${DocumentBucket.Arn}/*'
             - Effect: Allow
               Action: s3:ListBucket
-              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}'
+              Resource: !GetAtt DocumentBucket.Arn
         - Statement:
             - Effect: Allow
               Action: textract:StartDocumentAnalysis
