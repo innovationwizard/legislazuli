@@ -25,6 +25,23 @@ export async function extractTextFromPdf(pdfBuffer: Buffer): Promise<string> {
     throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
   }
 
+  // Validate PDF buffer
+  if (!pdfBuffer || pdfBuffer.length === 0) {
+    throw new Error('PDF buffer is empty or invalid');
+  }
+
+  // Check PDF size limits (Textract has a 500MB limit, but we'll be more conservative)
+  const maxSize = 100 * 1024 * 1024; // 100MB
+  if (pdfBuffer.length > maxSize) {
+    throw new Error(`PDF is too large (${Math.round(pdfBuffer.length / 1024 / 1024)}MB). Maximum size is 100MB.`);
+  }
+
+  // Validate PDF header (should start with %PDF)
+  const pdfHeader = pdfBuffer.slice(0, 4).toString('ascii');
+  if (pdfHeader !== '%PDF') {
+    throw new Error('Invalid PDF format: file does not appear to be a valid PDF');
+  }
+
   try {
     // Textract accepts PDF bytes directly
     const command = new DetectDocumentTextCommand({

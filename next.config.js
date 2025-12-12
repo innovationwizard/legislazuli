@@ -5,7 +5,13 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
     // Mark these as external packages for serverless compatibility
-    serverComponentsExternalPackages: ['@aws-sdk/client-textract'],
+    serverComponentsExternalPackages: [
+      '@aws-sdk/client-textract',
+      'puppeteer-core',
+      '@sparticuz/chromium',
+      'sharp',
+      'pdf-lib',
+    ],
   },
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -17,9 +23,14 @@ const nextConfig = {
         test: /\.node$/,
         use: 'ignore-loader',
       });
+
+      // Ensure @sparticuz/chromium binaries are included
+      config.externals = [...(config.externals || [])];
     }
     return config;
   },
+  // Ensure output is standalone for better Vercel compatibility
+  output: process.env.VERCEL ? 'standalone' : undefined,
 };
 
 module.exports = nextConfig;

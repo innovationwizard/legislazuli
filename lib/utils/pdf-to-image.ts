@@ -10,30 +10,71 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
     const puppeteerModule = await import('puppeteer-core');
     const chromiumModule = await import('@sparticuz/chromium');
     const puppeteer = puppeteerModule.default || puppeteerModule;
-    const Chromium = chromiumModule.default || chromiumModule;
-    
+    const chromium = chromiumModule.default || chromiumModule;
+
+    // Configure Chromium for Vercel/serverless
+    // @sparticuz/chromium v141 requires specific configuration
+    let executablePath: string;
+
+    // Check if running locally or in Vercel
+    const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
+
+    if (isLocal) {
+      // For local development, use system Chrome/Chromium
+      executablePath = process.env.CHROMIUM_PATH ||
+        process.platform === 'darwin'
+          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+          : '/usr/bin/chromium-browser';
+    } else {
+      // For Vercel/production, use @sparticuz/chromium
+      try {
+        // Set required environment variables for @sparticuz/chromium
+        if (!process.env.FONTCONFIG_PATH) {
+          process.env.FONTCONFIG_PATH = '/tmp';
+        }
+
+        executablePath = await chromium.executablePath();
+      } catch (chromiumPathError) {
+        console.error('Failed to get Chromium executable path:', chromiumPathError);
+        throw new Error(
+          'Chromium not available in serverless environment. ' +
+          'This is a deployment configuration issue. Please contact support.'
+        );
+      }
+    }
+
     // Launch browser with Chromium for serverless
     const browser = await puppeteer.launch({
-      args: Chromium.args,
+      args: isLocal
+        ? ['--no-sandbox', '--disable-setuid-sandbox']
+        : [
+            ...chromium.args,
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
+            '--disable-setuid-sandbox',
+            '--no-sandbox',
+            '--single-process',
+            '--no-zygote',
+          ],
       defaultViewport: { width: 1920, height: 1080 },
-      executablePath: await Chromium.executablePath(),
+      executablePath,
       headless: true,
     });
-    
+
     try {
       // Create a new page
       const page = await browser.newPage();
-      
+
       // Convert PDF buffer to data URL
       const pdfBase64 = pdfBuffer.toString('base64');
       const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
-      
+
       // Load the PDF in the page
       await page.goto(dataUrl, {
         waitUntil: 'networkidle0',
         timeout: 30000,
       });
-      
+
       // Take a screenshot of the first page (PDFs render as single page by default)
       // Use high quality settings for better OCR
       const screenshot = await page.screenshot({
@@ -41,7 +82,7 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
         fullPage: false, // Just the viewport (first page)
         quality: 100,
       });
-      
+
       // Convert screenshot buffer to base64
       if (Buffer.isBuffer(screenshot)) {
         return screenshot.toString('base64');

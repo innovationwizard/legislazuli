@@ -108,9 +108,38 @@ export async function POST(request: NextRequest) {
       if (orientationResult.wasRotated) {
         console.log(`✓ ${isPdf ? 'PDF' : 'Image'} orientation normalized before LLM processing (${orientationResult.detectedOrientation}, correction: ${orientationResult.appliedCorrection}°)`);
       }
-    } catch (normalizationError) {
+    } catch (normalizationError: any) {
       console.warn('Orientation normalization failed, using original document:', normalizationError);
-      // Continue with original buffer if normalization fails
+
+      // Check if it's an unsupported format error from our validation
+      const errorMessage = normalizationError?.message || '';
+      if (errorMessage.includes('UnsupportedDocumentFormat')) {
+        // Extract the reason from the error message
+        const reason = errorMessage.replace('UnsupportedDocumentFormat: ', '');
+        return NextResponse.json(
+          {
+            error: `PDF no soportado: ${reason}. Por favor, intenta con un PDF diferente o convierte el documento a un formato compatible.`,
+            errorCode: 'UNSUPPORTED_PDF_FORMAT',
+            details: reason
+          },
+          { status: 400 }
+        );
+      }
+
+      // Check if it's an UnsupportedDocumentException from Textract
+      if (normalizationError?.__type === 'UnsupportedDocumentException' ||
+          errorMessage.includes('unsupported document format')) {
+        return NextResponse.json(
+          {
+            error: 'El formato del PDF no es compatible con el sistema de procesamiento. Por favor, intenta guardar el PDF en un formato estándar (sin encriptación) o convierte a imagen.',
+            errorCode: 'UNSUPPORTED_PDF_FORMAT',
+            details: 'Textract UnsupportedDocumentException'
+          },
+          { status: 400 }
+        );
+      }
+
+      // Continue with original buffer for other errors
       processedBuffer = buffer;
     }
     
@@ -131,18 +160,45 @@ export async function POST(request: NextRequest) {
         
         // For PDFs, textractResponseForVerification should already be set from orientation normalization
         // If not (shouldn't happen), we'll handle verification gracefully
-      } catch (textractError) {
+      } catch (textractError: any) {
         console.error('Textract error, falling back to image conversion:', textractError);
+        
+        // Check if it's an UnsupportedDocumentException
+        const isUnsupportedFormat = textractError?.__type === 'UnsupportedDocumentException' || 
+                                    textractError?.message?.includes('unsupported document format');
+        
+        if (isUnsupportedFormat) {
+          console.warn('Textract: Unsupported document format, attempting image conversion fallback');
+        }
+        
         // Fallback to image conversion if Textract fails
         // Use processedBuffer (correctly oriented) for image conversion
         try {
           base64 = await convertPdfToImage(processedBuffer);
-        } catch (imageError) {
+        } catch (imageError: any) {
           console.error('PDF conversion error:', imageError);
+          
+          // Check if it's a Chromium path error
+          const isChromiumError = imageError?.message?.includes('chromium') || 
+                                 imageError?.message?.includes('brotli') ||
+                                 imageError?.message?.includes('executablePath');
+          
+          if (isChromiumError) {
+            return NextResponse.json(
+              { 
+                error: 'Error al procesar el PDF: configuración del servidor no disponible. Por favor, contacta al administrador.',
+                errorCode: 'PDF_CONVERSION_CONFIG_ERROR',
+                details: 'Chromium configuration error in serverless environment'
+              },
+              { status: 500 }
+            );
+          }
+          
           return NextResponse.json(
             { 
-              error: 'Error al procesar el PDF. Por favor, asegúrate de que el archivo PDF no esté corrupto.',
-              errorCode: 'PDF_CONVERSION_ERROR'
+              error: 'Error al procesar el PDF. Por favor, asegúrate de que el archivo PDF no esté corrupto y sea un formato válido.',
+              errorCode: 'PDF_CONVERSION_ERROR',
+              details: isUnsupportedFormat ? 'Document format not supported by Textract' : undefined
             },
             { status: 400 }
           );

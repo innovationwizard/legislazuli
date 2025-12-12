@@ -35,15 +35,67 @@ interface OrientationResult {
 }
 
 /**
+ * Validates if a PDF is supported by Textract
+ * Checks for common issues like encryption, password protection, etc.
+ */
+function validatePdfFormat(pdfBuffer: Buffer): { isValid: boolean; reason?: string } {
+  try {
+    // Check PDF header
+    const pdfHeader = pdfBuffer.slice(0, 5).toString('ascii');
+    if (!pdfHeader.startsWith('%PDF-')) {
+      return { isValid: false, reason: 'Invalid PDF header' };
+    }
+
+    // Check for encryption markers
+    const pdfContent = pdfBuffer.toString('latin1');
+
+    // Check for encryption dictionary
+    if (pdfContent.includes('/Encrypt')) {
+      return { isValid: false, reason: 'PDF is encrypted or password-protected' };
+    }
+
+    // Check for XFA forms (not supported by Textract)
+    if (pdfContent.includes('/XFA')) {
+      return { isValid: false, reason: 'PDF contains XFA forms (not supported)' };
+    }
+
+    return { isValid: true };
+  } catch (error) {
+    return { isValid: false, reason: 'Failed to validate PDF format' };
+  }
+}
+
+/**
  * Detects document orientation using Textract's DetectDocumentText API
  * This API has built-in orientation detection that's more reliable than AnalyzeDocument
- * 
+ *
  * Returns both the orientation and the full Textract response for verification
  */
 async function detectOrientation(
   fileBuffer: Buffer,
-  textractClient: TextractClient
+  textractClient: TextractClient,
+  mimeType: string
 ): Promise<{ orientation: TextractOrientation; response: DetectDocumentTextCommandOutput }> {
+  // Validate buffer before sending to Textract
+  if (!fileBuffer || fileBuffer.length === 0) {
+    throw new Error('File buffer is empty or invalid');
+  }
+
+  // Check file size limits
+  const maxSize = 100 * 1024 * 1024; // 100MB
+  if (fileBuffer.length > maxSize) {
+    throw new Error(`File is too large (${Math.round(fileBuffer.length / 1024 / 1024)}MB). Maximum size is 100MB.`);
+  }
+
+  // Validate PDF format before sending to Textract
+  if (mimeType === 'application/pdf') {
+    const validation = validatePdfFormat(fileBuffer);
+    if (!validation.isValid) {
+      console.warn(`PDF validation failed: ${validation.reason}`);
+      throw new Error(`UnsupportedDocumentFormat: ${validation.reason}`);
+    }
+  }
+
   const command = new DetectDocumentTextCommand({
     Document: { Bytes: fileBuffer },
   });
@@ -170,8 +222,8 @@ export async function normalizeDocumentOrientation(
 
   try {
     // Detect orientation and get full Textract response
-    const { orientation: detectedOrientation, response: textractResponse } = await detectOrientation(fileBuffer, textractClient);
-    
+    const { orientation: detectedOrientation, response: textractResponse } = await detectOrientation(fileBuffer, textractClient, mimeType);
+
     console.log(`Textract detected orientation: ${detectedOrientation}`);
 
     if (detectedOrientation === 'ROTATE_0') {
@@ -197,7 +249,14 @@ export async function normalizeDocumentOrientation(
     result.textractResponse = textractResponse;
     return result;
   } catch (error) {
+    // Check if it's an UnsupportedDocumentException
+    if (error && typeof error === 'object' && '__type' in error && error.__type === 'UnsupportedDocumentException') {
+      console.warn('Textract: Document format not supported, skipping orientation normalization:', error);
+      // Return original buffer without rotation
+      return { buffer: fileBuffer, wasRotated: false };
+    }
     console.error('Orientation normalization error:', error);
+    // Return original buffer on any error
     return { buffer: fileBuffer, wasRotated: false };
   }
 }
