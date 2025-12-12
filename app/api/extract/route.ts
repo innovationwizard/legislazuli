@@ -40,7 +40,8 @@ import { DocType } from '@/types';
 // Vercel Serverless Timeout Configuration
 // Extraction performs heavy operations: Textract, dual LLM inference, consensus, verification
 // Set to maximum allowed duration to prevent 504 Gateway Timeout errors
-export const maxDuration = 60; // 60 seconds (Vercel Pro plan max, Hobby is 10s)
+// NOTE: Hobby plan limit is 10 seconds. For better performance, consider upgrading to Pro (60s timeout)
+export const maxDuration = 10; // 10 seconds (Vercel Hobby plan max, Pro allows up to 60s)
 export const dynamic = 'force-dynamic'; // Prevent static caching
 
 export async function POST(request: NextRequest) {
@@ -155,6 +156,8 @@ export async function POST(request: NextRequest) {
         // Note: processedBuffer is now correctly oriented
         // For PDFs, we already have the Textract response from orientation normalization
         // But we need to extract text separately
+        // WARNING: With 10s timeout (Hobby plan), large/complex PDFs may timeout
+        // Consider upgrading to Pro plan (60s) for better reliability
         extractedText = await extractTextFromPdf(processedBuffer);
         useTextExtraction = true;
         

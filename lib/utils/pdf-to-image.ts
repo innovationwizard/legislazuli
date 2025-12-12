@@ -70,9 +70,11 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
       const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
 
       // Load the PDF in the page
+      // Reduced timeout for Hobby plan (10s function limit)
+      // Consider upgrading to Pro plan for better performance
       await page.goto(dataUrl, {
         waitUntil: 'networkidle0',
-        timeout: 30000,
+        timeout: 8000, // 8 seconds max to leave time for screenshot and cleanup
       });
 
       // Take a screenshot of the first page (PDFs render as single page by default)
