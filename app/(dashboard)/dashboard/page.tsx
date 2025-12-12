@@ -104,12 +104,72 @@ export default function DashboardPage() {
                 <p>Gap detectado: {result.gapDetected ? 'Sí' : 'No'}</p>
                 {result.gapAmount && <p>Monto del gap: ${result.gapAmount.toLocaleString()}</p>}
                 {result.totalAmount && <p>Monto total: ${result.totalAmount.toLocaleString()}</p>}
+                {result.immediateAvailability && <p>Disponibilidad inmediata: ${result.immediateAvailability.toLocaleString()}</p>}
                 {result.instrumentNumber && <p>Número de instrumento: {result.instrumentNumber}</p>}
               </div>
             </div>
-            <p className="text-sm text-gray-500">
-              Nota: Los resultados completos se guardarán en la base de datos.
-            </p>
+            
+            {/* Full Results Section */}
+            {(result.rawText || result.aiAnalysis) && (
+              <div className="border-t pt-4 mt-4">
+                <details className="group">
+                  <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+                    Ver resultados completos
+                  </summary>
+                  
+                  <div className="mt-4 space-y-4">
+                    {/* AI Analysis */}
+                    {result.aiAnalysis && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                        <h4 className="font-medium text-blue-800 mb-2">Análisis de IA</h4>
+                        <pre className="text-xs text-blue-700 whitespace-pre-wrap overflow-auto max-h-96">
+                          {JSON.stringify(result.aiAnalysis, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    
+                    {/* Raw Text */}
+                    {result.rawText && (
+                      <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-800">Texto extraído</h4>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(result.rawText || '');
+                              alert('Texto copiado al portapapeles');
+                            }}
+                            className="text-xs text-gray-600 hover:text-gray-800 underline"
+                          >
+                            Copiar todo
+                          </button>
+                        </div>
+                        <textarea
+                          readOnly
+                          value={result.rawText}
+                          className="w-full h-64 p-3 text-sm font-mono bg-white border border-gray-300 rounded resize-none"
+                          style={{ fontSize: '11px', lineHeight: '1.4' }}
+                        />
+                        <p className="text-xs text-gray-500 mt-2">
+                          {result.rawText.length.toLocaleString()} caracteres
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </details>
+              </div>
+            )}
+            
+            <div className="flex gap-2 pt-2">
+              <Button
+                onClick={() => {
+                  setResult(null);
+                  setIsProcessing(false);
+                }}
+                variant="secondary"
+              >
+                Procesar otro documento
+              </Button>
+            </div>
           </div>
         ) : (
           <FileUpload onUpload={handleUpload} processing={isProcessing} />
