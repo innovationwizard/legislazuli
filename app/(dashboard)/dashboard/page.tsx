@@ -17,18 +17,12 @@ export default function DashboardPage() {
   const { processDeed, result, isProcessing } = useLegislazuli();
   const isCondor = session?.user?.email === 'condor';
 
-  // Handle completion - redirect to extraction page
+  // Log completion for debugging
   useEffect(() => {
     if (result?.status === 'COMPLETED' && result.jobId) {
-      // For now, we'll need to create an extraction record in Supabase
-      // or redirect to a results page that shows the DynamoDB data
-      // For MVP, let's show the results inline or create a new extraction record
-      // TODO: Create extraction record from DynamoDB result
       console.log('Processing completed:', result);
-      // For now, we'll show a success message
-      alert(`Procesamiento completado. Gap detectado: ${result.gapDetected ? 'Sí' : 'No'}`);
     } else if (result?.status === 'FAILED') {
-      alert(`Error en el procesamiento: ${result.error || 'Error desconocido'}`);
+      console.error('Processing failed:', result.error);
     }
   }, [result]);
 
@@ -162,8 +156,8 @@ export default function DashboardPage() {
             <div className="flex gap-2 pt-2">
               <Button
                 onClick={() => {
-                  setResult(null);
-                  setIsProcessing(false);
+                  // Reset by reloading the page to clear hook state
+                  window.location.reload();
                 }}
                 variant="secondary"
               >
