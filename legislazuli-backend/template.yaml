@@ -72,10 +72,10 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:GetObjectVersion
-                Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}/*'
+                Resource: !Sub '${DocumentBucket.Arn}/*'
               - Effect: Allow
                 Action: s3:ListBucket
-                Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}'
+                Resource: !GetAtt DocumentBucket.Arn
 
   # ------------------------------------------------------------------
   # 3. COMPUTE LAYER (Lambdas)
@@ -126,7 +126,7 @@ Resources:
       Environment:
         Variables:
           RESULTS_TABLE_NAME: !Ref ResultsTable
-          S3_BUCKET_NAME: !Sub 'legislazuli-documents-${AWS::AccountId}'
+          S3_BUCKET_NAME: !Ref DocumentBucket
           # Note: AWS_REGION is reserved, Lambda automatically provides it
           BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20241022-v2:0"
       Policies:
@@ -148,10 +148,10 @@ Resources:
         - Statement:
             - Effect: Allow
               Action: s3:GetObject
-              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}/*'
+              Resource: !Sub '${DocumentBucket.Arn}/*'
             - Effect: Allow
               Action: s3:ListBucket
-              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}'
+              Resource: !GetAtt DocumentBucket.Arn
         - Statement:
             - Effect: Allow
               Action:
