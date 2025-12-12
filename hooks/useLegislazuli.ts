@@ -56,6 +56,10 @@ export function useLegislazuli() {
       // The S3 Key effectively becomes the tracking ID
       // We'll use the Textract JobId as stored in DynamoDB, but for now use the S3 key
       let pollInterval: NodeJS.Timeout | null = null;
+      let pollCount = 0;
+      const startTime = Date.now();
+      
+      console.log(`[Legislazuli] 🚀 Starting polling for key: ${key.substring(0, 30)}...`);
       
       const pollForResults = async () => {
         // Use requestIdleCallback or setTimeout to avoid blocking main thread
@@ -72,6 +76,12 @@ export function useLegislazuli() {
       };
 
       const performPoll = async () => {
+        pollCount++;
+        const pollStartTime = performance.now();
+        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        
+        console.log(`[Legislazuli] ⏱️  Poll #${pollCount} (${elapsedSeconds}s elapsed) - Checking status...`);
+        
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout for fetch
@@ -81,10 +91,22 @@ export function useLegislazuli() {
           });
           
           clearTimeout(timeoutId);
+          const pollDuration = Math.round(performance.now() - pollStartTime);
           
           if (pollRes.status === 200) {
             const data = await pollRes.json();
+            console.log(`[Legislazuli] ✅ Poll #${pollCount} completed in ${pollDuration}ms - Status: ${data.status}`);
+            
             if (data.status === 'COMPLETED') {
+              const totalTime = Math.round((Date.now() - startTime) / 1000);
+              console.log(`[Legislazuli] 🎉 Processing COMPLETED after ${totalTime}s (${pollCount} polls)`);
+              console.log(`[Legislazuli] 📊 Results:`, {
+                gapDetected: data.gapDetected,
+                gapAmount: data.gapAmount,
+                totalAmount: data.totalAmount,
+                instrumentNumber: data.instrumentNumber,
+              });
+              
               if (pollInterval) clearInterval(pollInterval);
               setIsProcessing(false);
               setResult({
@@ -100,6 +122,9 @@ export function useLegislazuli() {
               });
               return;
             } else if (data.status === 'FAILED') {
+              const totalTime = Math.round((Date.now() - startTime) / 1000);
+              console.error(`[Legislazuli] ❌ Processing FAILED after ${totalTime}s (${pollCount} polls):`, data.error);
+              
               if (pollInterval) clearInterval(pollInterval);
               setIsProcessing(false);
               setResult({ 
@@ -110,10 +135,15 @@ export function useLegislazuli() {
               return;
             }
             // If status is still PROCESSING, continue polling
+            console.log(`[Legislazuli] ⏳ Poll #${pollCount} - Still processing, next poll in 10s...`);
           } else if (pollRes.status === 404) {
+            console.log(`[Legislazuli] 🔍 Poll #${pollCount} completed in ${pollDuration}ms - Job not found yet (404), continuing...`);
             // Job not found yet, continue polling
             // This is expected during the initial processing phase
           } else {
+            const totalTime = Math.round((Date.now() - startTime) / 1000);
+            console.error(`[Legislazuli] ⚠️  Poll #${pollCount} failed after ${totalTime}s - Unexpected status: ${pollRes.status}`);
+            
             // Unexpected error
             if (pollInterval) clearInterval(pollInterval);
             setIsProcessing(false);
@@ -125,9 +155,12 @@ export function useLegislazuli() {
             return;
           }
         } catch (pollError: any) {
+          const pollDuration = Math.round(performance.now() - pollStartTime);
           // Ignore abort errors (timeout)
           if (pollError.name !== 'AbortError') {
-            console.error('Polling error:', pollError);
+            console.error(`[Legislazuli] ❌ Poll #${pollCount} error after ${pollDuration}ms:`, pollError);
+          } else {
+            console.warn(`[Legislazuli] ⏱️  Poll #${pollCount} timed out after ${pollDuration}ms (fetch timeout)`);
           }
           // Continue polling on network errors
         }
