@@ -138,6 +138,9 @@ export function FileUpload({ onUpload, processing = false }: FileUploadProps) {
               <p className="text-sm text-gray-500 mb-4">
                 PDF, PNG o JPG
               </p>
+              <p className="text-xs text-gray-400 mt-2">
+                Nota: PDFs mayores a 1MB se procesarán de forma asíncrona (2-5 minutos)
+              </p>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={processing}
@@ -187,7 +190,7 @@ export function FileUpload({ onUpload, processing = false }: FileUploadProps) {
   );
 }
 
-function LoadingSpinner() {
+export function LoadingSpinner() {
   return (
     <svg
       className="animate-spin h-5 w-5 text-white"
