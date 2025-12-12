@@ -1,12 +1,60 @@
-# Row Level Security (RLS) for Critical Tables
+# Row Level Security (RLS) for All Tables
 
 ## Overview
 
-This document describes the Row Level Security (RLS) policies implemented to protect critical AI training data and prompt versions from unauthorized access.
+This document describes the Row Level Security (RLS) policies implemented to protect all database tables from unauthorized access. This addresses Supabase Security Advisor warnings about RLS being disabled on public tables.
 
 ## Protected Tables
 
-### 1. `golden_set_truths`
+### Public Tables (User Data)
+
+The following tables have RLS enabled to ensure users can only access their own data:
+
+#### 1. `users`
+**Purpose**: User accounts and authentication data.
+
+**Policies**:
+- **SELECT**: Users can view their own account
+- **UPDATE**: Users can update their own account
+- **INSERT/DELETE**: Handled through API routes with proper authorization
+
+#### 2. `documents`
+**Purpose**: Documents uploaded by users.
+
+**Policies**:
+- **SELECT/INSERT/UPDATE/DELETE**: Users can only access documents they own (via `user_id`)
+
+#### 3. `extractions`
+**Purpose**: Extraction results for user documents.
+
+**Policies**:
+- **SELECT/INSERT/UPDATE/DELETE**: Users can only access extractions for their own documents (via `document_id` → `documents.user_id`)
+
+#### 4. `extracted_fields`
+**Purpose**: Individual fields extracted from documents.
+
+**Policies**:
+- **SELECT/INSERT/UPDATE/DELETE**: Users can only access fields for their own extractions (via `extraction_id` → `extractions.document_id` → `documents.user_id`)
+
+#### 5. `extraction_feedback`
+**Purpose**: Field-level feedback on extraction accuracy.
+
+**Policies**:
+- **SELECT**: Users can view feedback they created or feedback for their own extractions
+- **INSERT**: Users can create feedback for their own extractions
+- **UPDATE/DELETE**: Users can only modify their own feedback
+
+#### 6. `extraction_prompt_versions`
+**Purpose**: Tracks which prompt versions were used for each extraction.
+
+**Policies**:
+- **SELECT/INSERT/UPDATE/DELETE**: Users can only access prompt version records for their own extractions
+
+**Implementation**: Execute `scripts/enable-rls-all-tables.sql` in Supabase SQL Editor.
+
+### Critical Tables (AI Training Data)
+
+#### 1. `golden_set_truths`
 **Purpose**: Immutable snapshots of verified extraction results for Golden Set documents.
 
 **Risk**: If poisoned, destroys the mathematical proof of "100% Accuracy" claims and corrupts regression testing.
@@ -17,7 +65,7 @@ This document describes the Row Level Security (RLS) policies implemented to pro
 - **UPDATE**: Only superuser (condor) can modify
 - **DELETE**: Only superuser (condor) can delete
 
-### 2. `prompt_versions`
+#### 2. `prompt_versions`
 **Purpose**: Versioned prompts used for AI extraction with performance metrics.
 
 **Risk**: Unauthorized modification could degrade extraction accuracy or poison the prompt evolution system.
@@ -26,7 +74,7 @@ This document describes the Row Level Security (RLS) policies implemented to pro
 - **SELECT**: All authenticated users can view (for transparency)
 - **INSERT/UPDATE/DELETE**: Only superuser (condor) can modify
 
-### 3. `prompt_evolution_queue`
+#### 3. `prompt_evolution_queue`
 **Purpose**: Tracks feedback accumulation that triggers prompt evolution.
 
 **Risk**: Unauthorized modification could trigger incorrect prompt changes.
@@ -46,11 +94,43 @@ if (session.user.email !== 'condor') {
 
 ## Implementation
 
-Execute the SQL script in Supabase SQL Editor:
+Execute the SQL scripts in Supabase SQL Editor in order:
 
-```bash
-scripts/enable-rls-critical-tables.sql
-```
+1. **For public tables** (users, documents, extractions, etc.):
+   ```bash
+   scripts/enable-rls-all-tables.sql
+   ```
+
+2. **For critical AI training tables**:
+   ```bash
+   scripts/enable-rls-critical-tables.sql
+   ```
+
+## Current Architecture Notes
+
+### NextAuth.js + Service Role Key
+
+This application currently uses:
+- **NextAuth.js** for user authentication (not Supabase Auth)
+- **SUPABASE_SERVICE_ROLE_KEY** in API routes (bypasses RLS)
+
+**Important**: The RLS policies use `auth.uid()` which requires Supabase Auth. Since the app uses NextAuth:
+- ✅ **RLS is enabled** (satisfies Security Advisor requirements)
+- ✅ **Current functionality works** (service role bypasses RLS)
+- ✅ **Direct database access is protected** (anon key queries are blocked)
+- ⚠️ **Policies won't be enforced** until migrating to Supabase Auth
+
+### Migration Path to Supabase Auth
+
+To fully enforce RLS policies:
+
+1. Enable Supabase Auth in your project
+2. Create Supabase Auth users for each NextAuth user
+3. Map NextAuth sessions to Supabase Auth tokens
+4. Use Supabase Auth tokens in database queries instead of service role key
+5. RLS policies will then be automatically enforced
+
+Until then, API routes continue to enforce authorization through NextAuth session checks.
 
 ## Testing
 

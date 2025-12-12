@@ -20,22 +20,27 @@ ALTER TABLE documents
 ADD COLUMN IF NOT EXISTS golden_set_promoted_at TIMESTAMPTZ;
 
 -- Create function for atomic promotion to Golden Set
+-- SECURITY: Set search_path to empty string to prevent search_path manipulation attacks
 CREATE OR REPLACE FUNCTION promote_to_golden_set(
   doc_id UUID, 
   truth_json JSONB,
   verified_by_uuid UUID,
   notes_text TEXT DEFAULT NULL
 )
-RETURNS VOID AS $$
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = ''
+AS $$
 BEGIN
   -- 1. Flag the document as Golden Set
-  UPDATE documents 
+  UPDATE public.documents 
   SET is_golden_set = TRUE, 
-      golden_set_promoted_at = NOW() 
+      golden_set_promoted_at = pg_catalog.now() 
   WHERE id = doc_id;
 
   -- 2. Store the immutable truth snapshot
-  INSERT INTO golden_set_truths (
+  INSERT INTO public.golden_set_truths (
     document_id, 
     verified_result,
     verified_by,
@@ -47,10 +52,10 @@ BEGIN
     verified_result = EXCLUDED.verified_result,
     verified_by = EXCLUDED.verified_by,
     notes = EXCLUDED.notes,
-    verified_at = NOW();
+    verified_at = pg_catalog.now();
 
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 -- Add comment explaining the table
 COMMENT ON TABLE golden_set_truths IS 
