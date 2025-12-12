@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -9,59 +9,45 @@ import { ExtractionList } from '@/components/ExtractionList';
 import { JobStatus } from '@/components/JobStatus';
 import { DocType } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { useLegislazuli } from '@/hooks/useLegislazuli';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [uploading, setUploading] = useState(false);
-  const [asyncJobId, setAsyncJobId] = useState<string | null>(null);
+  const { processDeed, result, isProcessing } = useLegislazuli();
   const isCondor = session?.user?.email === 'condor';
 
+  // Handle completion - redirect to extraction page
+  useEffect(() => {
+    if (result?.status === 'COMPLETED' && result.jobId) {
+      // For now, we'll need to create an extraction record in Supabase
+      // or redirect to a results page that shows the DynamoDB data
+      // For MVP, let's show the results inline or create a new extraction record
+      // TODO: Create extraction record from DynamoDB result
+      console.log('Processing completed:', result);
+      // For now, we'll show a success message
+      alert(`Procesamiento completado. Gap detectado: ${result.gapDetected ? 'Sí' : 'No'}`);
+    } else if (result?.status === 'FAILED') {
+      alert(`Error en el procesamiento: ${result.error || 'Error desconocido'}`);
+    }
+  }, [result]);
+
   const handleUpload = async (file: File, docType: DocType) => {
-    setUploading(true);
-    setAsyncJobId(null);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('doc_type', docType);
-
-      const response = await fetch('/api/extract', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al procesar el documento');
-      }
-
-      // Check if async processing (202 Accepted)
-      if (response.status === 202) {
-        const result = await response.json();
-        // Show job status component for async processing
-        setAsyncJobId(result.jobId);
-        setUploading(false);
-        return;
-      }
-
-      // Synchronous processing (200 OK)
-      const result = await response.json();
-      router.push(`/extraction/${result.extraction_id}`);
+      // Use the new enterprise architecture hook
+      await processDeed(file);
+      // The hook handles polling and updates result state automatically
     } catch (error: any) {
       console.error('Upload error:', error);
       alert(error.message || 'Error al subir el archivo. Por favor intenta de nuevo.');
-    } finally {
-      setUploading(false);
     }
   };
 
   const handleJobComplete = (extractionId: string) => {
-    setAsyncJobId(null);
     router.push(`/extraction/${extractionId}`);
   };
 
   const handleJobError = (error: string) => {
-    setAsyncJobId(null);
     alert(`Error en el procesamiento: ${error}`);
   };
 
@@ -89,14 +75,46 @@ export default function DashboardPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6">
-        {asyncJobId ? (
-          <JobStatus 
-            jobId={asyncJobId} 
-            onComplete={handleJobComplete}
-            onError={handleJobError}
-          />
+        {result?.status === 'PROCESSING' || result?.status === 'UPLOADING' ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-lapis"></div>
+              <div>
+                <p className="font-medium text-gray-700">
+                  {result.status === 'UPLOADING' ? 'Subiendo archivo...' : 'Procesando documento...'}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {result.status === 'PROCESSING' && result.jobId 
+                    ? `Job ID: ${result.jobId.substring(0, 20)}...`
+                    : 'Esto puede tardar varios minutos'}
+                </p>
+              </div>
+            </div>
+            {result.status === 'PROCESSING' && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                <p className="text-sm text-blue-800">
+                  El documento se está procesando de forma asíncrona. Esta página se actualizará automáticamente cuando termine.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : result?.status === 'COMPLETED' ? (
+          <div className="space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-md p-4">
+              <h3 className="font-medium text-green-800 mb-2">✓ Procesamiento completado</h3>
+              <div className="space-y-1 text-sm text-green-700">
+                <p>Gap detectado: {result.gapDetected ? 'Sí' : 'No'}</p>
+                {result.gapAmount && <p>Monto del gap: ${result.gapAmount.toLocaleString()}</p>}
+                {result.totalAmount && <p>Monto total: ${result.totalAmount.toLocaleString()}</p>}
+                {result.instrumentNumber && <p>Número de instrumento: {result.instrumentNumber}</p>}
+              </div>
+            </div>
+            <p className="text-sm text-gray-500">
+              Nota: Los resultados completos se guardarán en la base de datos.
+            </p>
+          </div>
         ) : (
-          <FileUpload onUpload={handleUpload} processing={uploading} />
+          <FileUpload onUpload={handleUpload} processing={isProcessing} />
         )}
       </div>
 

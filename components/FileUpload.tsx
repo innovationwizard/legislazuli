@@ -140,6 +140,7 @@ export function FileUpload({ onUpload, processing = false }: FileUploadProps) {
               </p>
               <p className="text-xs text-gray-400 mt-2">
                 Nota: PDFs mayores a 1MB pueden tardar varios minutos
+                <br />
               </p>
               <button
                 onClick={() => fileInputRef.current?.click()}

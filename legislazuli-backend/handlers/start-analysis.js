@@ -4,8 +4,14 @@
  */
 
 const { TextractClient, StartDocumentAnalysisCommand } = require("@aws-sdk/client-textract");
+const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
+const { marshall } = require("@aws-sdk/util-dynamodb");
 
 const textract = new TextractClient({
+  region: process.env.AWS_REGION || 'us-east-2',
+});
+
+const dynamodb = new DynamoDBClient({
   region: process.env.AWS_REGION || 'us-east-2',
 });
 
@@ -43,12 +49,33 @@ exports.handler = async (event) => {
       throw new Error('No JobId returned from Textract');
     }
 
-    console.log(`Job Started: ${response.JobId}`);
+    const jobId = response.JobId;
+    console.log(`Job Started: ${jobId}`);
+
+    // Store initial record in DynamoDB with S3 key mapping
+    // This allows the frontend to query by S3 key while the job is processing
+    try {
+      await dynamodb.send(new PutItemCommand({
+        TableName: process.env.RESULTS_TABLE_NAME || 'LegislazuliResults',
+        Item: marshall({
+          jobId,
+          s3Key: key, // Store S3 key for querying
+          s3Bucket: bucket,
+          status: 'PROCESSING',
+          createdAt: new Date().toISOString(),
+        }),
+      }));
+      console.log(`Stored initial record for job ${jobId} with S3 key ${key}`);
+    } catch (dbError) {
+      console.error('Failed to store initial record in DynamoDB:', dbError);
+      // Don't fail the entire operation if DynamoDB write fails
+      // The process-results Lambda will create the record when it completes
+    }
     
     return { 
       statusCode: 200, 
       body: JSON.stringify({ 
-        jobId: response.JobId,
+        jobId,
         bucket,
         key
       })

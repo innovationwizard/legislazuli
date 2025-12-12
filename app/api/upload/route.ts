@@ -5,8 +5,13 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+  region: process.env.AWS_REGION || 'us-east-2',
+  credentials: process.env.LEGISLAZULI_ACCESS_KEY && process.env.LEGISLAZULI_SECRET_KEY
+    ? {
+        accessKeyId: process.env.LEGISLAZULI_ACCESS_KEY,
+        secretAccessKey: process.env.LEGISLAZULI_SECRET_KEY,
+      }
+    : process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
     ? {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -14,7 +19,7 @@ const s3Client = new S3Client({
     : undefined,
 });
 
-const S3_BUCKET = process.env.AWS_S3_BUCKET_NAME || '';
+const S3_BUCKET = process.env.AWS_BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME || '';
 
 /**
  * Generates a presigned URL for direct S3 upload
@@ -56,9 +61,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate unique S3 key
+    // Note: Must use 'uploads/' prefix to trigger Lambda (as configured in SAM template)
     const timestamp = Date.now();
     const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const key = `uploads/${session.user.id}/${timestamp}_${sanitizedFilename}`;
+    const key = `uploads/${timestamp}-${sanitizedFilename}`;
 
     // Create presigned URL (valid for 60 seconds)
     const command = new PutObjectCommand({

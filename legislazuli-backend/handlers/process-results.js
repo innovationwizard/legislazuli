@@ -9,8 +9,8 @@
  */
 
 const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
-const { marshall } = require("@aws-sdk/util-dynamodb");
+const { DynamoDBClient, PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
+const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
 
 // AWS_REGION is automatically provided by Lambda runtime
@@ -259,10 +259,32 @@ exports.handler = async (event) => {
     const analysis = await parseLegalDeed(fullText);
 
     // 5. Load: Save to DynamoDB
+    // First, try to retrieve existing record to preserve S3 key
+    let existingS3Key = null;
+    let existingS3Bucket = null;
+    try {
+      const getItemCmd = new GetItemCommand({
+        TableName: process.env.RESULTS_TABLE_NAME || 'LegislazuliResults',
+        Key: { jobId: { S: jobId } },
+      });
+      const existingItem = await dynamodb.send(getItemCmd);
+      if (existingItem.Item) {
+        const existing = unmarshall(existingItem.Item);
+        existingS3Key = existing.s3Key;
+        existingS3Bucket = existing.s3Bucket;
+      }
+    } catch (getError) {
+      console.warn('Could not retrieve existing record:', getError);
+      // Continue without S3 key - not critical
+    }
+
     const item = {
       jobId,
       status: 'COMPLETED',
-      createdAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+      // Preserve S3 key and bucket from initial record (if available)
+      ...(existingS3Key && { s3Key: existingS3Key }),
+      ...(existingS3Bucket && { s3Bucket: existingS3Bucket }),
       // Store core metadata from AI analysis
       instrumentNumber: analysis.instrumentNumber || null,
       gapDetected: analysis.gapDetected,
