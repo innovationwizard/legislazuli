@@ -1,6 +1,6 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { supabase } from './db/supabase';
+import { createServerClient } from './db/supabase';
 import bcryptjs from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
@@ -16,6 +16,8 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Use service role client to bypass RLS policies
+        const supabase = createServerClient();
         const { data: user, error } = await supabase
           .from('users')
           .select('*')
