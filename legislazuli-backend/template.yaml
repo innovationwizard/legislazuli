@@ -72,9 +72,12 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:GetObjectVersion
+                  - s3:PutObject
                 Resource: !Sub '${DocumentBucket.Arn}/*'
               - Effect: Allow
-                Action: s3:ListBucket
+                Action:
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
                 Resource: !GetAtt DocumentBucket.Arn
 
   # ------------------------------------------------------------------
@@ -90,12 +93,18 @@ Resources:
       Policies:
         # Use explicit S3 policy to avoid circular dependency
         # Reference the actual bucket created by CloudFormation
+        # Textract needs Read/Write access for OutputConfig
         - Statement:
             - Effect: Allow
-              Action: s3:GetObject
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
               Resource: !Sub '${DocumentBucket.Arn}/*'
             - Effect: Allow
-              Action: s3:ListBucket
+              Action:
+                - s3:ListBucket
+                - s3:GetBucketLocation
               Resource: !GetAtt DocumentBucket.Arn
         - Statement:
             - Effect: Allow
@@ -147,10 +156,15 @@ Resources:
               Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/LegislazuliResults'
         - Statement:
             - Effect: Allow
-              Action: s3:GetObject
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
               Resource: !Sub '${DocumentBucket.Arn}/*'
             - Effect: Allow
-              Action: s3:ListBucket
+              Action:
+                - s3:ListBucket
+                - s3:GetBucketLocation
               Resource: !GetAtt DocumentBucket.Arn
         - Statement:
             - Effect: Allow
