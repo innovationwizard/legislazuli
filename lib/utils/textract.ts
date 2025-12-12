@@ -4,7 +4,11 @@
  * Works perfectly in serverless environments
  */
 
-import { TextractClient, DetectDocumentTextCommand } from '@aws-sdk/client-textract';
+import { 
+  TextractClient, 
+  DetectDocumentTextCommand,
+  AnalyzeDocumentCommand 
+} from '@aws-sdk/client-textract';
 
 const textractClient = new TextractClient({
   region: process.env.AWS_REGION || 'us-east-1',
@@ -43,11 +47,13 @@ export async function extractTextFromPdf(pdfBuffer: Buffer): Promise<string> {
   }
 
   try {
-    // Textract accepts PDF bytes directly
-    const command = new DetectDocumentTextCommand({
+    // CRITICAL FIX: Use AnalyzeDocumentCommand for PDFs (DetectDocumentText only accepts images)
+    // AnalyzeDocument supports PDFs and provides better structure analysis
+    const command = new AnalyzeDocumentCommand({
       Document: {
         Bytes: pdfBuffer,
       },
+      FeatureTypes: ['FORMS', 'TABLES'], // Extract forms and tables for legal documents
     });
 
     const response = await textractClient.send(command);

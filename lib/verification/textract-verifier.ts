@@ -14,7 +14,11 @@
  * Example: Patent 76869 vs Textract 76868 = 80% similarity, but it's a critical error.
  */
 
-import { Block, DetectDocumentTextCommandOutput } from '@aws-sdk/client-textract';
+import { 
+  Block, 
+  DetectDocumentTextCommandOutput,
+  AnalyzeDocumentCommandOutput 
+} from '@aws-sdk/client-textract';
 import levenshtein from 'js-levenshtein';
 
 export type VerificationStatus = 'VERIFIED' | 'FUZZY_MATCH' | 'NOT_FOUND' | 'SUSPICIOUS';
@@ -33,7 +37,8 @@ export interface VerificationResult {
 export class TextractVerifier {
   private blocks: Block[];
 
-  constructor(textractResponse: DetectDocumentTextCommandOutput) {
+  constructor(textractResponse: DetectDocumentTextCommandOutput | AnalyzeDocumentCommandOutput) {
+    // Both DetectDocumentText and AnalyzeDocument return the same Blocks structure
     this.blocks = textractResponse.Blocks || [];
   }
 

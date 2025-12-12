@@ -18,14 +18,13 @@ const nextConfig = {
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
-      // Ignore native binary files
-      config.module.rules.push({
-        test: /\.node$/,
-        use: 'ignore-loader',
-      });
-
-      // Ensure @sparticuz/chromium binaries are included
-      config.externals = [...(config.externals || [])];
+      // CRITICAL: Don't ignore .node files for Chromium - they need to be included
+      // The binary must survive the build process for Vercel Lambda
+      // Only ignore problematic native modules, not Chromium
+      
+      // Ensure @sparticuz/chromium binaries are preserved
+      // These packages are already in serverComponentsExternalPackages above
+      // which tells Next.js not to bundle them, preserving the binary structure
     }
     return config;
   },

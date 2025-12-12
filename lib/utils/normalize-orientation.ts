@@ -10,6 +10,8 @@ import {
   TextractClient, 
   DetectDocumentTextCommand,
   DetectDocumentTextCommandOutput,
+  AnalyzeDocumentCommand,
+  AnalyzeDocumentCommandOutput,
   Block 
 } from '@aws-sdk/client-textract';
 import { PDFDocument, degrees } from 'pdf-lib';
@@ -31,7 +33,7 @@ interface OrientationResult {
   wasRotated: boolean;
   detectedOrientation?: string;
   appliedCorrection?: number;
-  textractResponse?: DetectDocumentTextCommandOutput;
+  textractResponse?: DetectDocumentTextCommandOutput | AnalyzeDocumentCommandOutput;
 }
 
 /**
@@ -75,7 +77,7 @@ async function detectOrientation(
   fileBuffer: Buffer,
   textractClient: TextractClient,
   mimeType: string
-): Promise<{ orientation: TextractOrientation; response: DetectDocumentTextCommandOutput }> {
+): Promise<{ orientation: TextractOrientation; response: DetectDocumentTextCommandOutput | AnalyzeDocumentCommandOutput }> {
   // Validate buffer before sending to Textract
   if (!fileBuffer || fileBuffer.length === 0) {
     throw new Error('File buffer is empty or invalid');
@@ -96,11 +98,25 @@ async function detectOrientation(
     }
   }
 
-  const command = new DetectDocumentTextCommand({
-    Document: { Bytes: fileBuffer },
-  });
-
-  const response = await textractClient.send(command);
+  // Use appropriate API based on file type
+  // For PDFs, use AnalyzeDocument (supports multi-page PDFs)
+  // For images, use DetectDocumentText (faster and cheaper)
+  const isPdf = mimeType === 'application/pdf';
+  
+  let response: DetectDocumentTextCommandOutput | AnalyzeDocumentCommandOutput;
+  
+  if (isPdf) {
+    const command = new AnalyzeDocumentCommand({
+      Document: { Bytes: fileBuffer },
+      FeatureTypes: ['FORMS'], // Minimal features for orientation detection
+    });
+    response = await textractClient.send(command);
+  } else {
+    const command = new DetectDocumentTextCommand({
+      Document: { Bytes: fileBuffer },
+    });
+    response = await textractClient.send(command);
+  }
 
   // Find PAGE blocks - they contain orientation metadata
   const pageBlocks = response.Blocks?.filter(
