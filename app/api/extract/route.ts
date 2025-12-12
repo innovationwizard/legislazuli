@@ -40,7 +40,7 @@ import { startDocumentAnalysis } from '@/lib/aws/textract-async';
 import { DocType } from '@/types';
 
 // Threshold for async processing (PDFs larger than this use async)
-const ASYNC_PROCESSING_THRESHOLD = 5 * 1024 * 1024; // 5MB
+const ASYNC_PROCESSING_THRESHOLD = 1 * 1024 * 1024; // 1MB
 
 // Vercel Serverless Timeout Configuration
 // Extraction performs heavy operations: Textract, dual LLM inference, consensus, verification

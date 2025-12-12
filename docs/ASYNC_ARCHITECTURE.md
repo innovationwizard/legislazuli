@@ -158,8 +158,8 @@ if (response.status === 202) {
 
 ## Thresholds
 
-- **Async Processing**: PDFs > 5MB
-- **Sync Processing**: PDFs ≤ 5MB or images
+- **Async Processing**: PDFs > 1MB
+- **Sync Processing**: PDFs ≤ 1MB or images
 
 ## Benefits
 
