@@ -32,7 +32,7 @@ export async function uploadPdfToS3(
   key: string
 ): Promise<{ bucket: string; key: string; url: string }> {
   if (!S3_BUCKET) {
-    throw new Error('AWS_S3_BUCKET_NAME environment variable is not set');
+    throw new Error('AWS_S3_BUCKET_NAME environment variable is not set. Please configure it in your environment variables.');
   }
 
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
@@ -60,8 +60,25 @@ export async function uploadPdfToS3(
       key,
       url,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('S3 upload error:', error);
+    
+    // Provide helpful error messages
+    if (error.Code === 'NoSuchBucket') {
+      throw new Error(
+        `S3 bucket "${S3_BUCKET}" does not exist. ` +
+        `Please create the bucket in AWS S3 or update AWS_S3_BUCKET_NAME environment variable. ` +
+        `Current bucket name: ${S3_BUCKET}`
+      );
+    }
+    
+    if (error.name === 'NoSuchBucket') {
+      throw new Error(
+        `S3 bucket "${S3_BUCKET}" does not exist. ` +
+        `Please create the bucket in AWS S3 or update AWS_S3_BUCKET_NAME environment variable.`
+      );
+    }
+    
     throw new Error(`Failed to upload PDF to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }

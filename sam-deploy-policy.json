@@ -1,0 +1,58 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "CloudFormationOrchestration",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:ListStackResources",
+                "cloudformation:DescribeStackEvents",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:GetTemplateSummary",
+                "cloudformation:UpdateStack"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3DeploymentBucket",
+            "Effect": "Allow",
+            "Action": [
+                "s3:CreateBucket",
+                "s3:ListBucket",
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": "arn:aws:s3:::aws-sam-cli-managed-*"
+        },
+        {
+            "Sid": "IAMRoleCreation",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy",
+                "iam:DeleteRole",
+                "iam:GetRole",
+                "iam:PassRole",
+                "iam:TagRole"
+            ],
+            "Resource": "arn:aws:iam::*:role/legislazuli-*"
+        },
+        {
+            "Sid": "ResourceCreation",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:*",
+                "dynamodb:*",
+                "sns:*",
+                "s3:*",
+                "textract:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

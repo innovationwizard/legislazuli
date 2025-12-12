@@ -264,15 +264,22 @@ export async function normalizeDocumentOrientation(
     // Include Textract response for verification
     result.textractResponse = textractResponse;
     return result;
-  } catch (error) {
+  } catch (error: any) {
     // Check if it's an UnsupportedDocumentException
     if (error && typeof error === 'object' && '__type' in error && error.__type === 'UnsupportedDocumentException') {
       console.warn('Textract: Document format not supported, skipping orientation normalization:', error);
-      // Return original buffer without rotation
+      // Return original buffer without rotation - document may still be processable
       return { buffer: fileBuffer, wasRotated: false };
     }
+    
+    // Check for other Textract errors
+    if (error?.$metadata?.httpStatusCode === 400) {
+      console.warn('Textract: Bad request (400), skipping orientation normalization:', error);
+      return { buffer: fileBuffer, wasRotated: false };
+    }
+    
     console.error('Orientation normalization error:', error);
-    // Return original buffer on any error
+    // Return original buffer on any error - don't fail the entire request
     return { buffer: fileBuffer, wasRotated: false };
   }
 }

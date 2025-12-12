@@ -1,0 +1,19 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "LambdaFunctionArn": "arn:aws:lambda:us-east-2:524390297512:function:legislazuli-stack-StartAnalysisFunction-RtkyzWM0XGG6",
+      "Events": ["s3:ObjectCreated:*"],
+      "Filter": {
+        "Key": {
+          "FilterRules": [
+            {
+              "Name": "prefix",
+              "Value": "uploads/"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+

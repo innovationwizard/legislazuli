@@ -133,20 +133,17 @@ export async function POST(request: NextRequest) {
       }
 
       // Check if it's an UnsupportedDocumentException from Textract
+      // For orientation normalization, we can continue without rotation
+      // The PDF might still be processable even if orientation detection fails
       if (normalizationError?.__type === 'UnsupportedDocumentException' ||
           errorMessage.includes('unsupported document format')) {
-        return NextResponse.json(
-          {
-            error: 'El formato del PDF no es compatible con el sistema de procesamiento. Por favor, intenta guardar el PDF en un formato estándar (sin encriptación) o convierte a imagen.',
-            errorCode: 'UNSUPPORTED_PDF_FORMAT',
-            details: 'Textract UnsupportedDocumentException'
-          },
-          { status: 400 }
-        );
+        console.warn('Textract orientation detection failed - PDF format may be unsupported, but continuing anyway');
+        // Continue with original buffer - don't fail the entire request
+        processedBuffer = buffer;
+      } else {
+        // Continue with original buffer for other errors
+        processedBuffer = buffer;
       }
-
-      // Continue with original buffer for other errors
-      processedBuffer = buffer;
     }
     
     // Process PDFs with AWS Textract (better accuracy for legal documents)
@@ -246,7 +243,23 @@ export async function POST(request: NextRequest) {
           }, { status: 202 }); // 202 Accepted - processing started
         } catch (asyncError: any) {
           console.error('Async processing setup error:', asyncError);
-          // Fall through to sync processing if async setup fails
+          
+          // If S3 bucket doesn't exist, provide helpful error
+          if (asyncError?.message?.includes('does not exist') || 
+              asyncError?.Code === 'NoSuchBucket' ||
+              asyncError?.name === 'NoSuchBucket') {
+            return NextResponse.json(
+              {
+                error: `Configuración de S3 requerida: El bucket "${process.env.AWS_S3_BUCKET_NAME || 'no configurado'}" no existe. Por favor, crea el bucket en AWS S3 o configura AWS_S3_BUCKET_NAME correctamente.`,
+                errorCode: 'S3_BUCKET_NOT_FOUND',
+                details: asyncError.message
+              },
+              { status: 500 }
+            );
+          }
+          
+          // Fall through to sync processing if async setup fails for other reasons
+          console.warn('Falling back to synchronous processing due to async setup failure');
         }
       }
 
@@ -272,6 +285,19 @@ export async function POST(request: NextRequest) {
         
         if (isUnsupportedFormat) {
           console.warn('Textract: Unsupported document format, attempting image conversion fallback');
+          
+          // For unsupported formats, try image conversion
+          // But first check if this is a large PDF that should use async
+          if (processedBuffer.length > ASYNC_PROCESSING_THRESHOLD) {
+            return NextResponse.json(
+              {
+                error: 'El formato del PDF no es compatible con Textract. PDFs grandes (>1MB) requieren un formato estándar sin encriptación. Por favor, intenta: 1) Guardar el PDF como un nuevo archivo sin protección, 2) Convertir a imágenes (PNG/JPG), o 3) Usar un PDF más pequeño.',
+                errorCode: 'UNSUPPORTED_PDF_FORMAT_LARGE',
+                details: 'Textract UnsupportedDocumentException - PDF may be encrypted or in unsupported format'
+              },
+              { status: 400 }
+            );
+          }
         }
         
         // Fallback to image conversion if Textract fails
@@ -284,24 +310,30 @@ export async function POST(request: NextRequest) {
           // Check if it's a Chromium path error
           const isChromiumError = imageError?.message?.includes('chromium') || 
                                  imageError?.message?.includes('brotli') ||
-                                 imageError?.message?.includes('executablePath');
+                                 imageError?.message?.includes('executablePath') ||
+                                 imageError?.message?.includes('ERR_ABORTED');
           
           if (isChromiumError) {
             return NextResponse.json(
               { 
-                error: 'Error al procesar el PDF: configuración del servidor no disponible. Por favor, contacta al administrador.',
+                error: 'Error al procesar el PDF: el formato no es compatible con el sistema de conversión. Por favor, intenta convertir el PDF a imágenes (PNG/JPG) manualmente o usa un PDF en formato estándar.',
                 errorCode: 'PDF_CONVERSION_CONFIG_ERROR',
-                details: 'Chromium configuration error in serverless environment'
+                details: 'Chromium/PDF conversion error - PDF format may be unsupported'
               },
-              { status: 500 }
+              { status: 400 }
             );
           }
           
+          // Provide helpful error message
+          const errorDetails = isUnsupportedFormat 
+            ? 'Document format not supported by Textract. PDF may be encrypted, password-protected, or in an unsupported format.'
+            : imageError?.message || 'Unknown error';
+          
           return NextResponse.json(
             { 
-              error: 'Error al procesar el PDF. Por favor, asegúrate de que el archivo PDF no esté corrupto y sea un formato válido.',
+              error: 'Error al procesar el PDF. El formato puede no ser compatible. Por favor, intenta: 1) Guardar el PDF como un nuevo archivo sin protección, 2) Convertir a imágenes (PNG/JPG), o 3) Verificar que el PDF no esté corrupto.',
               errorCode: 'PDF_CONVERSION_ERROR',
-              details: isUnsupportedFormat ? 'Document format not supported by Textract' : undefined
+              details: errorDetails
             },
             { status: 400 }
           );

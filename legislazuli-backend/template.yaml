@@ -1,0 +1,182 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Legislazuli Async Pipeline: S3 -> Lambda -> Textract -> SNS -> Lambda -> DynamoDB
+
+Globals:
+  Function:
+    Timeout: 60
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+    MemorySize: 256 # Balanced for SDK calls
+
+Resources:
+  # ------------------------------------------------------------------
+  # 1. STORAGE LAYER (S3 & DynamoDB)
+  # ------------------------------------------------------------------
+  DocumentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'legislazuli-documents-${AWS::AccountId}'
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders: ['*']
+            AllowedMethods: ['GET', 'PUT', 'POST', 'HEAD']
+            AllowedOrigins: ['*'] # LOCK THIS DOWN to your Vercel domain in prod
+            ExposedHeaders: ['ETag']
+      # Note: S3 notification will be configured after deployment via AWS CLI
+      # to avoid circular dependency with Lambda function
+
+  ResultsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: LegislazuliResults
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: jobId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: jobId
+          KeyType: HASH
+
+  # ------------------------------------------------------------------
+  # 2. MESSAGING LAYER (SNS Topic & Textract Role)
+  # ------------------------------------------------------------------
+  TextractCompleteTopic:
+    Type: AWS::SNS::Topic
+
+  # Role that allows Textract Service to publish to our SNS Topic
+  TextractServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: textract.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: TextractSNSPublish
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: sns:Publish
+                Resource: !Ref TextractCompleteTopic
+
+  # ------------------------------------------------------------------
+  # 3. COMPUTE LAYER (Lambdas)
+  # ------------------------------------------------------------------
+  
+  # A. The Trigger (Starts Job)
+  StartAnalysisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: handlers/
+      Handler: start-analysis.handler
+      Policies:
+        # Use explicit S3 policy to avoid circular dependency
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}/*'
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}'
+        - Statement:
+            - Effect: Allow
+              Action: textract:StartDocumentAnalysis
+              Resource: "*"
+            - Effect: Allow
+              Action: iam:PassRole
+              Resource: !GetAtt TextractServiceRole.Arn
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref TextractCompleteTopic
+          TEXTRACT_ROLE_ARN: !GetAtt TextractServiceRole.Arn
+
+  # B. The Processor (Parses Result)
+  ProcessResultsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: handlers/
+      Handler: process-results.handler
+      MemorySize: 512 # Increased for Bedrock API calls
+      Timeout: 120 # Increased timeout for AI processing
+      # SNS trigger commented out to avoid circular dependency - will configure after deployment
+      # Events:
+      #   SNSTrigger:
+      #     Type: SNS
+      #     Properties:
+      #       Topic: !Ref TextractCompleteTopic
+      Environment:
+        Variables:
+          RESULTS_TABLE_NAME: !Ref ResultsTable
+          S3_BUCKET_NAME: !Sub 'legislazuli-documents-${AWS::AccountId}'
+          # Note: AWS_REGION is reserved, Lambda automatically provides it
+          BEDROCK_MODEL_ID: "anthropic.claude-3-5-sonnet-20241022-v2:0"
+      Policies:
+        # Use explicit policies to avoid circular dependencies
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:GetItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:Query
+                - dynamodb:Scan
+              Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/LegislazuliResults'
+            - Effect: Allow
+              Action:
+                - dynamodb:DescribeTable
+              Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/LegislazuliResults'
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}/*'
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource: !Sub 'arn:aws:s3:::legislazuli-documents-${AWS::AccountId}'
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0"
+
+  # ------------------------------------------------------------------
+  # 4. PERMISSIONS GLUE
+  # ------------------------------------------------------------------
+  # Note: S3 Lambda Permission and bucket notification will be configured
+  # after deployment via AWS CLI to avoid circular dependency
+  # Run: aws lambda add-permission --function-name <function-arn> --principal s3.amazonaws.com --action lambda:InvokeFunction --source-arn <bucket-arn>
+  # Then: aws s3api put-bucket-notification-configuration --bucket <bucket> --notification-configuration file://notification.json
+
+Outputs:
+  BucketName:
+    Description: "S3 Bucket for uploads"
+    Value: !Ref DocumentBucket
+  BucketArn:
+    Description: "S3 Bucket ARN"
+    Value: !GetAtt DocumentBucket.Arn
+  TableName:
+    Description: "DynamoDB Table for results"
+    Value: !Ref ResultsTable
+  SNSTopicArn:
+    Description: "SNS Topic ARN for Textract completion notifications"
+    Value: !Ref TextractCompleteTopic
+  StartAnalysisFunctionArn:
+    Description: "Lambda Function ARN for S3 trigger configuration"
+    Value: !GetAtt StartAnalysisFunction.Arn
+  StartAnalysisFunctionName:
+    Description: "Lambda Function Name"
+    Value: !Ref StartAnalysisFunction
+  ProcessResultsFunctionArn:
+    Description: "Lambda Function ARN for SNS trigger configuration"
+    Value: !GetAtt ProcessResultsFunction.Arn
+  ProcessResultsFunctionName:
+    Description: "Lambda Function Name"
+    Value: !Ref ProcessResultsFunction
+

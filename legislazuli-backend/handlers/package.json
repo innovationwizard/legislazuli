@@ -1,0 +1,19 @@
+{
+  "name": "legislazuli-lambda-handlers",
+  "version": "1.0.0",
+  "description": "Lambda handlers for Legislazuli async processing pipeline",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-textract": "^3.0.0",
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/util-dynamodb": "^3.0.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
+

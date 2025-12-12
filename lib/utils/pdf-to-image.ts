@@ -65,17 +65,37 @@ export async function convertPdfToImage(pdfBuffer: Buffer): Promise<string> {
       // Create a new page
       const page = await browser.newPage();
 
-      // Convert PDF buffer to data URL
-      const pdfBase64 = pdfBuffer.toString('base64');
-      const dataUrl = `data:application/pdf;base64,${pdfBase64}`;
-
-      // Load the PDF in the page
-      // Reduced timeout for Hobby plan (10s function limit)
-      // Consider upgrading to Pro plan for better performance
-      await page.goto(dataUrl, {
-        waitUntil: 'networkidle0',
-        timeout: 8000, // 8 seconds max to leave time for screenshot and cleanup
-      });
+      // Instead of using data URI (which Chromium may block), write PDF to temp file
+      // For serverless environments, use /tmp directory
+      const fs = await import('fs');
+      const path = await import('path');
+      const os = await import('os');
+      
+      const tempDir = os.tmpdir();
+      const tempFilePath = path.join(tempDir, `pdf_${Date.now()}_${Math.random().toString(36).substring(7)}.pdf`);
+      
+      // Write PDF buffer to temp file
+      fs.writeFileSync(tempFilePath, pdfBuffer);
+      
+      // Load the PDF from file:// URL (more reliable than data URI)
+      const fileUrl = `file://${tempFilePath}`;
+      
+      try {
+        // Load the PDF in the page
+        // Reduced timeout for Hobby plan (10s function limit)
+        // Consider upgrading to Pro plan for better performance
+        await page.goto(fileUrl, {
+          waitUntil: 'networkidle0',
+          timeout: 8000, // 8 seconds max to leave time for screenshot and cleanup
+        });
+      } finally {
+        // Clean up temp file
+        try {
+          fs.unlinkSync(tempFilePath);
+        } catch (cleanupError) {
+          console.warn('Failed to cleanup temp file:', cleanupError);
+        }
+      }
 
       // Take a screenshot of the first page (PDFs render as single page by default)
       // Use high quality settings for better OCR
