@@ -21,7 +21,7 @@
     "fuse.js": "^7.0.0",
     "js-levenshtein": "^1.1.6",
     "lucide-react": "^0.555.0",
-    "next": "^14.2.33",
+    "next": "14.2.35",
     "next-auth": "^4.24.5",
     "numero-a-letras": "^1.0.3",
     "openai": "^4.24.0",
