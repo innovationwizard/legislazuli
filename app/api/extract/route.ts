@@ -35,7 +35,12 @@ import { extractTextFromPdf } from '@/lib/utils/textract';
 import { normalizeDocumentOrientation } from '@/lib/utils/normalize-orientation';
 import { TextractClient } from '@aws-sdk/client-textract';
 import { TextractVerifier } from '@/lib/verification/textract-verifier';
+import { uploadPdfToS3, generateS3Key } from '@/lib/aws/s3';
+import { startDocumentAnalysis } from '@/lib/aws/textract-async';
 import { DocType } from '@/types';
+
+// Threshold for async processing (PDFs larger than this use async)
+const ASYNC_PROCESSING_THRESHOLD = 5 * 1024 * 1024; // 5MB
 
 // Vercel Serverless Timeout Configuration
 // Extraction performs heavy operations: Textract, dual LLM inference, consensus, verification
@@ -151,6 +156,101 @@ export async function POST(request: NextRequest) {
     let base64 = '';
     
     if (isPdf) {
+      // Enterprise Architecture: Use async processing for large PDFs
+      // This decouples heavy processing from HTTP response loop
+      const useAsyncProcessing = processedBuffer.length > ASYNC_PROCESSING_THRESHOLD && 
+                                 process.env.AWS_S3_BUCKET_NAME;
+
+      if (useAsyncProcessing) {
+        // Upload to S3 and start async Textract job
+        const s3Key = generateS3Key(session.user.id, 'temp', file.name);
+        
+        try {
+          const s3Result = await uploadPdfToS3(processedBuffer, s3Key);
+          const jobId = await startDocumentAnalysis(s3Result.bucket, s3Result.key);
+
+          // Upload to Supabase Storage as well (for backup/access)
+          const supabase = createServerClient();
+          const sanitizedFilename = sanitizeFilename(file.name);
+          const fileName = `${Date.now()}_${sanitizedFilename}`;
+          const filePath = `${session.user.id}/${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('documents')
+            .upload(filePath, processedBuffer, {
+              contentType: file.type,
+              upsert: false,
+            });
+
+          if (uploadError) {
+            console.error('Supabase upload error:', uploadError);
+            // Continue anyway - S3 upload succeeded
+          }
+
+          // Save document first
+          const { data: document, error: docError } = await supabase
+            .from('documents')
+            .insert({
+              user_id: session.user.id,
+              filename: file.name,
+              file_path: filePath, // Supabase storage path
+              doc_type: docType,
+              detected_document_type: null,
+            })
+            .select()
+            .single();
+
+          if (docError || !document) {
+            return NextResponse.json({ error: 'Failed to save document' }, { status: 500 });
+          }
+
+          // Create Textract job record
+          const { data: textractJob, error: textractJobError } = await supabase
+            .from('textract_jobs')
+            .insert({
+              document_id: document.id,
+              job_id: jobId,
+              s3_bucket: s3Result.bucket,
+              s3_key: s3Result.key,
+              status: 'IN_PROGRESS',
+            })
+            .select()
+            .single();
+
+          if (textractJobError || !textractJob) {
+            return NextResponse.json({ error: 'Failed to create Textract job' }, { status: 500 });
+          }
+
+          // Create extraction job record
+          const { data: extractionJob, error: extractionJobError } = await supabase
+            .from('extraction_jobs')
+            .insert({
+              document_id: document.id,
+              textract_job_id: textractJob.id,
+              status: 'PROCESSING_TEXTTRACT',
+              status_message: 'Textract analysis in progress...',
+            })
+            .select()
+            .single();
+
+          if (extractionJobError || !extractionJob) {
+            return NextResponse.json({ error: 'Failed to create extraction job' }, { status: 500 });
+          }
+
+          // Return job ID for polling
+          return NextResponse.json({
+            jobId: extractionJob.id,
+            status: 'PROCESSING_TEXTTRACT',
+            message: 'PDF is being processed asynchronously. Use /api/jobs/[id]/status to check progress.',
+            estimatedTime: '2-5 minutes',
+          }, { status: 202 }); // 202 Accepted - processing started
+        } catch (asyncError: any) {
+          console.error('Async processing setup error:', asyncError);
+          // Fall through to sync processing if async setup fails
+        }
+      }
+
+      // Synchronous processing (for small PDFs or if async setup failed)
       try {
         // Use AWS Textract for PDFs - purpose-built for legal/government forms
         // Note: processedBuffer is now correctly oriented
