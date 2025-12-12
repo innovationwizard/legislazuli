@@ -8,7 +8,7 @@
  * - Load: Saves structured data and gap flag to DynamoDB
  */
 
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, GetObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
 const { DynamoDBClient, PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
 const { marshall, unmarshall } = require("@aws-sdk/util-dynamodb");
 const { BedrockRuntimeClient, InvokeModelCommand } = require("@aws-sdk/client-bedrock-runtime");
@@ -237,39 +237,78 @@ exports.handler = async (event) => {
     
     // Textract stores results as numbered files: processed/{jobId}/1, processed/{jobId}/2, etc.
     // Each file contains the results for one page. We need to read all pages and combine them.
-    // Note: Textract may create paths with double slashes, so we normalize
-    const prefix = `processed/${jobId}/`.replace(/\/+/g, '/');
+    // IMPORTANT: Textract creates paths with double slashes: processed//{jobId}/
+    // We need to try both patterns to find the files
+    const prefixes = [
+      `processed/${jobId}/`,      // Normal path
+      `processed//${jobId}/`,      // Double slash (Textract's actual format)
+    ];
     
-    console.log(`Fetching Textract results from s3://${bucket}/${prefix}`);
-    console.log(`JobId: ${jobId}, Bucket: ${bucket}`);
-
-    // List all files in the processed/{jobId}/ folder
-    const { ListObjectsV2Command } = require("@aws-sdk/client-s3");
-    const listCommand = new ListObjectsV2Command({
-      Bucket: bucket,
-      Prefix: prefix,
-    });
+    console.log(`Fetching Textract results for JobId: ${jobId}, Bucket: ${bucket}`);
     
-    const listResponse = await s3.send(listCommand);
+    let resultFiles = [];
+    let listResponse = null;
     
-    // Filter out the .s3_access_check file and get only numbered result files
-    const resultFiles = (listResponse.Contents || [])
-      .map(obj => obj.Key)
-      .filter(key => {
-        // Get filename (last part after /)
-        const filename = key.split('/').pop();
-        // Include files that are numeric (page numbers) or 'output.json'
-        return filename && (filename.match(/^\d+$/) || filename === 'output.json');
-      })
-      .sort((a, b) => {
-        // Sort by filename (numeric order for numbered files)
-        const aNum = parseInt(a.split('/').pop()) || 0;
-        const bNum = parseInt(b.split('/').pop()) || 0;
-        return aNum - bNum;
-      });
+    // Try each prefix until we find files
+    for (const prefix of prefixes) {
+      console.log(`Trying prefix: ${prefix}`);
+      try {
+        const listCommand = new ListObjectsV2Command({
+          Bucket: bucket,
+          Prefix: prefix,
+        });
+        
+        listResponse = await s3.send(listCommand);
+        
+        // Filter out the .s3_access_check file and get only numbered result files
+        const files = (listResponse.Contents || [])
+          .map(obj => obj.Key)
+          .filter(key => {
+            // Get filename (last part after /)
+            const filename = key.split('/').pop();
+            // Include files that are numeric (page numbers) or 'output.json'
+            // Exclude .s3_access_check and other metadata files
+            return filename && 
+                   filename !== '.s3_access_check' && 
+                   (filename.match(/^\d+$/) || filename === 'output.json');
+          })
+          .sort((a, b) => {
+            // Sort by filename (numeric order for numbered files)
+            const aNum = parseInt(a.split('/').pop()) || 0;
+            const bNum = parseInt(b.split('/').pop()) || 0;
+            return aNum - bNum;
+          });
+        
+        if (files.length > 0) {
+          resultFiles = files;
+          console.log(`Found ${resultFiles.length} result file(s) using prefix: ${prefix}`);
+          break; // Found files, exit loop
+        } else {
+          console.log(`No result files found with prefix: ${prefix}`);
+        }
+      } catch (err) {
+        console.warn(`Error listing with prefix ${prefix}:`, err.message);
+        // Continue to next prefix
+      }
+    }
     
     if (resultFiles.length === 0) {
-      throw new Error(`No Textract result files found in s3://${bucket}/${prefix}`);
+      // Log what we actually found for debugging
+      const debugPrefix = prefixes[0];
+      try {
+        const debugList = new ListObjectsV2Command({
+          Bucket: bucket,
+          Prefix: debugPrefix,
+        });
+        const debugResponse = await s3.send(debugList);
+        console.error(`Debug: Listed ${debugResponse.Contents?.length || 0} objects with prefix ${debugPrefix}`);
+        if (debugResponse.Contents && debugResponse.Contents.length > 0) {
+          console.error(`Debug: Found keys:`, debugResponse.Contents.map(obj => obj.Key).slice(0, 10));
+        }
+      } catch (debugErr) {
+        console.error(`Debug listing error:`, debugErr);
+      }
+      throw new Error(`No Textract result files found in s3://${bucket}/processed/{jobId}/. Tried prefixes: ${prefixes.join(', ')}`);
     }
     
     console.log(`Found ${resultFiles.length} result file(s): ${resultFiles.join(', ')}`);
