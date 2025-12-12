@@ -122,8 +122,58 @@ export default function DashboardPage() {
                       </div>
                     )}
                     
-                    {/* Raw Text */}
-                    {result.rawText && (
+                    {/* Raw Text - Paginated */}
+                    {result.textByPage && Object.keys(result.textByPage).length > 0 ? (
+                      <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-800">Texto extraído (por página)</h4>
+                          <button
+                            onClick={() => {
+                              const allText = Object.values(result.textByPage || {}).join('\n\n');
+                              navigator.clipboard.writeText(allText);
+                              alert('Texto copiado al portapapeles');
+                            }}
+                            className="text-xs text-gray-600 hover:text-gray-800 underline"
+                          >
+                            Copiar todo
+                          </button>
+                        </div>
+                        <div className="space-y-4">
+                          {Object.keys(result.textByPage)
+                            .sort((a, b) => parseInt(a) - parseInt(b))
+                            .map((pageNum) => (
+                              <div key={pageNum} className="bg-white border border-gray-300 rounded p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h5 className="text-sm font-semibold text-gray-700">
+                                    Página {pageNum}
+                                  </h5>
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(result.textByPage?.[pageNum] || '');
+                                      alert(`Página ${pageNum} copiada al portapapeles`);
+                                    }}
+                                    className="text-xs text-gray-600 hover:text-gray-800 underline"
+                                  >
+                                    Copiar página
+                                  </button>
+                                </div>
+                                <textarea
+                                  readOnly
+                                  value={result.textByPage[pageNum]}
+                                  className="w-full h-48 p-2 text-xs font-mono bg-gray-50 border border-gray-200 rounded resize-none"
+                                  style={{ fontSize: '10px', lineHeight: '1.4' }}
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {(result.textByPage[pageNum]?.length || 0).toLocaleString()} caracteres
+                                </p>
+                              </div>
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-3">
+                          Total: {Object.values(result.textByPage || {}).reduce((sum, text) => sum + (text?.length || 0), 0).toLocaleString()} caracteres en {Object.keys(result.textByPage || {}).length} página(s)
+                        </p>
+                      </div>
+                    ) : result.rawText ? (
                       <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium text-gray-800">Texto extraído</h4>
@@ -147,7 +197,7 @@ export default function DashboardPage() {
                           {result.rawText.length.toLocaleString()} caracteres
                         </p>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </details>
               </div>

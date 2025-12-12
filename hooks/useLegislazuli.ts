@@ -10,6 +10,7 @@ export interface ExtractionResult {
   immediateAvailability?: number;
   instrumentNumber?: string;
   rawText?: string;
+  textByPage?: Record<string, string>; // Page number -> text content
   aiAnalysis?: any;
   error?: string;
 }

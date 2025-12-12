@@ -91,6 +91,18 @@ export async function GET(req: NextRequest) {
     // Unmarshall DynamoDB item to plain object
     const result = unmarshall(Item);
 
+    // Parse textByPage if it exists
+    let textByPage = undefined;
+    if (result.textByPage) {
+      try {
+        textByPage = typeof result.textByPage === 'string' 
+          ? JSON.parse(result.textByPage) 
+          : result.textByPage;
+      } catch (e) {
+        console.warn('Failed to parse textByPage:', e);
+      }
+    }
+
     // Map DynamoDB result to our ExtractionResult format
     return NextResponse.json({
       jobId: result.jobId,
@@ -102,6 +114,7 @@ export async function GET(req: NextRequest) {
       immediateAvailability: result.immediateAvailability ? Number(result.immediateAvailability) : undefined,
       instrumentNumber: result.instrumentNumber,
       rawText: result.rawText,
+      textByPage: textByPage,
       aiAnalysis: result.aiAnalysis,
       error: result.error,
       createdAt: result.createdAt,

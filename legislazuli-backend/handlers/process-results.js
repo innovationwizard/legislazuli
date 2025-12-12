@@ -60,6 +60,36 @@ function linearizeTextractBlocks(blocks) {
     .join(' ');
 }
 
+/**
+ * Groups Textract blocks by page number
+ * Returns an object with page numbers as keys and text as values
+ */
+function groupTextByPage(blocks) {
+  if (!blocks || blocks.length === 0) {
+    return {};
+  }
+
+  const pages = {};
+  
+  blocks
+    .filter(block => block.BlockType === 'LINE' && block.Text)
+    .forEach(block => {
+      const pageNum = block.Page || 1; // Default to page 1 if not specified
+      if (!pages[pageNum]) {
+        pages[pageNum] = [];
+      }
+      pages[pageNum].push(block.Text);
+    });
+
+  // Convert arrays to strings
+  const result = {};
+  Object.keys(pages).sort((a, b) => parseInt(a) - parseInt(b)).forEach(pageNum => {
+    result[pageNum] = pages[pageNum].join(' ');
+  });
+
+  return result;
+}
+
 // ---------------------------------------------------------
 // DOMAIN LOGIC: AI-Powered Legal Deed Parser via Bedrock
 // ---------------------------------------------------------
