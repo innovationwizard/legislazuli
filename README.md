@@ -142,6 +142,16 @@ Para proteger las tablas críticas (`golden_set_truths`, `prompt_versions`, `pro
 -- Ver scripts/enable-rls-critical-tables.sql
 ```
 
+**e) Row Level Security (RLS) para tablas de async jobs (RECOMENDADO):**
+
+Para proteger las tablas de trabajos asíncronos (`textract_jobs`, `extraction_jobs`) de acceso no autorizado, ejecuta:
+
+```sql
+-- Ver scripts/enable-rls-async-jobs.sql
+```
+
+Esto resuelve las advertencias del Security Advisor de Supabase sobre RLS deshabilitado en estas tablas.
+
 **IMPORTANTE**: Este sistema usa NextAuth.js para autenticación. Las políticas RLS requieren Supabase Auth para funcionar completamente. Ver `docs/RLS_SECURITY.md` para más detalles sobre las opciones de configuración.
 
 **OPCIONAL - Hardening Avanzado**: Para activar RLS sin migrar de NextAuth, implementa el "Bridge Token Pattern". Ver `docs/BRIDGE_TOKEN_PATTERN.md` para la guía de implementación completa.
