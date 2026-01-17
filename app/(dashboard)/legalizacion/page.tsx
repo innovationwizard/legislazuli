@@ -601,7 +601,7 @@ function buildLegalizationText(docType: LegalizacionDocType, values: FormValues)
 
   return [
     'En la ciudad de Guatemala, el día ' + dateWords + ', como Notaria, DOY FE de que la presente hoja de papel de fotocopia ES AUTÉNTICA, por haber sido reproducida de su original el día de hoy en mi presencia, la cual reproduce la Patente de Comercio de ' +
-      `Sociedad de ${nombreEntidad}, con número de registro ${numeroRegistroWords} (${numeroRegistroDigits}), folio ${folioWords} (${folioDigits}) y libro ${libroWords} (${libroDigits}) de Empresas Mercantiles. En fe de lo anterior, firmo y sello la hoja de papel fotocopia que por medio del presente acto legalizo.`,
+      `Sociedad de ${nombreEntidad}, con número de registro ${numeroRegistroWords} (${numeroRegistroDigits}), folio ${folioWords} (${folioDigits}) y libro ${libroWords} (${libroDigits}) de Sociedades. En fe de lo anterior, firmo y sello la hoja de papel fotocopia que por medio del presente acto legalizo.`,
     '',
     'POR MÍ Y ANTE MÍ',
   ].join('\n');
