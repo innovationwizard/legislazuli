@@ -668,8 +668,6 @@ async function generateLegalizationPdf(
 
     if (line.isSignature) {
       drawCenteredLine(outputPage, line.text, font, boldFont, fontSize, LEGAL_WIDTH, currentY);
-    } else if (line.isLastOfParagraph) {
-      drawLeftLine(outputPage, line.text, font, boldFont, fontSize, LEGAL_MARGIN_X, currentY);
     } else {
       drawJustifiedLine(
         outputPage,
@@ -755,14 +753,14 @@ function wrapTextWithParagraphs(
   font: any,
   size: number,
   maxWidth: number
-): Array<{ text: string; isLastOfParagraph: boolean; isSignature: boolean }> {
+): Array<{ text: string; isSignature: boolean }> {
   const paragraphs = text.split('\n');
-  const lines: Array<{ text: string; isLastOfParagraph: boolean; isSignature: boolean }> = [];
+  const lines: Array<{ text: string; isSignature: boolean }> = [];
 
   for (const paragraph of paragraphs) {
     const trimmed = paragraph.trim();
     if (!trimmed) {
-      lines.push({ text: '', isLastOfParagraph: true, isSignature: false });
+      lines.push({ text: '', isSignature: false });
       continue;
     }
 
@@ -775,7 +773,6 @@ function wrapTextWithParagraphs(
       if (width > maxWidth && currentLine) {
         lines.push({
           text: currentLine,
-          isLastOfParagraph: false,
           isSignature: isSignatureLine(currentLine),
         });
         currentLine = word;
@@ -787,7 +784,6 @@ function wrapTextWithParagraphs(
     if (currentLine) {
       lines.push({
         text: currentLine,
-        isLastOfParagraph: true,
         isSignature: isSignatureLine(currentLine),
       });
     }
@@ -799,18 +795,6 @@ function wrapTextWithParagraphs(
 function isSignatureLine(text: string): boolean {
   const normalized = text.trim().toUpperCase();
   return normalized.startsWith('POR ');
-}
-
-function drawLeftLine(
-  page: any,
-  text: string,
-  font: any,
-  boldFont: any,
-  size: number,
-  x: number,
-  y: number
-) {
-  drawSegmentedLine(page, text, font, boldFont, size, x, y, 0, 'left');
 }
 
 function drawCenteredLine(
@@ -917,7 +901,7 @@ function getBoldWordIndices(words: string[]): Set<number> {
       boldIndices.add(i);
       boldIndices.add(i + 1);
     }
-    if (first === 'ES' && second === 'AUTÉNTICA') {
+    if (first === 'ES' && second === 'AUTENTICA') {
       boldIndices.add(i);
       boldIndices.add(i + 1);
     }
@@ -927,7 +911,11 @@ function getBoldWordIndices(words: string[]): Set<number> {
 }
 
 function normalizeBoldWord(word: string): string {
-  return word.replace(/[.,;:()]/g, '').toUpperCase();
+  return word
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[.,;:()]/g, '')
+    .toUpperCase();
 }
 
 function fitFontSize(text: string, font: any, maxWidth: number, maxHeight: number): number {
