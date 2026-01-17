@@ -7,7 +7,8 @@
 import { 
   TextractClient, 
   DetectDocumentTextCommand,
-  AnalyzeDocumentCommand 
+  AnalyzeDocumentCommand,
+  Block
 } from '@aws-sdk/client-textract';
 
 const textractClient = new TextractClient({
@@ -95,5 +96,78 @@ export async function extractTextFromPdf(pdfBuffer: Buffer): Promise<string> {
     console.error('Textract extraction error:', error);
     throw new Error(`Failed to extract text from PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+}
+
+/**
+ * Extracts text from an image using AWS Textract DetectDocumentText
+ * Returns the full text content of the document
+ */
+export async function extractTextFromImage(imageBuffer: Buffer): Promise<string> {
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    throw new Error('AWS credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.');
+  }
+
+  if (!imageBuffer || imageBuffer.length === 0) {
+    throw new Error('Image buffer is empty or invalid');
+  }
+
+  const maxSize = 10 * 1024 * 1024; // 10MB (Textract image limit is 10MB)
+  if (imageBuffer.length > maxSize) {
+    throw new Error(`Image is too large (${Math.round(imageBuffer.length / 1024 / 1024)}MB). Maximum size is 10MB.`);
+  }
+
+  try {
+    const command = new DetectDocumentTextCommand({
+      Document: {
+        Bytes: imageBuffer,
+      },
+    });
+
+    const response = await textractClient.send(command);
+
+    const textBlocks: string[] = [];
+    if (response.Blocks) {
+      const blocks = response.Blocks
+        .filter((block: Block) => block.BlockType === 'LINE' && block.Text)
+        .sort((a, b) => {
+          const topA = a.Geometry?.BoundingBox?.Top || 0;
+          const topB = b.Geometry?.BoundingBox?.Top || 0;
+          if (topA !== topB) return topA - topB;
+          const leftA = a.Geometry?.BoundingBox?.Left || 0;
+          const leftB = b.Geometry?.BoundingBox?.Left || 0;
+          return leftA - leftB;
+        });
+
+      for (const block of blocks) {
+        if (block.Text) {
+          textBlocks.push(block.Text);
+        }
+      }
+    }
+
+    const fullText = textBlocks.join('\n');
+    if (!fullText.trim()) {
+      throw new Error('No text extracted from image');
+    }
+
+    return fullText;
+  } catch (error) {
+    console.error('Textract image extraction error:', error);
+    throw new Error(`Failed to extract text from image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Extracts text from a document (PDF or image) using AWS Textract
+ */
+export async function extractTextFromDocument(
+  buffer: Buffer,
+  mimeType: string
+): Promise<string> {
+  if (mimeType === 'application/pdf') {
+    return extractTextFromPdf(buffer);
+  }
+
+  return extractTextFromImage(buffer);
 }
 

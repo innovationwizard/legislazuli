@@ -41,6 +41,12 @@ export default function DashboardLayout({
               <Logo size={32} />
             </Link>
             <div className="flex items-center gap-4">
+              <Link
+                href="/legalizacion"
+                className="px-4 py-2 text-sm font-medium text-white border border-white/30 rounded-md hover:text-gold hover:border-gold transition-colors"
+              >
+                Legalización
+              </Link>
               <span className="text-sm text-white">{session.user?.email}</span>
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}

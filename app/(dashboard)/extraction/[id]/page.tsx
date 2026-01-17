@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -23,13 +23,7 @@ export default function ExtractionPage() {
   } | null>(null);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (params.id && session) {
-      fetchExtraction(params.id as string);
-    }
-  }, [params.id, session]);
-
-  const fetchExtraction = async (id: string) => {
+  const fetchExtraction = useCallback(async (id: string) => {
     try {
       const response = await fetch(`/api/extractions/${id}`);
       if (!response.ok) {
@@ -107,7 +101,13 @@ export default function ExtractionPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session]);
+
+  useEffect(() => {
+    if (params.id && session) {
+      fetchExtraction(params.id as string);
+    }
+  }, [params.id, session, fetchExtraction]);
 
   const handleDownload = () => {
     if (!extraction) return;

@@ -1,0 +1,1837 @@
+0 verbose cli /Users/jorgeluiscontrerasherrera/.nvm/versions/node/v22.17.1/bin/node /Users/jorgeluiscontrerasherrera/.nvm/versions/node/v22.17.1/bin/npm
+1 info using npm@10.9.2
+2 info using node@v22.17.1
+3 silly config load:file:/Users/jorgeluiscontrerasherrera/.nvm/versions/node/v22.17.1/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/jorgeluiscontrerasherrera/Documents/_git/legis/.npmrc
+5 silly config load:file:/Users/jorgeluiscontrerasherrera/.npmrc
+6 silly config load:file:/Users/jorgeluiscontrerasherrera/.nvm/versions/node/v22.17.1/etc/npmrc
+7 verbose title npm install @aws-sdk/client-dynamodb @aws-sdk/util-dynamodb
+8 verbose argv "install" "@aws-sdk/client-dynamodb" "@aws-sdk/util-dynamodb"
+9 verbose logfile logs-max:10 dir:/Users/jorgeluiscontrerasherrera/Documents/_git/legis/.npm-cache/_logs/2026-01-17T03_54_54_664Z-
+10 verbose logfile /Users/jorgeluiscontrerasherrera/Documents/_git/legis/.npm-cache/_logs/2026-01-17T03_54_54_664Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly idealTree buildDeps
+14 silly fetch manifest @aws-sdk/client-dynamodb@^3.948.0
+15 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-dynamodb cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fclient-dynamodb 637ms (cache miss)
+17 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-dynamodb set size:undefined disposed:false
+18 silly fetch manifest @aws-sdk/util-dynamodb@^3.948.0
+19 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-dynamodb cache-miss
+20 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2futil-dynamodb 438ms (cache miss)
+21 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-dynamodb set size:undefined disposed:false
+22 silly placeDep ROOT @aws-sdk/client-dynamodb@3.971.0 OK for: legislazuli@0.0.0-alpha want: ^3.948.0
+23 silly placeDep ROOT @aws-sdk/util-dynamodb@3.971.0 OK for: legislazuli@0.0.0-alpha want: ^3.948.0
+24 silly fetch manifest @aws-sdk/core@3.970.0
+25 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcore cache-miss
+26 silly fetch manifest @aws-sdk/credential-provider-node@3.971.0
+27 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-node cache-miss
+28 silly fetch manifest @aws-sdk/dynamodb-codec@3.970.0
+29 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fdynamodb-codec cache-miss
+30 silly fetch manifest @aws-sdk/middleware-endpoint-discovery@3.971.0
+31 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-endpoint-discovery cache-miss
+32 silly fetch manifest @aws-sdk/middleware-host-header@3.969.0
+33 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-host-header cache-miss
+34 silly fetch manifest @aws-sdk/middleware-logger@3.969.0
+35 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-logger cache-miss
+36 silly fetch manifest @aws-sdk/middleware-recursion-detection@3.969.0
+37 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-recursion-detection cache-miss
+38 silly fetch manifest @aws-sdk/middleware-user-agent@3.970.0
+39 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-user-agent cache-miss
+40 silly fetch manifest @aws-sdk/region-config-resolver@3.969.0
+41 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fregion-config-resolver cache-miss
+42 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fregion-config-resolver 276ms (cache miss)
+43 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fregion-config-resolver set size:undefined disposed:false
+44 silly fetch manifest @aws-sdk/types@3.969.0
+45 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2ftypes cache-miss
+46 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fmiddleware-recursion-detection 290ms (cache miss)
+47 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-recursion-detection set size:undefined disposed:false
+48 silly fetch manifest @aws-sdk/util-endpoints@3.970.0
+49 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-endpoints cache-miss
+50 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fmiddleware-user-agent 292ms (cache miss)
+51 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-user-agent set size:undefined disposed:false
+52 silly fetch manifest @aws-sdk/util-user-agent-browser@3.969.0
+53 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-user-agent-browser cache-miss
+54 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-node 304ms (cache miss)
+55 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-node set size:undefined disposed:false
+56 silly fetch manifest @aws-sdk/util-user-agent-node@3.971.0
+57 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-user-agent-node cache-miss
+58 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fmiddleware-logger 326ms (cache miss)
+59 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-logger set size:undefined disposed:false
+60 silly fetch manifest @smithy/config-resolver@^4.4.6
+61 silly packumentCache full:https://registry.npmjs.org/@smithy%2fconfig-resolver cache-miss
+62 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fmiddleware-host-header 357ms (cache miss)
+63 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-host-header set size:undefined disposed:false
+64 silly fetch manifest @smithy/core@^3.20.6
+65 silly packumentCache full:https://registry.npmjs.org/@smithy%2fcore cache-miss
+66 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2futil-user-agent-node 98ms (cache miss)
+67 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-user-agent-node set size:undefined disposed:false
+68 silly fetch manifest @smithy/fetch-http-handler@^5.3.9
+69 silly packumentCache full:https://registry.npmjs.org/@smithy%2ffetch-http-handler cache-miss
+70 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2futil-user-agent-browser 124ms (cache miss)
+71 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-user-agent-browser set size:undefined disposed:false
+72 silly fetch manifest @smithy/hash-node@^4.2.8
+73 silly packumentCache full:https://registry.npmjs.org/@smithy%2fhash-node cache-miss
+74 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcore 426ms (cache miss)
+75 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcore set size:undefined disposed:false
+76 silly fetch manifest @smithy/invalid-dependency@^4.2.8
+77 silly packumentCache full:https://registry.npmjs.org/@smithy%2finvalid-dependency cache-miss
+78 http fetch GET 200 https://registry.npmjs.org/@smithy%2fcore 100ms (cache miss)
+79 silly packumentCache full:https://registry.npmjs.org/@smithy%2fcore set size:undefined disposed:false
+80 silly fetch manifest @smithy/middleware-content-length@^4.2.8
+81 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-content-length cache-miss
+82 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fmiddleware-endpoint-discovery 470ms (cache miss)
+83 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-endpoint-discovery set size:undefined disposed:false
+84 silly fetch manifest @smithy/middleware-endpoint@^4.4.7
+85 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-endpoint cache-miss
+86 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2futil-endpoints 185ms (cache miss)
+87 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-endpoints set size:undefined disposed:false
+88 silly fetch manifest @smithy/middleware-retry@^4.4.23
+89 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-retry cache-miss
+90 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2ftypes 204ms (cache miss)
+91 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2ftypes set size:undefined disposed:false
+92 silly fetch manifest @smithy/middleware-serde@^4.2.9
+93 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-serde cache-miss
+94 http fetch GET 200 https://registry.npmjs.org/@smithy%2fmiddleware-endpoint 91ms (cache miss)
+95 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-endpoint set size:undefined disposed:false
+96 silly fetch manifest @smithy/middleware-stack@^4.2.8
+97 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-stack cache-miss
+98 http fetch GET 200 https://registry.npmjs.org/@smithy%2ffetch-http-handler 159ms (cache miss)
+99 silly packumentCache full:https://registry.npmjs.org/@smithy%2ffetch-http-handler set size:undefined disposed:false
+100 silly fetch manifest @smithy/node-config-provider@^4.3.8
+101 silly packumentCache full:https://registry.npmjs.org/@smithy%2fnode-config-provider cache-miss
+102 http fetch GET 200 https://registry.npmjs.org/@smithy%2fmiddleware-retry 99ms (cache miss)
+103 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-retry set size:undefined disposed:false
+104 silly fetch manifest @smithy/node-http-handler@^4.4.8
+105 silly packumentCache full:https://registry.npmjs.org/@smithy%2fnode-http-handler cache-miss
+106 http fetch GET 200 https://registry.npmjs.org/@smithy%2fmiddleware-serde 106ms (cache miss)
+107 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-serde set size:undefined disposed:false
+108 silly fetch manifest @smithy/protocol-http@^5.3.8
+109 silly packumentCache full:https://registry.npmjs.org/@smithy%2fprotocol-http cache-miss
+110 http fetch GET 200 https://registry.npmjs.org/@smithy%2fconfig-resolver 310ms (cache miss)
+111 silly packumentCache full:https://registry.npmjs.org/@smithy%2fconfig-resolver set size:undefined disposed:false
+112 silly fetch manifest @smithy/smithy-client@^4.10.8
+113 silly packumentCache full:https://registry.npmjs.org/@smithy%2fsmithy-client cache-miss
+114 http fetch GET 200 https://registry.npmjs.org/@smithy%2fmiddleware-stack 79ms (cache miss)
+115 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-stack set size:undefined disposed:false
+116 silly fetch manifest @smithy/types@^4.12.0
+117 silly packumentCache full:https://registry.npmjs.org/@smithy%2ftypes cache-miss
+118 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fdynamodb-codec 652ms (cache miss)
+119 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fdynamodb-codec set size:undefined disposed:false
+120 silly fetch manifest @smithy/url-parser@^4.2.8
+121 silly packumentCache full:https://registry.npmjs.org/@smithy%2furl-parser cache-miss
+122 http fetch GET 200 https://registry.npmjs.org/@smithy%2fnode-config-provider 84ms (cache miss)
+123 silly packumentCache full:https://registry.npmjs.org/@smithy%2fnode-config-provider set size:undefined disposed:false
+124 silly fetch manifest @smithy/util-defaults-mode-browser@^4.3.22
+125 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-defaults-mode-browser cache-miss
+126 http fetch GET 200 https://registry.npmjs.org/@smithy%2fmiddleware-content-length 198ms (cache miss)
+127 silly packumentCache full:https://registry.npmjs.org/@smithy%2fmiddleware-content-length set size:undefined disposed:false
+128 silly fetch manifest @smithy/util-defaults-mode-node@^4.2.25
+129 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-defaults-mode-node cache-miss
+130 http fetch GET 200 https://registry.npmjs.org/@smithy%2fhash-node 242ms (cache miss)
+131 silly packumentCache full:https://registry.npmjs.org/@smithy%2fhash-node set size:undefined disposed:false
+132 silly fetch manifest @smithy/util-endpoints@^3.2.8
+133 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-endpoints cache-miss
+134 http fetch GET 200 https://registry.npmjs.org/@smithy%2fprotocol-http 101ms (cache miss)
+135 silly packumentCache full:https://registry.npmjs.org/@smithy%2fprotocol-http set size:undefined disposed:false
+136 silly fetch manifest @smithy/util-middleware@^4.2.8
+137 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-middleware cache-miss
+138 http fetch GET 200 https://registry.npmjs.org/@smithy%2fsmithy-client 92ms (cache miss)
+139 silly packumentCache full:https://registry.npmjs.org/@smithy%2fsmithy-client set size:undefined disposed:false
+140 silly fetch manifest @smithy/util-retry@^4.2.8
+141 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-retry cache-miss
+142 http fetch GET 200 https://registry.npmjs.org/@smithy%2ftypes 98ms (cache miss)
+143 silly packumentCache full:https://registry.npmjs.org/@smithy%2ftypes set size:undefined disposed:false
+144 silly fetch manifest @smithy/util-waiter@^4.2.8
+145 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-waiter cache-miss
+146 http fetch GET 200 https://registry.npmjs.org/@smithy%2futil-defaults-mode-browser 105ms (cache miss)
+147 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-defaults-mode-browser set size:undefined disposed:false
+148 http fetch GET 200 https://registry.npmjs.org/@smithy%2fnode-http-handler 184ms (cache miss)
+149 silly packumentCache full:https://registry.npmjs.org/@smithy%2fnode-http-handler set size:undefined disposed:false
+150 http fetch GET 200 https://registry.npmjs.org/@smithy%2futil-middleware 87ms (cache miss)
+151 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-middleware set size:undefined disposed:false
+152 http fetch GET 200 https://registry.npmjs.org/@smithy%2futil-defaults-mode-node 144ms (cache miss)
+153 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-defaults-mode-node set size:undefined disposed:false
+154 http fetch GET 200 https://registry.npmjs.org/@smithy%2finvalid-dependency 390ms (cache miss)
+155 silly packumentCache full:https://registry.npmjs.org/@smithy%2finvalid-dependency set size:undefined disposed:false
+156 http fetch GET 200 https://registry.npmjs.org/@smithy%2futil-retry 90ms (cache miss)
+157 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-retry set size:undefined disposed:false
+158 http fetch GET 200 https://registry.npmjs.org/@smithy%2furl-parser 280ms (cache miss)
+159 silly packumentCache full:https://registry.npmjs.org/@smithy%2furl-parser set size:undefined disposed:false
+160 http fetch GET 200 https://registry.npmjs.org/@smithy%2futil-endpoints 276ms (cache miss)
+161 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-endpoints set size:undefined disposed:false
+162 http fetch GET 200 https://registry.npmjs.org/@smithy%2futil-waiter 212ms (cache miss)
+163 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-waiter set size:undefined disposed:false
+164 silly fetch manifest @aws-sdk/client-dynamodb@3.970.0
+165 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-dynamodb cache-miss
+166 http cache https://registry.npmjs.org/@aws-sdk%2fclient-dynamodb 8ms (cache hit)
+167 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-dynamodb set size:2694871 disposed:false
+168 silly fetch manifest aws-crt@>=1.0.0
+169 silly packumentCache full:https://registry.npmjs.org/aws-crt cache-miss
+170 http fetch GET 200 https://registry.npmjs.org/aws-crt 83ms (cache miss)
+171 silly packumentCache full:https://registry.npmjs.org/aws-crt set size:undefined disposed:false
+172 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/core@3.970.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.970.0
+173 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-node@3.971.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.971.0
+174 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/dynamodb-codec@3.970.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.970.0
+175 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/client-dynamodb@3.970.0 OK for: @aws-sdk/dynamodb-codec@3.970.0 want: 3.970.0
+176 silly placeDep ROOT @aws-sdk/middleware-endpoint-discovery@3.971.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.971.0
+177 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/middleware-host-header@3.969.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.969.0
+178 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/middleware-logger@3.969.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.969.0
+179 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/middleware-recursion-detection@3.969.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.969.0
+180 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/middleware-user-agent@3.970.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.970.0
+181 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/region-config-resolver@3.969.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.969.0
+182 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/types@3.969.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.969.0
+183 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/util-endpoints@3.970.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.970.0
+184 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/util-user-agent-browser@3.969.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.969.0
+185 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/util-user-agent-node@3.971.0 OK for: @aws-sdk/client-dynamodb@3.971.0 want: 3.971.0
+186 silly placeDep ROOT @smithy/config-resolver@4.4.6 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.4.6
+187 silly placeDep ROOT @smithy/core@3.20.7 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^3.20.6
+188 silly placeDep ROOT @smithy/fetch-http-handler@5.3.9 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^5.3.9
+189 silly placeDep ROOT @smithy/hash-node@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+190 silly placeDep ROOT @smithy/invalid-dependency@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+191 silly placeDep ROOT @smithy/middleware-content-length@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+192 silly placeDep ROOT @smithy/middleware-endpoint@4.4.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.4.7
+193 silly placeDep ROOT @smithy/middleware-retry@4.4.24 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.4.23
+194 silly placeDep ROOT @smithy/middleware-serde@4.2.9 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.9
+195 silly placeDep ROOT @smithy/middleware-stack@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+196 silly placeDep ROOT @smithy/node-config-provider@4.3.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.3.8
+197 silly placeDep ROOT @smithy/node-http-handler@4.4.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.4.8
+198 silly placeDep ROOT @smithy/protocol-http@5.3.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^5.3.8
+199 silly placeDep ROOT @smithy/smithy-client@4.10.9 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.10.8
+200 silly placeDep ROOT @smithy/types@4.12.0 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.12.0
+201 silly placeDep ROOT @smithy/url-parser@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+202 silly placeDep ROOT @smithy/util-defaults-mode-browser@4.3.23 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.3.22
+203 silly placeDep ROOT @smithy/util-defaults-mode-node@4.2.26 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.25
+204 silly placeDep ROOT @smithy/util-endpoints@3.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^3.2.8
+205 silly placeDep ROOT @smithy/util-middleware@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+206 silly placeDep ROOT @smithy/util-retry@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+207 silly placeDep ROOT @smithy/util-waiter@4.2.8 REPLACE for: @aws-sdk/client-dynamodb@3.971.0 want: ^4.2.8
+208 silly fetch manifest @aws-sdk/xml-builder@3.969.0
+209 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fxml-builder cache-miss
+210 silly fetch manifest @smithy/property-provider@^4.2.8
+211 silly packumentCache full:https://registry.npmjs.org/@smithy%2fproperty-provider cache-miss
+212 silly fetch manifest @smithy/signature-v4@^5.3.8
+213 silly packumentCache full:https://registry.npmjs.org/@smithy%2fsignature-v4 cache-miss
+214 silly fetch manifest @aws-sdk/credential-provider-env@3.970.0
+215 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-env cache-miss
+216 silly fetch manifest @aws-sdk/credential-provider-http@3.970.0
+217 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-http cache-miss
+218 silly fetch manifest @aws-sdk/credential-provider-ini@3.971.0
+219 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-ini cache-miss
+220 silly fetch manifest @aws-sdk/credential-provider-process@3.970.0
+221 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-process cache-miss
+222 silly fetch manifest @aws-sdk/credential-provider-sso@3.971.0
+223 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-sso cache-miss
+224 silly fetch manifest @aws-sdk/credential-provider-web-identity@3.971.0
+225 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-web-identity cache-miss
+226 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-process 112ms (cache miss)
+227 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-process set size:undefined disposed:false
+228 silly fetch manifest @smithy/credential-provider-imds@^4.2.8
+229 silly packumentCache full:https://registry.npmjs.org/@smithy%2fcredential-provider-imds cache-miss
+230 http fetch GET 200 https://registry.npmjs.org/@smithy%2fsignature-v4 121ms (cache miss)
+231 silly packumentCache full:https://registry.npmjs.org/@smithy%2fsignature-v4 set size:undefined disposed:false
+232 silly fetch manifest @smithy/property-provider@^4.2.8
+233 silly packumentCache full:https://registry.npmjs.org/@smithy%2fproperty-provider cache-miss
+234 http fetch GET 200 https://registry.npmjs.org/@smithy%2fproperty-provider 124ms (cache miss)
+235 silly packumentCache full:https://registry.npmjs.org/@smithy%2fproperty-provider set size:undefined disposed:false
+236 silly fetch manifest @smithy/shared-ini-file-loader@^4.4.3
+237 silly packumentCache full:https://registry.npmjs.org/@smithy%2fshared-ini-file-loader cache-miss
+238 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-sso 133ms (cache miss)
+239 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-sso set size:undefined disposed:false
+240 silly fetch manifest @aws-sdk/util-user-agent-node@3.970.0
+241 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-user-agent-node cache-miss
+242 http cache https://registry.npmjs.org/@aws-sdk%2futil-user-agent-node 4ms (cache hit)
+243 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2futil-user-agent-node set size:972310 disposed:false
+244 silly fetch manifest @aws-sdk/credential-provider-node@3.970.0
+245 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-node cache-miss
+246 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-http 149ms (cache miss)
+247 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-http set size:undefined disposed:false
+248 silly fetch manifest @aws-sdk/middleware-endpoint-discovery@3.969.0
+249 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-endpoint-discovery cache-miss
+250 http cache https://registry.npmjs.org/@aws-sdk%2fcredential-provider-node 8ms (cache hit)
+251 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-node set size:1708125 disposed:false
+252 silly fetch manifest @aws-sdk/endpoint-cache@3.971.0
+253 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fendpoint-cache cache-miss
+254 http cache https://registry.npmjs.org/@aws-sdk%2fmiddleware-endpoint-discovery 9ms (cache hit)
+255 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fmiddleware-endpoint-discovery set size:663204 disposed:false
+256 silly fetch manifest @smithy/util-stream@^4.5.10
+257 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-stream cache-miss
+258 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fxml-builder 202ms (cache miss)
+259 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fxml-builder set size:undefined disposed:false
+260 silly fetch manifest @smithy/querystring-builder@^4.2.8
+261 silly packumentCache full:https://registry.npmjs.org/@smithy%2fquerystring-builder cache-miss
+262 http fetch GET 200 https://registry.npmjs.org/@smithy%2fcredential-provider-imds 96ms (cache miss)
+263 silly packumentCache full:https://registry.npmjs.org/@smithy%2fcredential-provider-imds set size:undefined disposed:false
+264 silly fetch manifest @smithy/shared-ini-file-loader@^4.4.3
+265 silly packumentCache full:https://registry.npmjs.org/@smithy%2fshared-ini-file-loader cache-miss
+266 http fetch GET 200 https://registry.npmjs.org/@smithy%2fshared-ini-file-loader 96ms (cache miss)
+267 silly packumentCache full:https://registry.npmjs.org/@smithy%2fshared-ini-file-loader set size:undefined disposed:false
+268 silly fetch manifest @smithy/service-error-classification@^4.2.8
+269 silly packumentCache full:https://registry.npmjs.org/@smithy%2fservice-error-classification cache-miss
+270 http fetch GET 200 https://registry.npmjs.org/@smithy%2fproperty-provider 104ms (cache miss)
+271 silly packumentCache full:https://registry.npmjs.org/@smithy%2fproperty-provider set size:undefined disposed:false
+272 silly fetch manifest @smithy/smithy-client@^4.10.9
+273 silly packumentCache full:https://registry.npmjs.org/@smithy%2fsmithy-client cache-miss
+274 http cache https://registry.npmjs.org/@smithy%2fsmithy-client 5ms (cache hit)
+275 silly packumentCache full:https://registry.npmjs.org/@smithy%2fsmithy-client set size:457876 disposed:false
+276 silly fetch manifest @smithy/abort-controller@^4.2.8
+277 silly packumentCache full:https://registry.npmjs.org/@smithy%2fabort-controller cache-miss
+278 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-ini 244ms (cache miss)
+279 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-ini set size:undefined disposed:false
+280 silly fetch manifest @smithy/querystring-builder@^4.2.8
+281 silly packumentCache full:https://registry.npmjs.org/@smithy%2fquerystring-builder cache-miss
+282 http fetch GET 200 https://registry.npmjs.org/@smithy%2futil-stream 97ms (cache miss)
+283 silly packumentCache full:https://registry.npmjs.org/@smithy%2futil-stream set size:undefined disposed:false
+284 silly fetch manifest @smithy/querystring-parser@^4.2.8
+285 silly packumentCache full:https://registry.npmjs.org/@smithy%2fquerystring-parser cache-miss
+286 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-web-identity 276ms (cache miss)
+287 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-web-identity set size:undefined disposed:false
+288 silly fetch manifest @smithy/service-error-classification@^4.2.8
+289 silly packumentCache full:https://registry.npmjs.org/@smithy%2fservice-error-classification cache-miss
+290 http fetch GET 200 https://registry.npmjs.org/@smithy%2fquerystring-builder 91ms (cache miss)
+291 silly packumentCache full:https://registry.npmjs.org/@smithy%2fquerystring-builder set size:undefined disposed:false
+292 silly fetch manifest @smithy/abort-controller@^4.2.8
+293 silly packumentCache full:https://registry.npmjs.org/@smithy%2fabort-controller cache-miss
+294 http fetch GET 200 https://registry.npmjs.org/@smithy%2fshared-ini-file-loader 94ms (cache miss)
+295 silly packumentCache full:https://registry.npmjs.org/@smithy%2fshared-ini-file-loader set size:undefined disposed:false
+296 http fetch GET 200 https://registry.npmjs.org/@smithy%2fabort-controller 103ms (cache miss)
+297 silly packumentCache full:https://registry.npmjs.org/@smithy%2fabort-controller set size:undefined disposed:false
+298 http fetch GET 200 https://registry.npmjs.org/@smithy%2fquerystring-builder 88ms (cache miss)
+299 silly packumentCache full:https://registry.npmjs.org/@smithy%2fquerystring-builder set size:undefined disposed:false
+300 http fetch GET 200 https://registry.npmjs.org/@smithy%2fservice-error-classification 132ms (cache miss)
+301 silly packumentCache full:https://registry.npmjs.org/@smithy%2fservice-error-classification set size:undefined disposed:false
+302 http fetch GET 200 https://registry.npmjs.org/@smithy%2fservice-error-classification 102ms (cache miss)
+303 silly packumentCache full:https://registry.npmjs.org/@smithy%2fservice-error-classification set size:undefined disposed:false
+304 http fetch GET 200 https://registry.npmjs.org/@smithy%2fabort-controller 98ms (cache miss)
+305 silly packumentCache full:https://registry.npmjs.org/@smithy%2fabort-controller set size:undefined disposed:false
+306 http fetch GET 200 https://registry.npmjs.org/@smithy%2fquerystring-parser 194ms (cache miss)
+307 silly packumentCache full:https://registry.npmjs.org/@smithy%2fquerystring-parser set size:undefined disposed:false
+308 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fendpoint-cache 458ms (cache miss)
+309 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fendpoint-cache set size:undefined disposed:false
+310 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-env 655ms (cache miss)
+311 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-env set size:undefined disposed:false
+312 silly placeDep ROOT @aws-sdk/endpoint-cache@3.971.0 OK for: @aws-sdk/middleware-endpoint-discovery@3.971.0 want: 3.971.0
+313 silly placeDep node_modules/@aws-sdk/middleware-endpoint-discovery @aws-sdk/types@3.969.0 OK for: @aws-sdk/middleware-endpoint-discovery@3.971.0 want: 3.969.0
+314 silly fetch manifest mnemonist@0.38.3
+315 silly packumentCache full:https://registry.npmjs.org/mnemonist cache-miss
+316 http fetch GET 200 https://registry.npmjs.org/mnemonist 175ms (cache miss)
+317 silly packumentCache full:https://registry.npmjs.org/mnemonist set size:undefined disposed:false
+318 silly placeDep ROOT mnemonist@0.38.3 OK for: @aws-sdk/endpoint-cache@3.971.0 want: 0.38.3
+319 silly fetch manifest obliterator@^1.6.1
+320 silly packumentCache full:https://registry.npmjs.org/obliterator cache-miss
+321 http fetch GET 200 https://registry.npmjs.org/obliterator 83ms (cache miss)
+322 silly packumentCache full:https://registry.npmjs.org/obliterator set size:undefined disposed:false
+323 silly placeDep ROOT @smithy/util-stream@4.5.10 REPLACE for: @smithy/core@3.20.7 want: ^4.5.10
+324 silly placeDep ROOT @smithy/querystring-builder@4.2.8 REPLACE for: @smithy/fetch-http-handler@5.3.9 want: ^4.2.8
+325 silly placeDep ROOT @smithy/shared-ini-file-loader@4.4.3 REPLACE for: @smithy/middleware-endpoint@4.4.8 want: ^4.4.3
+326 silly placeDep ROOT @smithy/service-error-classification@4.2.8 OK for: @smithy/middleware-retry@4.4.24 want: ^4.2.8
+327 silly placeDep ROOT @smithy/property-provider@4.2.8 REPLACE for: @smithy/node-config-provider@4.3.8 want: ^4.2.8
+328 silly placeDep ROOT @smithy/abort-controller@4.2.8 OK for: @smithy/node-http-handler@4.4.8 want: ^4.2.8
+329 silly placeDep ROOT @smithy/querystring-parser@4.2.8 OK for: @smithy/url-parser@4.2.8 want: ^4.2.8
+330 silly placeDep ROOT @smithy/credential-provider-imds@4.2.8 REPLACE for: @smithy/util-defaults-mode-node@4.2.26 want: ^4.2.8
+331 silly placeDep ROOT obliterator@1.6.1 OK for: mnemonist@0.38.3 want: ^1.6.1
+332 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-node@3.970.0 OK for: @aws-sdk/client-dynamodb@3.970.0 want: 3.970.0
+333 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/middleware-endpoint-discovery@3.969.0 OK for: @aws-sdk/client-dynamodb@3.970.0 want: 3.969.0
+334 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/util-user-agent-node@3.970.0 OK for: @aws-sdk/client-dynamodb@3.970.0 want: 3.970.0
+335 silly fetch manifest @aws-sdk/credential-provider-ini@3.970.0
+336 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-ini cache-miss
+337 silly fetch manifest @aws-sdk/credential-provider-sso@3.970.0
+338 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-sso cache-miss
+339 silly fetch manifest @aws-sdk/credential-provider-web-identity@3.970.0
+340 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-web-identity cache-miss
+341 silly fetch manifest @aws-sdk/endpoint-cache@3.968.0
+342 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fendpoint-cache cache-miss
+343 http cache https://registry.npmjs.org/@aws-sdk%2fendpoint-cache 4ms (cache hit)
+344 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fendpoint-cache set size:147657 disposed:false
+345 http cache https://registry.npmjs.org/@aws-sdk%2fcredential-provider-sso 6ms (cache hit)
+346 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-sso set size:1389521 disposed:false
+347 http cache https://registry.npmjs.org/@aws-sdk%2fcredential-provider-web-identity 12ms (cache hit)
+348 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-web-identity set size:824980 disposed:false
+349 http cache https://registry.npmjs.org/@aws-sdk%2fcredential-provider-ini 16ms (cache hit)
+350 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-ini set size:1626564 disposed:false
+351 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/xml-builder@3.969.0 OK for: @aws-sdk/core@3.970.0 want: 3.969.0
+352 silly placeDep ROOT @smithy/signature-v4@5.3.8 REPLACE for: @aws-sdk/core@3.970.0 want: ^5.3.8
+353 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-env@3.970.0 OK for: @aws-sdk/credential-provider-node@3.971.0 want: 3.970.0
+354 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-http@3.970.0 OK for: @aws-sdk/credential-provider-node@3.971.0 want: 3.970.0
+355 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-ini@3.971.0 OK for: @aws-sdk/credential-provider-node@3.971.0 want: 3.971.0
+356 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-process@3.970.0 OK for: @aws-sdk/credential-provider-node@3.971.0 want: 3.970.0
+357 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-sso@3.971.0 OK for: @aws-sdk/credential-provider-node@3.971.0 want: 3.971.0
+358 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-web-identity@3.971.0 OK for: @aws-sdk/credential-provider-node@3.971.0 want: 3.971.0
+359 silly fetch manifest @aws-sdk/credential-provider-login@3.971.0
+360 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-login cache-miss
+361 silly fetch manifest @aws-sdk/nested-clients@3.971.0
+362 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients cache-miss
+363 silly fetch manifest @aws-sdk/client-sso@3.971.0
+364 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-sso cache-miss
+365 silly fetch manifest @aws-sdk/token-providers@3.971.0
+366 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2ftoken-providers cache-miss
+367 silly fetch manifest @aws-sdk/nested-clients@3.971.0
+368 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients cache-miss
+369 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fcredential-provider-login 101ms (cache miss)
+370 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-login set size:undefined disposed:false
+371 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fnested-clients 177ms (cache miss)
+372 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients set size:undefined disposed:false
+373 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fnested-clients 182ms (cache miss)
+374 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients set size:undefined disposed:false
+375 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2ftoken-providers 197ms (cache miss)
+376 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2ftoken-providers set size:undefined disposed:false
+377 http fetch GET 200 https://registry.npmjs.org/@aws-sdk%2fclient-sso 240ms (cache miss)
+378 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-sso set size:undefined disposed:false
+379 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-login@3.971.0 OK for: @aws-sdk/credential-provider-ini@3.971.0 want: 3.971.0
+380 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/nested-clients@3.971.0 OK for: @aws-sdk/credential-provider-ini@3.971.0 want: 3.971.0
+381 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/client-sso@3.971.0 OK for: @aws-sdk/credential-provider-sso@3.971.0 want: 3.971.0
+382 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/token-providers@3.971.0 OK for: @aws-sdk/credential-provider-sso@3.971.0 want: 3.971.0
+383 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-ini@3.970.0 OK for: @aws-sdk/credential-provider-node@3.970.0 want: 3.970.0
+384 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-sso@3.970.0 OK for: @aws-sdk/credential-provider-node@3.970.0 want: 3.970.0
+385 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-web-identity@3.970.0 OK for: @aws-sdk/credential-provider-node@3.970.0 want: 3.970.0
+386 silly fetch manifest @aws-sdk/nested-clients@3.970.0
+387 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients cache-miss
+388 silly fetch manifest @aws-sdk/credential-provider-login@3.970.0
+389 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-login cache-miss
+390 silly fetch manifest @aws-sdk/client-sso@3.970.0
+391 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-sso cache-miss
+392 silly fetch manifest @aws-sdk/token-providers@3.970.0
+393 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2ftoken-providers cache-miss
+394 silly fetch manifest @aws-sdk/nested-clients@3.970.0
+395 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients cache-miss
+396 http cache https://registry.npmjs.org/@aws-sdk%2fcredential-provider-login 3ms (cache hit)
+397 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fcredential-provider-login set size:65713 disposed:false
+398 http cache https://registry.npmjs.org/@aws-sdk%2fnested-clients 4ms (cache hit)
+399 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients set size:497232 disposed:false
+400 http cache https://registry.npmjs.org/@aws-sdk%2fnested-clients 6ms (cache hit)
+401 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients set size:497232 disposed:false
+402 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fnested-clients dispose
+403 http cache https://registry.npmjs.org/@aws-sdk%2ftoken-providers 9ms (cache hit)
+404 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2ftoken-providers set size:974067 disposed:false
+405 http cache https://registry.npmjs.org/@aws-sdk%2fclient-sso 13ms (cache hit)
+406 silly packumentCache full:https://registry.npmjs.org/@aws-sdk%2fclient-sso set size:2152353 disposed:false
+407 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/credential-provider-login@3.970.0 OK for: @aws-sdk/credential-provider-ini@3.970.0 want: 3.970.0
+408 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/nested-clients@3.970.0 OK for: @aws-sdk/credential-provider-ini@3.970.0 want: 3.970.0
+409 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/client-sso@3.970.0 OK for: @aws-sdk/credential-provider-sso@3.970.0 want: 3.970.0
+410 silly placeDep node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb @aws-sdk/token-providers@3.970.0 OK for: @aws-sdk/credential-provider-sso@3.970.0 want: 3.970.0
+411 silly placeDep node_modules/@aws-sdk/client-dynamodb @aws-sdk/endpoint-cache@3.968.0 OK for: @aws-sdk/middleware-endpoint-discovery@3.969.0 want: 3.968.0
+412 silly reify mark retired [
+412 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/abort-controller'
+412 silly reify ]
+413 silly reify mark retired [
+413 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/config-resolver'
+413 silly reify ]
+414 silly reify mark retired [
+414 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/core'
+414 silly reify ]
+415 silly reify mark retired [
+415 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/credential-provider-imds'
+415 silly reify ]
+416 silly reify mark retired [
+416 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/fetch-http-handler'
+416 silly reify ]
+417 silly reify mark retired [
+417 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/hash-node'
+417 silly reify ]
+418 silly reify mark retired [
+418 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/invalid-dependency'
+418 silly reify ]
+419 silly reify mark retired [
+419 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-content-length'
+419 silly reify ]
+420 silly reify mark retired [
+420 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-endpoint'
+420 silly reify ]
+421 silly reify mark retired [
+421 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-retry'
+421 silly reify ]
+422 silly reify mark retired [
+422 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-serde'
+422 silly reify ]
+423 silly reify mark retired [
+423 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-stack'
+423 silly reify ]
+424 silly reify mark retired [
+424 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/node-config-provider'
+424 silly reify ]
+425 silly reify mark retired [
+425 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/node-http-handler'
+425 silly reify ]
+426 silly reify mark retired [
+426 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/property-provider'
+426 silly reify ]
+427 silly reify mark retired [
+427 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/protocol-http'
+427 silly reify ]
+428 silly reify mark retired [
+428 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/querystring-builder'
+428 silly reify ]
+429 silly reify mark retired [
+429 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/querystring-parser'
+429 silly reify ]
+430 silly reify mark retired [
+430 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/service-error-classification'
+430 silly reify ]
+431 silly reify mark retired [
+431 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/shared-ini-file-loader'
+431 silly reify ]
+432 silly reify mark retired [
+432 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/signature-v4'
+432 silly reify ]
+433 silly reify mark retired [
+433 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/smithy-client'
+433 silly reify ]
+434 silly reify mark retired [
+434 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/types'
+434 silly reify ]
+435 silly reify mark retired [
+435 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/url-parser'
+435 silly reify ]
+436 silly reify mark retired [
+436 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-defaults-mode-browser'
+436 silly reify ]
+437 silly reify mark retired [
+437 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-defaults-mode-node'
+437 silly reify ]
+438 silly reify mark retired [
+438 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-endpoints'
+438 silly reify ]
+439 silly reify mark retired [
+439 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-middleware'
+439 silly reify ]
+440 silly reify mark retired [
+440 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-retry'
+440 silly reify ]
+441 silly reify mark retired [
+441 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-stream'
+441 silly reify ]
+442 silly reify mark retired [
+442 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-waiter'
+442 silly reify ]
+443 silly reify moves {
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/abort-controller': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.abort-controller-Xp85os0s',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/config-resolver': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.config-resolver-wsXhO8dU',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/core': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.core-17UMcsU9',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/credential-provider-imds': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.credential-provider-imds-ULNRGAX7',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/fetch-http-handler': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.fetch-http-handler-O8lNfwPu',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/hash-node': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.hash-node-0ISueyyu',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/invalid-dependency': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.invalid-dependency-mTWFOj4s',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-content-length': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.middleware-content-length-5j5fpnVH',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-endpoint': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.middleware-endpoint-ilU3llmT',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-retry': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.middleware-retry-7F4uPOGM',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-serde': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.middleware-serde-lszMw4IV',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/middleware-stack': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.middleware-stack-XUVdatlj',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/node-config-provider': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.node-config-provider-0ZwW1spb',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/node-http-handler': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.node-http-handler-QewLC3XD',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/property-provider': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.property-provider-giQtxIxU',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/protocol-http': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.protocol-http-j2AWcqmR',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/querystring-builder': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.querystring-builder-SaJ0th0M',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/querystring-parser': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.querystring-parser-3TfEjxwf',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/service-error-classification': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.service-error-classification-Jkd8iqT9',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/shared-ini-file-loader': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.shared-ini-file-loader-oYd3qgWB',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/signature-v4': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.signature-v4-9bRp5CuI',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/smithy-client': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.smithy-client-uhaFkWO5',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/types': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.types-IPBd0c5r',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/url-parser': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.url-parser-aGRmcZ57',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-defaults-mode-browser': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.util-defaults-mode-browser-ODd124xX',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-defaults-mode-node': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.util-defaults-mode-node-xlEm818a',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-endpoints': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.util-endpoints-SfqFO1So',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-middleware': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.util-middleware-a1tP3qX6',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-retry': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.util-retry-WqbBbxIG',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-stream': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.util-stream-bOH3mUzY',
+443 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/util-waiter': '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@smithy/.util-waiter-EcBogB1L'
+443 silly reify }
+444 silly audit bulk request {
+444 silly audit   '@alloc/quick-lru': [ '5.2.0' ],
+444 silly audit   '@anthropic-ai/sdk': [ '0.20.9' ],
+444 silly audit   '@types/node': [ '18.19.130', '20.19.25' ],
+444 silly audit   'undici-types': [ '5.26.5', '6.21.0' ],
+444 silly audit   '@aws-crypto/crc32': [ '5.2.0' ],
+444 silly audit   '@aws-crypto/crc32c': [ '5.2.0' ],
+444 silly audit   '@aws-crypto/sha1-browser': [ '5.2.0' ],
+444 silly audit   '@smithy/is-array-buffer': [ '2.2.0', '4.2.0' ],
+444 silly audit   '@smithy/util-buffer-from': [ '2.2.0', '4.2.0' ],
+444 silly audit   '@smithy/util-utf8': [ '2.3.0', '4.2.0' ],
+444 silly audit   '@aws-crypto/sha256-browser': [ '5.2.0' ],
+444 silly audit   '@aws-crypto/sha256-js': [ '5.2.0' ],
+444 silly audit   '@aws-crypto/supports-web-crypto': [ '5.2.0' ],
+444 silly audit   '@aws-crypto/util': [ '5.2.0' ],
+444 silly audit   '@aws-sdk/client-s3': [ '3.948.0' ],
+444 silly audit   '@aws-sdk/client-sso': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/core': [ '3.947.0', '3.940.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-env': [ '3.947.0', '3.940.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-http': [ '3.947.0', '3.940.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-ini': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-login': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-node': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-process': [ '3.947.0', '3.940.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-sso': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/credential-provider-web-identity': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/middleware-recursion-detection': [ '3.948.0', '3.936.0', '3.969.0' ],
+444 silly audit   '@aws-sdk/middleware-user-agent': [ '3.947.0', '3.940.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/nested-clients': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/token-providers': [ '3.948.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/util-user-agent-node': [ '3.947.0', '3.940.0', '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/client-textract': [ '3.940.0' ],
+444 silly audit   '@aws-sdk/middleware-bucket-endpoint': [ '3.936.0' ],
+444 silly audit   '@aws-sdk/middleware-expect-continue': [ '3.936.0' ],
+444 silly audit   '@aws-sdk/middleware-flexible-checksums': [ '3.947.0' ],
+444 silly audit   '@aws-sdk/middleware-host-header': [ '3.936.0', '3.969.0' ],
+444 silly audit   '@aws-sdk/middleware-location-constraint': [ '3.936.0' ],
+444 silly audit   '@aws-sdk/middleware-logger': [ '3.936.0', '3.969.0' ],
+444 silly audit   '@aws-sdk/middleware-sdk-s3': [ '3.947.0' ],
+444 silly audit   '@aws-sdk/middleware-ssec': [ '3.936.0' ],
+444 silly audit   '@aws-sdk/region-config-resolver': [ '3.936.0', '3.969.0' ],
+444 silly audit   '@aws-sdk/s3-request-presigner': [ '3.948.0' ],
+444 silly audit   '@aws-sdk/signature-v4-multi-region': [ '3.947.0' ],
+444 silly audit   '@aws-sdk/types': [ '3.936.0', '3.969.0' ],
+444 silly audit   '@aws-sdk/util-arn-parser': [ '3.893.0' ],
+444 silly audit   '@aws-sdk/util-endpoints': [ '3.936.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/util-format-url': [ '3.936.0' ],
+444 silly audit   '@aws-sdk/util-locate-window': [ '3.893.0' ],
+444 silly audit   '@aws-sdk/util-user-agent-browser': [ '3.936.0', '3.969.0' ],
+444 silly audit   '@aws-sdk/xml-builder': [ '3.930.0', '3.969.0' ],
+444 silly audit   '@aws/lambda-invoke-store': [ '0.2.2' ],
+444 silly audit   '@babel/runtime': [ '7.28.4' ],
+444 silly audit   '@emnapi/core': [ '1.7.1' ],
+444 silly audit   '@emnapi/runtime': [ '1.7.1' ],
+444 silly audit   '@emnapi/wasi-threads': [ '1.1.0' ],
+444 silly audit   '@eslint-community/eslint-utils': [ '4.9.0' ],
+444 silly audit   '@eslint-community/regexpp': [ '4.12.2' ],
+444 silly audit   '@eslint/eslintrc': [ '2.1.4' ],
+444 silly audit   '@eslint/js': [ '8.57.1' ],
+444 silly audit   '@google/generative-ai': [ '0.24.1' ],
+444 silly audit   '@humanwhocodes/config-array': [ '0.13.0' ],
+444 silly audit   '@humanwhocodes/module-importer': [ '1.0.1' ],
+444 silly audit   '@humanwhocodes/object-schema': [ '2.0.3' ],
+444 silly audit   '@img/colour': [ '1.0.0' ],
+444 silly audit   '@img/sharp-darwin-arm64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-darwin-x64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-libvips-darwin-arm64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-darwin-x64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linux-arm': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linux-arm64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linux-ppc64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linux-riscv64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linux-s390x': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linux-x64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linuxmusl-arm64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-libvips-linuxmusl-x64': [ '1.2.4' ],
+444 silly audit   '@img/sharp-linux-arm': [ '0.34.5' ],
+444 silly audit   '@img/sharp-linux-arm64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-linux-ppc64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-linux-riscv64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-linux-s390x': [ '0.34.5' ],
+444 silly audit   '@img/sharp-linux-x64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-linuxmusl-arm64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-linuxmusl-x64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-wasm32': [ '0.34.5' ],
+444 silly audit   '@img/sharp-win32-arm64': [ '0.34.5' ],
+444 silly audit   '@img/sharp-win32-ia32': [ '0.34.5' ],
+444 silly audit   '@img/sharp-win32-x64': [ '0.34.5' ],
+444 silly audit   '@isaacs/cliui': [ '8.0.2' ],
+444 silly audit   'ansi-regex': [ '6.2.2', '5.0.1' ],
+444 silly audit   'strip-ansi': [ '7.1.2', '6.0.1' ],
+444 silly audit   '@jridgewell/gen-mapping': [ '0.3.13' ],
+444 silly audit   '@jridgewell/resolve-uri': [ '3.1.2' ],
+444 silly audit   '@jridgewell/sourcemap-codec': [ '1.5.5' ],
+444 silly audit   '@jridgewell/trace-mapping': [ '0.3.31' ],
+444 silly audit   '@napi-rs/canvas': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-android-arm64': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-darwin-arm64': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-darwin-x64': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-linux-arm-gnueabihf': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-linux-arm64-gnu': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-linux-arm64-musl': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-linux-riscv64-gnu': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-linux-x64-gnu': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-linux-x64-musl': [ '0.1.83' ],
+444 silly audit   '@napi-rs/canvas-win32-x64-msvc': [ '0.1.83' ],
+444 silly audit   '@napi-rs/wasm-runtime': [ '0.2.12' ],
+444 silly audit   '@next/env': [ '14.2.35' ],
+444 silly audit   '@next/eslint-plugin-next': [ '14.2.33' ],
+444 silly audit   '@next/swc-darwin-arm64': [ '14.2.33' ],
+444 silly audit   '@next/swc-darwin-x64': [ '14.2.33' ],
+444 silly audit   '@next/swc-linux-arm64-gnu': [ '14.2.33' ],
+444 silly audit   '@next/swc-linux-arm64-musl': [ '14.2.33' ],
+444 silly audit   '@next/swc-linux-x64-gnu': [ '14.2.33' ],
+444 silly audit   '@next/swc-linux-x64-musl': [ '14.2.33' ],
+444 silly audit   '@next/swc-win32-arm64-msvc': [ '14.2.33' ],
+444 silly audit   '@next/swc-win32-ia32-msvc': [ '14.2.33' ],
+444 silly audit   '@next/swc-win32-x64-msvc': [ '14.2.33' ],
+444 silly audit   '@nodelib/fs.scandir': [ '2.1.5' ],
+444 silly audit   '@nodelib/fs.stat': [ '2.0.5' ],
+444 silly audit   '@nodelib/fs.walk': [ '1.2.8' ],
+444 silly audit   '@nolyfill/is-core-module': [ '1.0.39' ],
+444 silly audit   '@panva/hkdf': [ '1.2.1' ],
+444 silly audit   '@pdf-lib/standard-fonts': [ '1.0.0' ],
+444 silly audit   '@pdf-lib/upng': [ '1.0.1' ],
+444 silly audit   '@pkgjs/parseargs': [ '0.11.0' ],
+444 silly audit   '@puppeteer/browsers': [ '2.10.13' ],
+444 silly audit   '@rtsao/scc': [ '1.1.0' ],
+444 silly audit   '@rushstack/eslint-patch': [ '1.15.0' ],
+444 silly audit   '@smithy/chunked-blob-reader': [ '5.2.0' ],
+444 silly audit   '@smithy/chunked-blob-reader-native': [ '4.2.1' ],
+444 silly audit   '@smithy/eventstream-codec': [ '4.2.5' ],
+444 silly audit   '@smithy/eventstream-serde-browser': [ '4.2.5' ],
+444 silly audit   '@smithy/eventstream-serde-config-resolver': [ '4.3.5' ],
+444 silly audit   '@smithy/eventstream-serde-node': [ '4.2.5' ],
+444 silly audit   '@smithy/eventstream-serde-universal': [ '4.2.5' ],
+444 silly audit   '@smithy/hash-blob-browser': [ '4.2.6' ],
+444 silly audit   '@smithy/hash-stream-node': [ '4.2.5' ],
+444 silly audit   '@smithy/md5-js': [ '4.2.5' ],
+444 silly audit   '@smithy/util-base64': [ '4.3.0' ],
+444 silly audit   '@smithy/util-body-length-browser': [ '4.2.0' ],
+444 silly audit   '@smithy/util-body-length-node': [ '4.2.1' ],
+444 silly audit   '@smithy/util-config-provider': [ '4.2.0' ],
+444 silly audit   '@smithy/util-hex-encoding': [ '4.2.0' ],
+444 silly audit   '@smithy/util-uri-escape': [ '4.2.0' ],
+444 silly audit   '@smithy/uuid': [ '1.1.0' ],
+444 silly audit   '@sparticuz/chromium': [ '141.0.0' ],
+444 silly audit   '@supabase/auth-js': [ '2.86.0' ],
+444 silly audit   '@supabase/functions-js': [ '2.86.0' ],
+444 silly audit   '@supabase/postgrest-js': [ '2.86.0' ],
+444 silly audit   '@supabase/realtime-js': [ '2.86.0' ],
+444 silly audit   '@supabase/storage-js': [ '2.86.0' ],
+444 silly audit   '@supabase/supabase-js': [ '2.86.0' ],
+444 silly audit   '@swc/counter': [ '0.1.3' ],
+444 silly audit   '@swc/helpers': [ '0.5.5' ],
+444 silly audit   '@tootallnate/quickjs-emscripten': [ '0.23.0' ],
+444 silly audit   '@tybys/wasm-util': [ '0.10.1' ],
+444 silly audit   '@types/bcryptjs': [ '2.4.6' ],
+444 silly audit   '@types/diff': [ '7.0.2' ],
+444 silly audit   '@types/js-levenshtein': [ '1.1.3' ],
+444 silly audit   '@types/json5': [ '0.0.29' ],
+444 silly audit   '@types/node-fetch': [ '2.6.13' ],
+444 silly audit   '@types/phoenix': [ '1.6.6' ],
+444 silly audit   '@types/prop-types': [ '15.7.15' ],
+444 silly audit   '@types/react': [ '18.3.27' ],
+444 silly audit   '@types/react-dom': [ '18.3.7' ],
+444 silly audit   '@types/ws': [ '8.18.1' ],
+444 silly audit   '@types/yauzl': [ '2.10.3' ],
+444 silly audit   '@typescript-eslint/eslint-plugin': [ '8.48.0' ],
+444 silly audit   ignore: [ '7.0.5', '5.3.2' ],
+444 silly audit   '@typescript-eslint/parser': [ '8.48.0' ],
+444 silly audit   '@typescript-eslint/project-service': [ '8.48.0' ],
+444 silly audit   '@typescript-eslint/scope-manager': [ '8.48.0' ],
+444 silly audit   '@typescript-eslint/tsconfig-utils': [ '8.48.0' ],
+444 silly audit   '@typescript-eslint/type-utils': [ '8.48.0' ],
+444 silly audit   '@typescript-eslint/types': [ '8.48.0' ],
+444 silly audit   '@typescript-eslint/typescript-estree': [ '8.48.0' ],
+444 silly audit   'brace-expansion': [ '2.0.2', '1.1.12' ],
+444 silly audit   minimatch: [ '9.0.5', '3.1.2' ],
+444 silly audit   '@typescript-eslint/utils': [ '8.48.0' ],
+444 silly audit   '@typescript-eslint/visitor-keys': [ '8.48.0' ],
+444 silly audit   'eslint-visitor-keys': [ '4.2.1', '3.4.3' ],
+444 silly audit   '@ungap/structured-clone': [ '1.3.0' ],
+444 silly audit   '@unrs/resolver-binding-android-arm-eabi': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-android-arm64': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-darwin-arm64': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-darwin-x64': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-freebsd-x64': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-arm-gnueabihf': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-arm-musleabihf': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-arm64-gnu': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-arm64-musl': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-ppc64-gnu': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-riscv64-gnu': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-riscv64-musl': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-s390x-gnu': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-x64-gnu': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-linux-x64-musl': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-wasm32-wasi': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-win32-arm64-msvc': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-win32-ia32-msvc': [ '1.11.1' ],
+444 silly audit   '@unrs/resolver-binding-win32-x64-msvc': [ '1.11.1' ],
+444 silly audit   'abort-controller': [ '3.0.0' ],
+444 silly audit   acorn: [ '8.15.0' ],
+444 silly audit   'acorn-jsx': [ '5.3.2' ],
+444 silly audit   'agent-base': [ '7.1.4' ],
+444 silly audit   agentkeepalive: [ '4.6.0' ],
+444 silly audit   ajv: [ '6.12.6' ],
+444 silly audit   'ansi-styles': [ '4.3.0', '3.2.1', '6.2.3' ],
+444 silly audit   'any-promise': [ '1.3.0' ],
+444 silly audit   anymatch: [ '3.1.3' ],
+444 silly audit   arg: [ '5.0.2' ],
+444 silly audit   argparse: [ '2.0.1' ],
+444 silly audit   'aria-query': [ '5.3.2' ],
+444 silly audit   'array-buffer-byte-length': [ '1.0.2' ],
+444 silly audit   'array-includes': [ '3.1.9' ],
+444 silly audit   'array.prototype.findlast': [ '1.2.5' ],
+444 silly audit   'array.prototype.findlastindex': [ '1.2.6' ],
+444 silly audit   'array.prototype.flat': [ '1.3.3' ],
+444 silly audit   'array.prototype.flatmap': [ '1.3.3' ],
+444 silly audit   'array.prototype.tosorted': [ '1.1.4' ],
+444 silly audit   'arraybuffer.prototype.slice': [ '1.0.4' ],
+444 silly audit   'ast-types': [ '0.13.4' ],
+444 silly audit   'ast-types-flow': [ '0.0.8' ],
+444 silly audit   'async-function': [ '1.0.0' ],
+444 silly audit   asynckit: [ '0.4.0' ],
+444 silly audit   autoprefixer: [ '10.4.22' ],
+444 silly audit   'available-typed-arrays': [ '1.0.7' ],
+444 silly audit   'axe-core': [ '4.11.0' ],
+444 silly audit   'axobject-query': [ '4.1.0' ],
+444 silly audit   'balanced-match': [ '1.0.2' ],
+444 silly audit   'bare-events': [ '2.8.2' ],
+444 silly audit   'bare-fs': [ '4.5.2' ],
+444 silly audit   'bare-os': [ '3.6.2' ],
+444 silly audit   'bare-path': [ '3.0.0' ],
+444 silly audit   'bare-stream': [ '2.7.0' ],
+444 silly audit   'bare-url': [ '2.3.2' ],
+444 silly audit   'baseline-browser-mapping': [ '2.8.32' ],
+444 silly audit   'basic-ftp': [ '5.0.5' ],
+444 silly audit   bcryptjs: [ '2.4.3' ],
+444 silly audit   'binary-extensions': [ '2.3.0' ],
+444 silly audit   bowser: [ '2.13.0' ],
+444 silly audit   braces: [ '3.0.3' ],
+444 silly audit   browserslist: [ '4.28.0' ],
+444 silly audit   'buffer-crc32': [ '0.2.13' ],
+444 silly audit   busboy: [ '1.6.0' ],
+444 silly audit   'call-bind': [ '1.0.8' ],
+444 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+444 silly audit   'call-bound': [ '1.0.4' ],
+444 silly audit   callsites: [ '3.1.0' ],
+444 silly audit   'camelcase-css': [ '2.0.1' ],
+444 silly audit   'caniuse-lite': [ '1.0.30001757' ],
+444 silly audit   chalk: [ '4.1.2', '2.4.2' ],
+444 silly audit   chokidar: [ '3.6.0' ],
+444 silly audit   'glob-parent': [ '5.1.2', '6.0.2' ],
+444 silly audit   'chromium-bidi': [ '11.0.0' ],
+444 silly audit   'client-only': [ '0.0.1' ],
+444 silly audit   cliui: [ '8.0.1' ],
+444 silly audit   'emoji-regex': [ '8.0.0', '9.2.2' ],
+444 silly audit   'string-width': [ '4.2.3', '5.1.2' ],
+444 silly audit   'wrap-ansi': [ '7.0.0', '8.1.0' ],
+444 silly audit   'color-convert': [ '2.0.1', '1.9.3' ],
+444 silly audit   'color-name': [ '1.1.4', '1.1.3' ],
+444 silly audit   'combined-stream': [ '1.0.8' ],
+444 silly audit   commander: [ '4.1.1' ],
+444 silly audit   'concat-map': [ '0.0.1' ],
+444 silly audit   cookie: [ '0.7.2' ],
+444 silly audit   'cross-spawn': [ '7.0.6' ],
+444 silly audit   cssesc: [ '3.0.0' ],
+444 silly audit   csstype: [ '3.2.3' ],
+444 silly audit   'damerau-levenshtein': [ '1.0.8' ],
+444 silly audit   'data-uri-to-buffer': [ '6.0.2' ],
+444 silly audit   'data-view-buffer': [ '1.0.2' ],
+444 silly audit   'data-view-byte-length': [ '1.0.2' ],
+444 silly audit   'data-view-byte-offset': [ '1.0.1' ],
+444 silly audit   debug: [ '4.4.3', '2.6.9', '3.2.7' ],
+444 silly audit   'deep-is': [ '0.1.4' ],
+444 silly audit   'define-data-property': [ '1.1.4' ],
+444 silly audit   'define-properties': [ '1.2.1' ],
+444 silly audit   degenerator: [ '5.0.1' ],
+444 silly audit   'delayed-stream': [ '1.0.0' ],
+444 silly audit   'detect-libc': [ '2.1.2' ],
+444 silly audit   'devtools-protocol': [ '0.0.1521046' ],
+444 silly audit   didyoumean: [ '1.2.2' ],
+444 silly audit   diff: [ '8.0.2' ],
+444 silly audit   dlv: [ '1.1.3' ],
+444 silly audit   doctrine: [ '3.0.0', '2.1.0' ],
+444 silly audit   'dunder-proto': [ '1.0.1' ],
+444 silly audit   eastasianwidth: [ '0.2.0' ],
+444 silly audit   'electron-to-chromium': [ '1.5.262' ],
+444 silly audit   'end-of-stream': [ '1.4.5' ],
+444 silly audit   'es-abstract': [ '1.24.0' ],
+444 silly audit   'es-define-property': [ '1.0.1' ],
+444 silly audit   'es-errors': [ '1.3.0' ],
+444 silly audit   'es-iterator-helpers': [ '1.2.1' ],
+444 silly audit   'es-object-atoms': [ '1.1.1' ],
+444 silly audit   'es-set-tostringtag': [ '2.1.0' ],
+444 silly audit   'es-shim-unscopables': [ '1.1.0' ],
+444 silly audit   'es-to-primitive': [ '1.3.0' ],
+444 silly audit   escalade: [ '3.2.0' ],
+444 silly audit   'escape-string-regexp': [ '4.0.0', '1.0.5' ],
+444 silly audit   escodegen: [ '2.1.0' ],
+444 silly audit   eslint: [ '8.57.1' ],
+444 silly audit   'eslint-cli': [ '1.1.1' ],
+444 silly audit   'has-flag': [ '3.0.0', '4.0.0' ],
+444 silly audit   ms: [ '2.0.0', '2.1.3' ],
+444 silly audit   'supports-color': [ '5.5.0', '7.2.0' ],
+444 silly audit   'eslint-config-next': [ '14.2.33' ],
+444 silly audit   'eslint-import-resolver-node': [ '0.3.9' ],
+444 silly audit   'eslint-import-resolver-typescript': [ '3.10.1' ],
+444 silly audit   'eslint-module-utils': [ '2.12.1' ],
+444 silly audit   'eslint-plugin-import': [ '2.32.0' ],
+444 silly audit   semver: [ '6.3.1', '7.7.3' ],
+444 silly audit   'eslint-plugin-jsx-a11y': [ '6.10.2' ],
+444 silly audit   'eslint-plugin-react': [ '7.37.5' ],
+444 silly audit   'eslint-plugin-react-hooks': [ '5.0.0-canary-7118f5dd7-20230705' ],
+444 silly audit   resolve: [ '2.0.0-next.5', '1.22.11' ],
+444 silly audit   'eslint-scope': [ '7.2.2' ],
+444 silly audit   espree: [ '9.6.1' ],
+444 silly audit   esprima: [ '4.0.1' ],
+444 silly audit   esquery: [ '1.6.0' ],
+444 silly audit   esrecurse: [ '4.3.0' ],
+444 silly audit   estraverse: [ '5.3.0' ],
+444 silly audit   esutils: [ '2.0.3' ],
+444 silly audit   'event-target-shim': [ '5.0.1' ],
+444 silly audit   'events-universal': [ '1.0.1' ],
+444 silly audit   'extract-zip': [ '2.0.1' ],
+444 silly audit   'fast-deep-equal': [ '3.1.3' ],
+444 silly audit   'fast-fifo': [ '1.3.2' ],
+444 silly audit   'fast-glob': [ '3.3.3' ],
+444 silly audit   'fast-json-stable-stringify': [ '2.1.0' ],
+444 silly audit   'fast-levenshtein': [ '2.0.6' ],
+444 silly audit   'fast-xml-parser': [ '5.2.5' ],
+444 silly audit   fastq: [ '1.19.1' ],
+444 silly audit   'fd-slicer': [ '1.1.0' ],
+444 silly audit   'file-entry-cache': [ '6.0.1' ],
+444 silly audit   'fill-range': [ '7.1.1' ],
+444 silly audit   'find-up': [ '5.0.0' ],
+444 silly audit   'flat-cache': [ '3.2.0' ],
+444 silly audit   flatted: [ '3.3.3' ],
+444 silly audit   'follow-redirects': [ '1.15.11' ],
+444 silly audit   'for-each': [ '0.3.5' ],
+444 silly audit   'foreground-child': [ '3.3.1' ],
+444 silly audit   'form-data': [ '4.0.5' ],
+444 silly audit   'form-data-encoder': [ '1.7.2' ],
+444 silly audit   'formdata-node': [ '4.4.1' ],
+444 silly audit   'web-streams-polyfill': [ '4.0.0-beta.3', '3.3.3' ],
+444 silly audit   'fraction.js': [ '5.3.4' ],
+444 silly audit   fsevents: [ '2.3.3' ],
+444 silly audit   'function-bind': [ '1.1.2' ],
+444 silly audit   'function.prototype.name': [ '1.1.8' ],
+444 silly audit   'functions-have-names': [ '1.2.3' ],
+444 silly audit   'fuse.js': [ '7.1.0' ],
+444 silly audit   'generator-function': [ '2.0.1' ],
+444 silly audit   'get-caller-file': [ '2.0.5' ],
+444 silly audit   'get-intrinsic': [ '1.3.0' ],
+444 silly audit   'get-proto': [ '1.0.1' ],
+444 silly audit   'get-stream': [ '5.2.0' ],
+444 silly audit   'get-symbol-description': [ '1.1.0' ],
+444 silly audit   'get-tsconfig': [ '4.13.0' ],
+444 silly audit   'get-uri': [ '6.0.5' ],
+444 silly audit   glob: [ '10.5.0' ],
+444 silly audit   globals: [ '13.24.0' ],
+444 silly audit   globalthis: [ '1.0.4' ],
+444 silly audit   gopd: [ '1.2.0' ],
+444 silly audit   'graceful-fs': [ '4.2.11' ],
+444 silly audit   graphemer: [ '1.4.0' ],
+444 silly audit   'has-bigints': [ '1.1.0' ],
+444 silly audit   'has-property-descriptors': [ '1.0.2' ],
+444 silly audit   'has-proto': [ '1.2.0' ],
+444 silly audit   'has-symbols': [ '1.1.0' ],
+444 silly audit   'has-tostringtag': [ '1.0.2' ],
+444 silly audit   hasown: [ '2.0.2' ],
+444 silly audit   'http-proxy-agent': [ '7.0.2' ],
+444 silly audit   'https-proxy-agent': [ '7.0.6' ],
+444 silly audit   'humanize-ms': [ '1.2.1' ],
+444 silly audit   'iceberg-js': [ '0.8.0' ],
+444 silly audit   'ignore-loader': [ '0.1.2' ],
+444 silly audit   'import-fresh': [ '3.3.1' ],
+444 silly audit   imurmurhash: [ '0.1.4' ],
+444 silly audit   'internal-slot': [ '1.1.0' ],
+444 silly audit   'ip-address': [ '10.1.0' ],
+444 silly audit   'is-array-buffer': [ '3.0.5' ],
+444 silly audit   'is-async-function': [ '2.1.1' ],
+444 silly audit   'is-bigint': [ '1.1.0' ],
+444 silly audit   'is-binary-path': [ '2.1.0' ],
+444 silly audit   'is-boolean-object': [ '1.2.2' ],
+444 silly audit   'is-bun-module': [ '2.0.0' ],
+444 silly audit   'is-callable': [ '1.2.7' ],
+444 silly audit   'is-core-module': [ '2.16.1' ],
+444 silly audit   'is-data-view': [ '1.0.2' ],
+444 silly audit   'is-date-object': [ '1.1.0' ],
+444 silly audit   'is-extglob': [ '2.1.1' ],
+444 silly audit   'is-finalizationregistry': [ '1.1.1' ],
+444 silly audit   'is-fullwidth-code-point': [ '3.0.0' ],
+444 silly audit   'is-generator-function': [ '1.1.2' ],
+444 silly audit   'is-glob': [ '4.0.3' ],
+444 silly audit   'is-map': [ '2.0.3' ],
+444 silly audit   'is-negative-zero': [ '2.0.3' ],
+444 silly audit   'is-number': [ '7.0.0' ],
+444 silly audit   'is-number-object': [ '1.1.1' ],
+444 silly audit   'is-path-inside': [ '3.0.3' ],
+444 silly audit   'is-regex': [ '1.2.1' ],
+444 silly audit   'is-set': [ '2.0.3' ],
+444 silly audit   'is-shared-array-buffer': [ '1.0.4' ],
+444 silly audit   'is-string': [ '1.1.1' ],
+444 silly audit   'is-symbol': [ '1.1.1' ],
+444 silly audit   'is-typed-array': [ '1.1.15' ],
+444 silly audit   'is-weakmap': [ '2.0.2' ],
+444 silly audit   'is-weakref': [ '1.1.1' ],
+444 silly audit   'is-weakset': [ '2.0.4' ],
+444 silly audit   isarray: [ '2.0.5' ],
+444 silly audit   isexe: [ '2.0.0' ],
+444 silly audit   'iterator.prototype': [ '1.1.5' ],
+444 silly audit   jackspeak: [ '3.4.3' ],
+444 silly audit   jiti: [ '1.21.7' ],
+444 silly audit   jose: [ '4.15.9' ],
+444 silly audit   'js-levenshtein': [ '1.1.6' ],
+444 silly audit   'js-tokens': [ '4.0.0' ],
+444 silly audit   'js-yaml': [ '4.1.1' ],
+444 silly audit   'json-buffer': [ '3.0.1' ],
+444 silly audit   'json-schema-traverse': [ '0.4.1' ],
+444 silly audit   'json-stable-stringify-without-jsonify': [ '1.0.1' ],
+444 silly audit   json5: [ '1.0.2' ],
+444 silly audit   'jsx-ast-utils': [ '3.3.5' ],
+444 silly audit   keyv: [ '4.5.4' ],
+444 silly audit   'language-subtag-registry': [ '0.3.23' ],
+444 silly audit   'language-tags': [ '1.0.9' ],
+444 silly audit   levn: [ '0.4.1' ],
+444 silly audit   lilconfig: [ '3.1.3' ],
+444 silly audit   'lines-and-columns': [ '1.2.4' ],
+444 silly audit   'locate-path': [ '6.0.0' ],
+444 silly audit   'lodash.merge': [ '4.6.2' ],
+444 silly audit   'loose-envify': [ '1.4.0' ],
+444 silly audit   'lru-cache': [ '6.0.0', '10.4.3', '7.18.3' ],
+444 silly audit   'lucide-react': [ '0.555.0' ],
+444 silly audit   'math-intrinsics': [ '1.1.0' ],
+444 silly audit   merge2: [ '1.4.1' ],
+444 silly audit   micromatch: [ '4.0.8' ],
+444 silly audit   'mime-db': [ '1.52.0' ],
+444 silly audit   'mime-types': [ '2.1.35' ],
+444 silly audit   minimist: [ '1.2.8' ],
+444 silly audit   minipass: [ '7.1.2' ],
+444 silly audit   mitt: [ '3.0.1' ],
+444 silly audit   mz: [ '2.7.0' ],
+444 silly audit   nanoid: [ '3.3.11' ],
+444 silly audit   'napi-postinstall': [ '0.3.4' ],
+444 silly audit   'natural-compare': [ '1.4.0' ],
+444 silly audit   netmask: [ '2.0.2' ],
+444 silly audit   next: [ '14.2.35' ],
+444 silly audit   'next-auth': [ '4.24.13' ],
+444 silly audit   postcss: [ '8.4.31', '8.5.6' ],
+444 silly audit   'node-domexception': [ '1.0.0' ],
+444 silly audit   'node-fetch': [ '2.7.0' ],
+444 silly audit   'node-releases': [ '2.0.27' ],
+444 silly audit   'normalize-path': [ '3.0.0' ],
+444 silly audit   'normalize-range': [ '0.1.2' ],
+444 silly audit   'numero-a-letras': [ '1.0.6' ],
+444 silly audit   oauth: [ '0.9.15' ],
+444 silly audit   'object-assign': [ '4.1.1' ],
+444 silly audit   'object-hash': [ '2.2.0', '3.0.0' ],
+444 silly audit   'object-inspect': [ '1.13.4' ],
+444 silly audit   'object-keys': [ '1.1.1' ],
+444 silly audit   'object.assign': [ '4.1.7' ],
+444 silly audit   'object.entries': [ '1.1.9' ],
+444 silly audit   'object.fromentries': [ '2.0.8' ],
+444 silly audit   'object.groupby': [ '1.0.3' ],
+444 silly audit   'object.values': [ '1.2.1' ],
+444 silly audit   'oidc-token-hash': [ '5.2.0' ],
+444 silly audit   once: [ '1.4.0' ],
+444 silly audit   openai: [ '4.104.0' ],
+444 silly audit   'openid-client': [ '5.7.1' ],
+444 silly audit   optionator: [ '0.9.4' ],
+444 silly audit   'own-keys': [ '1.0.1' ],
+444 silly audit   'p-limit': [ '3.1.0' ],
+444 silly audit   'p-locate': [ '5.0.0' ],
+444 silly audit   'pac-proxy-agent': [ '7.2.0' ],
+444 silly audit   'pac-resolver': [ '7.0.1' ],
+444 silly audit   'package-json-from-dist': [ '1.0.1' ],
+444 silly audit   pako: [ '1.0.11' ],
+444 silly audit   'parent-module': [ '1.0.1' ],
+444 silly audit   'path-exists': [ '4.0.0' ],
+444 silly audit   'path-key': [ '3.1.1' ],
+444 silly audit   'path-parse': [ '1.0.7' ],
+444 silly audit   'path-scurry': [ '1.11.1' ],
+444 silly audit   'pdf-lib': [ '1.17.1' ],
+444 silly audit   tslib: [ '1.14.1', '2.8.1' ],
+444 silly audit   'pdfjs-dist': [ '5.4.394' ],
+444 silly audit   pend: [ '1.2.0' ],
+444 silly audit   picocolors: [ '1.1.1' ],
+444 silly audit   picomatch: [ '2.3.1', '4.0.3' ],
+444 silly audit   pify: [ '2.3.0' ],
+444 silly audit   pirates: [ '4.0.7' ],
+444 silly audit   'possible-typed-array-names': [ '1.1.0' ],
+444 silly audit   'postcss-import': [ '15.1.0' ],
+444 silly audit   'postcss-js': [ '4.1.0' ],
+444 silly audit   'postcss-load-config': [ '6.0.1' ],
+444 silly audit   'postcss-nested': [ '6.2.0' ],
+444 silly audit   'postcss-selector-parser': [ '6.1.2' ],
+444 silly audit   'postcss-value-parser': [ '4.2.0' ],
+444 silly audit   preact: [ '10.27.2' ],
+444 silly audit   'preact-render-to-string': [ '5.2.6' ],
+444 silly audit   'prelude-ls': [ '1.2.1' ],
+444 silly audit   'pretty-format': [ '3.8.0' ],
+444 silly audit   progress: [ '2.0.3' ],
+444 silly audit   'prop-types': [ '15.8.1' ],
+444 silly audit   'proxy-agent': [ '6.5.0' ],
+444 silly audit   'proxy-from-env': [ '1.1.0' ],
+444 silly audit   pump: [ '3.0.3' ],
+444 silly audit   punycode: [ '2.3.1' ],
+444 silly audit   'puppeteer-core': [ '24.31.0' ],
+444 silly audit   'queue-microtask': [ '1.2.3' ],
+444 silly audit   react: [ '18.3.1' ],
+444 silly audit   'react-dom': [ '18.3.1' ],
+444 silly audit   'react-is': [ '16.13.1' ],
+444 silly audit   'read-cache': [ '1.0.0' ],
+444 silly audit   readdirp: [ '3.6.0' ],
+444 silly audit   'reflect.getprototypeof': [ '1.0.10' ],
+444 silly audit   'regexp.prototype.flags': [ '1.5.4' ],
+444 silly audit   'require-directory': [ '2.1.1' ],
+444 silly audit   'resolve-from': [ '4.0.0' ],
+444 silly audit   'resolve-pkg-maps': [ '1.0.0' ],
+444 silly audit   reusify: [ '1.1.0' ],
+444 silly audit   rimraf: [ '3.0.2' ],
+444 silly audit   'run-parallel': [ '1.2.0' ],
+444 silly audit   'safe-array-concat': [ '1.1.3' ],
+444 silly audit   'safe-push-apply': [ '1.0.0' ],
+444 silly audit   'safe-regex-test': [ '1.1.0' ],
+444 silly audit   scheduler: [ '0.23.2' ],
+444 silly audit   'set-function-length': [ '1.2.2' ],
+444 silly audit   'set-function-name': [ '2.0.2' ],
+444 silly audit   'set-proto': [ '1.0.0' ],
+444 silly audit   sharp: [ '0.34.5' ],
+444 silly audit   'shebang-command': [ '2.0.0' ],
+444 silly audit   'shebang-regex': [ '3.0.0' ],
+444 silly audit   'side-channel': [ '1.1.0' ],
+444 silly audit   'side-channel-list': [ '1.0.0' ],
+444 silly audit   'side-channel-map': [ '1.0.1' ],
+444 silly audit   'side-channel-weakmap': [ '1.0.2' ],
+444 silly audit   'signal-exit': [ '4.1.0' ],
+444 silly audit   'smart-buffer': [ '4.2.0' ],
+444 silly audit   socks: [ '2.8.7' ],
+444 silly audit   'socks-proxy-agent': [ '8.0.5' ],
+444 silly audit   'source-map': [ '0.6.1' ],
+444 silly audit   'source-map-js': [ '1.2.1' ],
+444 silly audit   'stable-hash': [ '0.0.5' ],
+444 silly audit   'stop-iteration-iterator': [ '1.1.0' ],
+444 silly audit   streamsearch: [ '1.1.0' ],
+444 silly audit   streamx: [ '2.23.0' ],
+444 silly audit   'string.prototype.includes': [ '2.0.1' ],
+444 silly audit   'string.prototype.matchall': [ '4.0.12' ],
+444 silly audit   'string.prototype.repeat': [ '1.0.0' ],
+444 silly audit   'string.prototype.trim': [ '1.2.10' ],
+444 silly audit   'string.prototype.trimend': [ '1.0.9' ],
+444 silly audit   'string.prototype.trimstart': [ '1.0.8' ],
+444 silly audit   'strip-bom': [ '3.0.0' ],
+444 silly audit   'strip-json-comments': [ '3.1.1' ],
+444 silly audit   strnum: [ '2.1.1' ],
+444 silly audit   'styled-jsx': [ '5.1.1' ],
+444 silly audit   sucrase: [ '3.35.1' ],
+444 silly audit   'supports-preserve-symlinks-flag': [ '1.0.0' ],
+444 silly audit   tailwindcss: [ '3.4.18' ],
+444 silly audit   'tar-fs': [ '3.1.1' ],
+444 silly audit   'tar-stream': [ '3.1.7' ],
+444 silly audit   b4a: [ '1.7.3' ],
+444 silly audit   'text-decoder': [ '1.2.3' ],
+444 silly audit   'text-table': [ '0.2.0' ],
+444 silly audit   thenify: [ '3.3.1' ],
+444 silly audit   'thenify-all': [ '1.6.0' ],
+444 silly audit   tinyglobby: [ '0.2.15' ],
+444 silly audit   fdir: [ '6.5.0' ],
+444 silly audit   'to-regex-range': [ '5.0.1' ],
+444 silly audit   tr46: [ '0.0.3' ],
+444 silly audit   'ts-api-utils': [ '2.1.0' ],
+444 silly audit   'ts-interface-checker': [ '0.1.13' ],
+444 silly audit   'tsconfig-paths': [ '3.15.0' ],
+444 silly audit   'type-check': [ '0.4.0' ],
+444 silly audit   'type-fest': [ '0.20.2' ],
+444 silly audit   'typed-array-buffer': [ '1.0.3' ],
+444 silly audit   'typed-array-byte-length': [ '1.0.3' ],
+444 silly audit   'typed-array-byte-offset': [ '1.0.4' ],
+444 silly audit   'typed-array-length': [ '1.0.7' ],
+444 silly audit   'typed-query-selector': [ '2.12.0' ],
+444 silly audit   typescript: [ '5.9.3' ],
+444 silly audit   'unbox-primitive': [ '1.1.0' ],
+444 silly audit   'unrs-resolver': [ '1.11.1' ],
+444 silly audit   'update-browserslist-db': [ '1.1.4' ],
+444 silly audit   'uri-js': [ '4.4.1' ],
+444 silly audit   'util-deprecate': [ '1.0.2' ],
+444 silly audit   uuid: [ '8.3.2' ],
+444 silly audit   'webdriver-bidi-protocol': [ '0.3.9' ],
+444 silly audit   'webidl-conversions': [ '3.0.1' ],
+444 silly audit   'whatwg-url': [ '5.0.0' ],
+444 silly audit   which: [ '2.0.2' ],
+444 silly audit   'which-boxed-primitive': [ '1.1.1' ],
+444 silly audit   'which-builtin-type': [ '1.2.1' ],
+444 silly audit   'which-collection': [ '1.0.2' ],
+444 silly audit   'which-typed-array': [ '1.1.19' ],
+444 silly audit   'word-wrap': [ '1.2.5' ],
+444 silly audit   wrappy: [ '1.0.2' ],
+444 silly audit   ws: [ '8.18.3' ],
+444 silly audit   y18n: [ '5.0.8' ],
+444 silly audit   yallist: [ '4.0.0' ],
+444 silly audit   yargs: [ '17.7.2' ],
+444 silly audit   'yargs-parser': [ '21.1.1' ],
+444 silly audit   yauzl: [ '2.10.0' ],
+444 silly audit   'yocto-queue': [ '0.1.0' ],
+444 silly audit   zod: [ '3.25.76' ],
+444 silly audit   '@aws-sdk/client-dynamodb': [ '3.971.0', '3.970.0' ],
+444 silly audit   '@aws-sdk/util-dynamodb': [ '3.971.0' ],
+444 silly audit   '@aws-sdk/dynamodb-codec': [ '3.970.0' ],
+444 silly audit   '@aws-sdk/middleware-endpoint-discovery': [ '3.971.0', '3.969.0' ],
+444 silly audit   '@smithy/config-resolver': [ '4.4.6' ],
+444 silly audit   '@smithy/core': [ '3.20.7' ],
+444 silly audit   '@smithy/fetch-http-handler': [ '5.3.9' ],
+444 silly audit   '@smithy/hash-node': [ '4.2.8' ],
+444 silly audit   '@smithy/invalid-dependency': [ '4.2.8' ],
+444 silly audit   '@smithy/middleware-content-length': [ '4.2.8' ],
+444 silly audit   '@smithy/middleware-endpoint': [ '4.4.8' ],
+444 silly audit   '@smithy/middleware-retry': [ '4.4.24' ],
+444 silly audit   '@smithy/middleware-serde': [ '4.2.9' ],
+444 silly audit   '@smithy/middleware-stack': [ '4.2.8' ],
+444 silly audit   '@smithy/node-config-provider': [ '4.3.8' ],
+444 silly audit   '@smithy/node-http-handler': [ '4.4.8' ],
+444 silly audit   '@smithy/protocol-http': [ '5.3.8' ],
+444 silly audit   '@smithy/smithy-client': [ '4.10.9' ],
+444 silly audit   '@smithy/types': [ '4.12.0' ],
+444 silly audit   '@smithy/url-parser': [ '4.2.8' ],
+444 silly audit   '@smithy/util-defaults-mode-browser': [ '4.3.23' ],
+444 silly audit   '@smithy/util-defaults-mode-node': [ '4.2.26' ],
+444 silly audit   '@smithy/util-endpoints': [ '3.2.8' ],
+444 silly audit   '@smithy/util-middleware': [ '4.2.8' ],
+444 silly audit   '@smithy/util-retry': [ '4.2.8' ],
+444 silly audit   '@smithy/util-waiter': [ '4.2.8' ],
+444 silly audit   '@aws-sdk/endpoint-cache': [ '3.971.0', '3.968.0' ],
+444 silly audit   mnemonist: [ '0.38.3' ],
+444 silly audit   '@smithy/util-stream': [ '4.5.10' ],
+444 silly audit   '@smithy/querystring-builder': [ '4.2.8' ],
+444 silly audit   '@smithy/shared-ini-file-loader': [ '4.4.3' ],
+444 silly audit   '@smithy/service-error-classification': [ '4.2.8' ],
+444 silly audit   '@smithy/property-provider': [ '4.2.8' ],
+444 silly audit   '@smithy/abort-controller': [ '4.2.8' ],
+444 silly audit   '@smithy/querystring-parser': [ '4.2.8' ],
+444 silly audit   '@smithy/credential-provider-imds': [ '4.2.8' ],
+444 silly audit   obliterator: [ '1.6.1' ],
+444 silly audit   '@smithy/signature-v4': [ '5.3.8' ]
+444 silly audit }
+445 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-win32-x64-msvc
+446 silly reify mark deleted [
+446 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-win32-x64-msvc'
+446 silly reify ]
+447 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-win32-ia32-msvc
+448 silly reify mark deleted [
+448 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-win32-ia32-msvc'
+448 silly reify ]
+449 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-win32-arm64-msvc
+450 silly reify mark deleted [
+450 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-win32-arm64-msvc'
+450 silly reify ]
+451 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-wasm32-wasi
+452 silly reify mark deleted [
+452 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-wasm32-wasi'
+452 silly reify ]
+453 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/wasm-runtime
+454 silly reify mark deleted [
+454 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/wasm-runtime'
+454 silly reify ]
+455 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@emnapi/core
+456 silly reify mark deleted [
+456 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@emnapi/core'
+456 silly reify ]
+457 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@tybys/wasm-util
+458 silly reify mark deleted [
+458 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@tybys/wasm-util'
+458 silly reify ]
+459 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@emnapi/wasi-threads
+460 silly reify mark deleted [
+460 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@emnapi/wasi-threads'
+460 silly reify ]
+461 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-x64-musl
+462 silly reify mark deleted [
+462 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-x64-musl'
+462 silly reify ]
+463 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-x64-gnu
+464 silly reify mark deleted [
+464 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-x64-gnu'
+464 silly reify ]
+465 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-s390x-gnu
+466 silly reify mark deleted [
+466 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-s390x-gnu'
+466 silly reify ]
+467 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-riscv64-musl
+468 silly reify mark deleted [
+468 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-riscv64-musl'
+468 silly reify ]
+469 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-riscv64-gnu
+470 silly reify mark deleted [
+470 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-riscv64-gnu'
+470 silly reify ]
+471 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-ppc64-gnu
+472 silly reify mark deleted [
+472 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-ppc64-gnu'
+472 silly reify ]
+473 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm64-musl
+474 silly reify mark deleted [
+474 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm64-musl'
+474 silly reify ]
+475 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm64-gnu
+476 silly reify mark deleted [
+476 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm64-gnu'
+476 silly reify ]
+477 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm-musleabihf
+478 silly reify mark deleted [
+478 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm-musleabihf'
+478 silly reify ]
+479 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm-gnueabihf
+480 silly reify mark deleted [
+480 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-linux-arm-gnueabihf'
+480 silly reify ]
+481 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-freebsd-x64
+482 silly reify mark deleted [
+482 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-freebsd-x64'
+482 silly reify ]
+483 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-darwin-x64
+484 silly reify mark deleted [
+484 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-darwin-x64'
+484 silly reify ]
+485 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-android-arm64
+486 silly reify mark deleted [
+486 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-android-arm64'
+486 silly reify ]
+487 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-android-arm-eabi
+488 silly reify mark deleted [
+488 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@unrs/resolver-binding-android-arm-eabi'
+488 silly reify ]
+489 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-win32-x64-msvc
+490 silly reify mark deleted [
+490 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-win32-x64-msvc'
+490 silly reify ]
+491 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-win32-ia32-msvc
+492 silly reify mark deleted [
+492 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-win32-ia32-msvc'
+492 silly reify ]
+493 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-win32-arm64-msvc
+494 silly reify mark deleted [
+494 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-win32-arm64-msvc'
+494 silly reify ]
+495 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-x64-musl
+496 silly reify mark deleted [
+496 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-x64-musl'
+496 silly reify ]
+497 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-x64-gnu
+498 silly reify mark deleted [
+498 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-x64-gnu'
+498 silly reify ]
+499 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-arm64-musl
+500 silly reify mark deleted [
+500 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-arm64-musl'
+500 silly reify ]
+501 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-arm64-gnu
+502 silly reify mark deleted [
+502 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-linux-arm64-gnu'
+502 silly reify ]
+503 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-darwin-x64
+504 silly reify mark deleted [
+504 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@next/swc-darwin-x64'
+504 silly reify ]
+505 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-win32-x64-msvc
+506 silly reify mark deleted [
+506 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-win32-x64-msvc'
+506 silly reify ]
+507 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-x64-musl
+508 silly reify mark deleted [
+508 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-x64-musl'
+508 silly reify ]
+509 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-x64-gnu
+510 silly reify mark deleted [
+510 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-x64-gnu'
+510 silly reify ]
+511 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-riscv64-gnu
+512 silly reify mark deleted [
+512 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-riscv64-gnu'
+512 silly reify ]
+513 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-arm64-musl
+514 silly reify mark deleted [
+514 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-arm64-musl'
+514 silly reify ]
+515 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-arm64-gnu
+516 silly reify mark deleted [
+516 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-arm64-gnu'
+516 silly reify ]
+517 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-arm-gnueabihf
+518 silly reify mark deleted [
+518 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-linux-arm-gnueabihf'
+518 silly reify ]
+519 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-darwin-x64
+520 silly reify mark deleted [
+520 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-darwin-x64'
+520 silly reify ]
+521 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-android-arm64
+522 silly reify mark deleted [
+522 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@napi-rs/canvas-android-arm64'
+522 silly reify ]
+523 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-win32-x64
+524 silly reify mark deleted [
+524 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-win32-x64'
+524 silly reify ]
+525 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-win32-ia32
+526 silly reify mark deleted [
+526 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-win32-ia32'
+526 silly reify ]
+527 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-win32-arm64
+528 silly reify mark deleted [
+528 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-win32-arm64'
+528 silly reify ]
+529 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-wasm32
+530 silly reify mark deleted [
+530 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-wasm32'
+530 silly reify ]
+531 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linuxmusl-x64
+532 silly reify mark deleted [
+532 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linuxmusl-x64'
+532 silly reify ]
+533 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linuxmusl-arm64
+534 silly reify mark deleted [
+534 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linuxmusl-arm64'
+534 silly reify ]
+535 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-x64
+536 silly reify mark deleted [
+536 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-x64'
+536 silly reify ]
+537 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-s390x
+538 silly reify mark deleted [
+538 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-s390x'
+538 silly reify ]
+539 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-riscv64
+540 silly reify mark deleted [
+540 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-riscv64'
+540 silly reify ]
+541 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-ppc64
+542 silly reify mark deleted [
+542 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-ppc64'
+542 silly reify ]
+543 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-arm64
+544 silly reify mark deleted [
+544 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-arm64'
+544 silly reify ]
+545 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-arm
+546 silly reify mark deleted [
+546 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-linux-arm'
+546 silly reify ]
+547 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linuxmusl-x64
+548 silly reify mark deleted [
+548 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linuxmusl-x64'
+548 silly reify ]
+549 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linuxmusl-arm64
+550 silly reify mark deleted [
+550 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linuxmusl-arm64'
+550 silly reify ]
+551 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-x64
+552 silly reify mark deleted [
+552 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-x64'
+552 silly reify ]
+553 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-s390x
+554 silly reify mark deleted [
+554 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-s390x'
+554 silly reify ]
+555 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-riscv64
+556 silly reify mark deleted [
+556 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-riscv64'
+556 silly reify ]
+557 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-ppc64
+558 silly reify mark deleted [
+558 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-ppc64'
+558 silly reify ]
+559 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-arm64
+560 silly reify mark deleted [
+560 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-arm64'
+560 silly reify ]
+561 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-arm
+562 silly reify mark deleted [
+562 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-linux-arm'
+562 silly reify ]
+563 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-darwin-x64
+564 silly reify mark deleted [
+564 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-libvips-darwin-x64'
+564 silly reify ]
+565 verbose reify failed optional dependency /Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-darwin-x64
+566 silly reify mark deleted [
+566 silly reify   '/Users/jorgeluiscontrerasherrera/Documents/_git/legis/node_modules/@img/sharp-darwin-x64'
+566 silly reify ]
+567 http cache obliterator@https://registry.npmjs.org/obliterator/-/obliterator-1.6.1.tgz 0ms (cache hit)
+568 http cache @aws-sdk/middleware-endpoint-discovery@https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.971.0.tgz 0ms (cache hit)
+569 http cache mnemonist@https://registry.npmjs.org/mnemonist/-/mnemonist-0.38.3.tgz 0ms (cache hit)
+570 http cache @aws-sdk/endpoint-cache@https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.971.0.tgz 0ms (cache hit)
+571 http cache @aws-sdk/util-dynamodb@https://registry.npmjs.org/@aws-sdk/util-dynamodb/-/util-dynamodb-3.971.0.tgz 0ms (cache hit)
+572 http cache @aws-sdk/client-dynamodb@https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.971.0.tgz 0ms (cache hit)
+573 http cache @tybys/wasm-util@https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz 0ms (cache hit)
+574 http cache @emnapi/core@https://registry.npmjs.org/@emnapi/core/-/core-1.7.1.tgz 0ms (cache hit)
+575 http cache @emnapi/wasi-threads@https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.1.0.tgz 0ms (cache hit)
+576 http cache @smithy/util-waiter@https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.2.8.tgz 0ms (cache hit)
+577 http cache @smithy/util-stream@https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.5.10.tgz 0ms (cache hit)
+578 http cache @smithy/util-retry@https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.2.8.tgz 0ms (cache hit)
+579 http cache @napi-rs/wasm-runtime@https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz 0ms (cache hit)
+580 http cache @smithy/util-middleware@https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.2.8.tgz 0ms (cache hit)
+581 http cache @smithy/util-defaults-mode-browser@https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.3.23.tgz 0ms (cache hit)
+582 http cache @smithy/url-parser@https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.2.8.tgz 0ms (cache hit)
+583 http cache @smithy/util-defaults-mode-node@https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.2.26.tgz 0ms (cache hit)
+584 http cache @smithy/smithy-client@https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.10.9.tgz 0ms (cache hit)
+585 http cache @smithy/util-endpoints@https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.2.8.tgz 0ms (cache hit)
+586 http cache @smithy/types@https://registry.npmjs.org/@smithy/types/-/types-4.12.0.tgz 0ms (cache hit)
+587 http cache @smithy/shared-ini-file-loader@https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.4.3.tgz 0ms (cache hit)
+588 http cache @smithy/signature-v4@https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.3.8.tgz 0ms (cache hit)
+589 http cache @smithy/querystring-parser@https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.2.8.tgz 0ms (cache hit)
+590 http cache @smithy/querystring-builder@https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.2.8.tgz 0ms (cache hit)
+591 http cache @smithy/service-error-classification@https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.2.8.tgz 0ms (cache hit)
+592 http cache @smithy/protocol-http@https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.3.8.tgz 0ms (cache hit)
+593 http cache @smithy/node-config-provider@https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.3.8.tgz 0ms (cache hit)
+594 http cache @smithy/property-provider@https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.2.8.tgz 0ms (cache hit)
+595 http cache @smithy/middleware-stack@https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.2.8.tgz 0ms (cache hit)
+596 http cache @smithy/middleware-serde@https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.2.9.tgz 0ms (cache hit)
+597 http cache @smithy/node-http-handler@https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.4.8.tgz 0ms (cache hit)
+598 http cache @smithy/middleware-retry@https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.4.24.tgz 0ms (cache hit)
+599 http cache @smithy/middleware-endpoint@https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.4.8.tgz 0ms (cache hit)
+600 http cache @smithy/middleware-content-length@https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.2.8.tgz 0ms (cache hit)
+601 http cache @smithy/invalid-dependency@https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.2.8.tgz 0ms (cache hit)
+602 http cache @smithy/hash-node@https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.2.8.tgz 0ms (cache hit)
+603 http cache @smithy/credential-provider-imds@https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.2.8.tgz 0ms (cache hit)
+604 http cache @smithy/fetch-http-handler@https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.3.9.tgz 0ms (cache hit)
+605 http cache @smithy/core@https://registry.npmjs.org/@smithy/core/-/core-3.20.7.tgz 0ms (cache hit)
+606 http cache @smithy/config-resolver@https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.4.6.tgz 0ms (cache hit)
+607 http cache @smithy/abort-controller@https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.2.8.tgz 0ms (cache hit)
+608 http cache @aws-sdk/endpoint-cache@https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.968.0.tgz 0ms (cache hit)
+609 http cache @aws-sdk/types@https://registry.npmjs.org/@aws-sdk/types/-/types-3.969.0.tgz 0ms (cache hit)
+610 http cache @aws-sdk/credential-provider-web-identity@https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.971.0.tgz 0ms (cache hit)
+611 http cache @aws-sdk/nested-clients@https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.971.0.tgz 0ms (cache hit)
+612 http cache @aws-sdk/credential-provider-login@https://registry.npmjs.org/@aws-sdk/credential-provider-login/-/credential-provider-login-3.971.0.tgz 0ms (cache hit)
+613 http cache @aws-sdk/client-sso@https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.971.0.tgz 0ms (cache hit)
+614 http cache @aws-sdk/token-providers@https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.971.0.tgz 0ms (cache hit)
+615 http cache @aws-sdk/credential-provider-ini@https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.971.0.tgz 0ms (cache hit)
+616 http cache @aws-sdk/credential-provider-sso@https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.971.0.tgz 0ms (cache hit)
+617 http cache @aws-sdk/credential-provider-http@https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.970.0.tgz 0ms (cache hit)
+618 http cache @aws-sdk/credential-provider-process@https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.970.0.tgz 0ms (cache hit)
+619 http cache @aws-sdk/xml-builder@https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.969.0.tgz 0ms (cache hit)
+620 http cache @aws-sdk/util-user-agent-browser@https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.969.0.tgz 0ms (cache hit)
+621 http cache @aws-sdk/credential-provider-env@https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.970.0.tgz 0ms (cache hit)
+622 http cache @aws-sdk/util-endpoints@https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.970.0.tgz 0ms (cache hit)
+623 http cache @aws-sdk/util-user-agent-node@https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.971.0.tgz 0ms (cache hit)
+624 http cache @aws-sdk/types@https://registry.npmjs.org/@aws-sdk/types/-/types-3.969.0.tgz 0ms (cache hit)
+625 http cache @aws-sdk/middleware-user-agent@https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.970.0.tgz 0ms (cache hit)
+626 http cache @aws-sdk/region-config-resolver@https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.969.0.tgz 1ms (cache hit)
+627 http cache @aws-sdk/middleware-recursion-detection@https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.969.0.tgz 0ms (cache hit)
+628 http cache @aws-sdk/middleware-logger@https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.969.0.tgz 0ms (cache hit)
+629 http cache @aws-sdk/client-dynamodb@https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.970.0.tgz 0ms (cache hit)
+630 http cache @aws-sdk/middleware-host-header@https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.969.0.tgz 0ms (cache hit)
+631 http cache @aws-sdk/token-providers@https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.970.0.tgz 0ms (cache hit)
+632 http cache @aws-sdk/client-sso@https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.970.0.tgz 0ms (cache hit)
+633 http cache @aws-sdk/nested-clients@https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.970.0.tgz 0ms (cache hit)
+634 http cache @aws-sdk/credential-provider-login@https://registry.npmjs.org/@aws-sdk/credential-provider-login/-/credential-provider-login-3.970.0.tgz 0ms (cache hit)
+635 http cache @aws-sdk/credential-provider-web-identity@https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.970.0.tgz 0ms (cache hit)
+636 http cache @aws-sdk/credential-provider-sso@https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.970.0.tgz 0ms (cache hit)
+637 http cache @aws-sdk/credential-provider-ini@https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.970.0.tgz 0ms (cache hit)
+638 http cache @aws-sdk/middleware-endpoint-discovery@https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.969.0.tgz 0ms (cache hit)
+639 http cache @aws-sdk/dynamodb-codec@https://registry.npmjs.org/@aws-sdk/dynamodb-codec/-/dynamodb-codec-3.970.0.tgz 0ms (cache hit)
+640 http cache @aws-sdk/credential-provider-node@https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.970.0.tgz 0ms (cache hit)
+641 http cache @aws-sdk/util-user-agent-node@https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.970.0.tgz 0ms (cache hit)
+642 http cache @aws-sdk/credential-provider-node@https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.971.0.tgz 0ms (cache hit)
+643 http cache @aws-sdk/core@https://registry.npmjs.org/@aws-sdk/core/-/core-3.970.0.tgz 0ms (cache hit)
+644 silly tarball no local data for obliterator@https://registry.npmjs.org/obliterator/-/obliterator-1.6.1.tgz. Extracting by manifest.
+645 silly tarball no local data for @aws-sdk/middleware-endpoint-discovery@https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.971.0.tgz. Extracting by manifest.
+646 silly tarball no local data for mnemonist@https://registry.npmjs.org/mnemonist/-/mnemonist-0.38.3.tgz. Extracting by manifest.
+647 silly tarball no local data for @aws-sdk/endpoint-cache@https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.971.0.tgz. Extracting by manifest.
+648 silly tarball no local data for @aws-sdk/util-dynamodb@https://registry.npmjs.org/@aws-sdk/util-dynamodb/-/util-dynamodb-3.971.0.tgz. Extracting by manifest.
+649 silly tarball no local data for @aws-sdk/client-dynamodb@https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.971.0.tgz. Extracting by manifest.
+650 silly tarball no local data for @tybys/wasm-util@https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz. Extracting by manifest.
+651 silly tarball no local data for @emnapi/core@https://registry.npmjs.org/@emnapi/core/-/core-1.7.1.tgz. Extracting by manifest.
+652 silly tarball no local data for @emnapi/wasi-threads@https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.1.0.tgz. Extracting by manifest.
+653 silly tarball no local data for @smithy/util-waiter@https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.2.8.tgz. Extracting by manifest.
+654 silly tarball no local data for @smithy/util-stream@https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.5.10.tgz. Extracting by manifest.
+655 silly tarball no local data for @smithy/util-retry@https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.2.8.tgz. Extracting by manifest.
+656 silly tarball no local data for @napi-rs/wasm-runtime@https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz. Extracting by manifest.
+657 silly tarball no local data for @smithy/util-middleware@https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.2.8.tgz. Extracting by manifest.
+658 silly tarball no local data for @smithy/util-defaults-mode-browser@https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.3.23.tgz. Extracting by manifest.
+659 silly tarball no local data for @smithy/url-parser@https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.2.8.tgz. Extracting by manifest.
+660 silly tarball no local data for @smithy/util-defaults-mode-node@https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.2.26.tgz. Extracting by manifest.
+661 silly tarball no local data for @smithy/smithy-client@https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.10.9.tgz. Extracting by manifest.
+662 silly tarball no local data for @smithy/util-endpoints@https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.2.8.tgz. Extracting by manifest.
+663 silly tarball no local data for @smithy/types@https://registry.npmjs.org/@smithy/types/-/types-4.12.0.tgz. Extracting by manifest.
+664 silly tarball no local data for @smithy/shared-ini-file-loader@https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.4.3.tgz. Extracting by manifest.
+665 silly tarball no local data for @smithy/signature-v4@https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.3.8.tgz. Extracting by manifest.
+666 silly tarball no local data for @smithy/querystring-parser@https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.2.8.tgz. Extracting by manifest.
+667 silly tarball no local data for @smithy/querystring-builder@https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.2.8.tgz. Extracting by manifest.
+668 silly tarball no local data for @smithy/service-error-classification@https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.2.8.tgz. Extracting by manifest.
+669 silly tarball no local data for @smithy/protocol-http@https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.3.8.tgz. Extracting by manifest.
+670 silly tarball no local data for @smithy/node-config-provider@https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.3.8.tgz. Extracting by manifest.
+671 silly tarball no local data for @smithy/property-provider@https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.2.8.tgz. Extracting by manifest.
+672 silly tarball no local data for @smithy/middleware-stack@https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.2.8.tgz. Extracting by manifest.
+673 silly tarball no local data for @smithy/middleware-serde@https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.2.9.tgz. Extracting by manifest.
+674 silly tarball no local data for @smithy/node-http-handler@https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.4.8.tgz. Extracting by manifest.
+675 silly tarball no local data for @smithy/middleware-retry@https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.4.24.tgz. Extracting by manifest.
+676 silly tarball no local data for @smithy/middleware-endpoint@https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.4.8.tgz. Extracting by manifest.
+677 silly tarball no local data for @smithy/middleware-content-length@https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.2.8.tgz. Extracting by manifest.
+678 silly tarball no local data for @smithy/invalid-dependency@https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.2.8.tgz. Extracting by manifest.
+679 silly tarball no local data for @smithy/hash-node@https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.2.8.tgz. Extracting by manifest.
+680 silly tarball no local data for @smithy/credential-provider-imds@https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.2.8.tgz. Extracting by manifest.
+681 silly tarball no local data for @smithy/fetch-http-handler@https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.3.9.tgz. Extracting by manifest.
+682 silly tarball no local data for @smithy/core@https://registry.npmjs.org/@smithy/core/-/core-3.20.7.tgz. Extracting by manifest.
+683 silly tarball no local data for @smithy/config-resolver@https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.4.6.tgz. Extracting by manifest.
+684 silly tarball no local data for @smithy/abort-controller@https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.2.8.tgz. Extracting by manifest.
+685 silly tarball no local data for @aws-sdk/endpoint-cache@https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.968.0.tgz. Extracting by manifest.
+686 silly tarball no local data for @aws-sdk/types@https://registry.npmjs.org/@aws-sdk/types/-/types-3.969.0.tgz. Extracting by manifest.
+687 silly tarball no local data for @aws-sdk/credential-provider-web-identity@https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.971.0.tgz. Extracting by manifest.
+688 silly tarball no local data for @aws-sdk/nested-clients@https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.971.0.tgz. Extracting by manifest.
+689 silly tarball no local data for @aws-sdk/credential-provider-login@https://registry.npmjs.org/@aws-sdk/credential-provider-login/-/credential-provider-login-3.971.0.tgz. Extracting by manifest.
+690 silly tarball no local data for @aws-sdk/client-sso@https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.971.0.tgz. Extracting by manifest.
+691 silly tarball no local data for @aws-sdk/token-providers@https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.971.0.tgz. Extracting by manifest.
+692 silly tarball no local data for @aws-sdk/credential-provider-ini@https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.971.0.tgz. Extracting by manifest.
+693 silly tarball no local data for @aws-sdk/credential-provider-sso@https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.971.0.tgz. Extracting by manifest.
+694 silly tarball no local data for @aws-sdk/credential-provider-http@https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.970.0.tgz. Extracting by manifest.
+695 silly tarball no local data for @aws-sdk/xml-builder@https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.969.0.tgz. Extracting by manifest.
+696 silly tarball no local data for @aws-sdk/util-user-agent-browser@https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.969.0.tgz. Extracting by manifest.
+697 silly tarball no local data for @aws-sdk/credential-provider-process@https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.970.0.tgz. Extracting by manifest.
+698 silly tarball no local data for @aws-sdk/util-endpoints@https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.970.0.tgz. Extracting by manifest.
+699 silly tarball no local data for @aws-sdk/credential-provider-env@https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.970.0.tgz. Extracting by manifest.
+700 silly tarball no local data for @aws-sdk/util-user-agent-node@https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.971.0.tgz. Extracting by manifest.
+701 silly tarball no local data for @aws-sdk/types@https://registry.npmjs.org/@aws-sdk/types/-/types-3.969.0.tgz. Extracting by manifest.
+702 silly tarball no local data for @aws-sdk/middleware-user-agent@https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.970.0.tgz. Extracting by manifest.
+703 silly tarball no local data for @aws-sdk/region-config-resolver@https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.969.0.tgz. Extracting by manifest.
+704 silly tarball no local data for @aws-sdk/middleware-logger@https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.969.0.tgz. Extracting by manifest.
+705 silly tarball no local data for @aws-sdk/middleware-recursion-detection@https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.969.0.tgz. Extracting by manifest.
+706 silly tarball no local data for @aws-sdk/client-dynamodb@https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.970.0.tgz. Extracting by manifest.
+707 silly tarball no local data for @aws-sdk/middleware-host-header@https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.969.0.tgz. Extracting by manifest.
+708 silly tarball no local data for @aws-sdk/token-providers@https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.970.0.tgz. Extracting by manifest.
+709 silly tarball no local data for @aws-sdk/client-sso@https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.970.0.tgz. Extracting by manifest.
+710 silly tarball no local data for @aws-sdk/nested-clients@https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.970.0.tgz. Extracting by manifest.
+711 silly tarball no local data for @aws-sdk/credential-provider-login@https://registry.npmjs.org/@aws-sdk/credential-provider-login/-/credential-provider-login-3.970.0.tgz. Extracting by manifest.
+712 silly tarball no local data for @aws-sdk/credential-provider-web-identity@https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.970.0.tgz. Extracting by manifest.
+713 silly tarball no local data for @aws-sdk/credential-provider-sso@https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.970.0.tgz. Extracting by manifest.
+714 silly tarball no local data for @aws-sdk/credential-provider-ini@https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.970.0.tgz. Extracting by manifest.
+715 silly tarball no local data for @aws-sdk/middleware-endpoint-discovery@https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.969.0.tgz. Extracting by manifest.
+716 silly tarball no local data for @aws-sdk/dynamodb-codec@https://registry.npmjs.org/@aws-sdk/dynamodb-codec/-/dynamodb-codec-3.970.0.tgz. Extracting by manifest.
+717 silly tarball no local data for @aws-sdk/credential-provider-node@https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.970.0.tgz. Extracting by manifest.
+718 silly tarball no local data for @aws-sdk/util-user-agent-node@https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.970.0.tgz. Extracting by manifest.
+719 silly tarball no local data for @aws-sdk/credential-provider-node@https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.971.0.tgz. Extracting by manifest.
+720 silly tarball no local data for @aws-sdk/core@https://registry.npmjs.org/@aws-sdk/core/-/core-3.970.0.tgz. Extracting by manifest.
+721 http fetch GET 200 https://registry.npmjs.org/mnemonist/-/mnemonist-0.38.3.tgz 116ms (cache miss)
+722 http fetch GET 200 https://registry.npmjs.org/@emnapi/core/-/core-1.7.1.tgz 121ms (cache miss)
+723 http fetch GET 200 https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.1.tgz 130ms (cache miss)
+724 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 185ms
+725 silly audit report {
+725 silly audit report   diff: [
+725 silly audit report     {
+725 silly audit report       id: 1112148,
+725 silly audit report       url: 'https://github.com/advisories/GHSA-73rr-hh4g-fpgx',
+725 silly audit report       title: 'jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch',
+725 silly audit report       severity: 'low',
+725 silly audit report       vulnerable_versions: '<8.0.3',
+725 silly audit report       cwe: [Array],
+725 silly audit report       cvss: [Object]
+725 silly audit report     }
+725 silly audit report   ],
+725 silly audit report   preact: [
+725 silly audit report     {
+725 silly audit report       id: 1111983,
+725 silly audit report       url: 'https://github.com/advisories/GHSA-36hm-qxxp-pg3m',
+725 silly audit report       title: 'Preact has JSON VNode Injection issue',
+725 silly audit report       severity: 'high',
+725 silly audit report       vulnerable_versions: '>=10.27.0 <10.27.3',
+725 silly audit report       cwe: [Array],
+725 silly audit report       cvss: [Object]
+725 silly audit report     }
+725 silly audit report   ]
+725 silly audit report }
+726 silly packumentCache corgi:https://registry.npmjs.org/diff cache-miss
+727 silly packumentCache corgi:https://registry.npmjs.org/preact cache-miss
+728 http fetch GET 200 https://registry.npmjs.org/obliterator/-/obliterator-1.6.1.tgz 185ms (cache miss)
+729 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/util-dynamodb/-/util-dynamodb-3.971.0.tgz 184ms (cache miss)
+730 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.971.0.tgz 205ms (cache miss)
+731 http fetch GET 200 https://registry.npmjs.org/@smithy/url-parser/-/url-parser-4.2.8.tgz 209ms (cache miss)
+732 http fetch GET 200 https://registry.npmjs.org/@smithy/util-defaults-mode-node/-/util-defaults-mode-node-4.2.26.tgz 228ms (cache miss)
+733 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.971.0.tgz 244ms (cache miss)
+734 http fetch GET 200 https://registry.npmjs.org/@emnapi/wasi-threads/-/wasi-threads-1.1.0.tgz 276ms (cache miss)
+735 http fetch GET 200 https://registry.npmjs.org/@smithy/util-stream/-/util-stream-4.5.10.tgz 283ms (cache miss)
+736 http fetch GET 200 https://registry.npmjs.org/@smithy/util-defaults-mode-browser/-/util-defaults-mode-browser-4.3.23.tgz 286ms (cache miss)
+737 http fetch GET 200 https://registry.npmjs.org/@smithy/util-middleware/-/util-middleware-4.2.8.tgz 296ms (cache miss)
+738 http fetch GET 200 https://registry.npmjs.org/@smithy/util-waiter/-/util-waiter-4.2.8.tgz 304ms (cache miss)
+739 http fetch GET 200 https://registry.npmjs.org/@smithy/shared-ini-file-loader/-/shared-ini-file-loader-4.4.3.tgz 306ms (cache miss)
+740 http fetch GET 200 https://registry.npmjs.org/@smithy/signature-v4/-/signature-v4-5.3.8.tgz 310ms (cache miss)
+741 http fetch GET 200 https://registry.npmjs.org/@smithy/util-endpoints/-/util-endpoints-3.2.8.tgz 311ms (cache miss)
+742 http fetch GET 200 https://registry.npmjs.org/@smithy/querystring-parser/-/querystring-parser-4.2.8.tgz 317ms (cache miss)
+743 http fetch GET 200 https://registry.npmjs.org/@smithy/querystring-builder/-/querystring-builder-4.2.8.tgz 317ms (cache miss)
+744 http fetch GET 200 https://registry.npmjs.org/@smithy/service-error-classification/-/service-error-classification-4.2.8.tgz 340ms (cache miss)
+745 http fetch GET 200 https://registry.npmjs.org/@smithy/protocol-http/-/protocol-http-5.3.8.tgz 354ms (cache miss)
+746 http fetch GET 200 https://registry.npmjs.org/@smithy/smithy-client/-/smithy-client-4.10.9.tgz 360ms (cache miss)
+747 http fetch GET 200 https://registry.npmjs.org/@smithy/node-config-provider/-/node-config-provider-4.3.8.tgz 368ms (cache miss)
+748 http fetch GET 200 https://registry.npmjs.org/@smithy/util-retry/-/util-retry-4.2.8.tgz 378ms (cache miss)
+749 http fetch GET 200 https://registry.npmjs.org/@smithy/middleware-stack/-/middleware-stack-4.2.8.tgz 386ms (cache miss)
+750 http fetch GET 200 https://registry.npmjs.org/@smithy/property-provider/-/property-provider-4.2.8.tgz 388ms (cache miss)
+751 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.971.0.tgz 391ms (cache miss)
+752 http fetch GET 200 https://registry.npmjs.org/@smithy/middleware-retry/-/middleware-retry-4.4.24.tgz 399ms (cache miss)
+753 http fetch GET 200 https://registry.npmjs.org/@smithy/node-http-handler/-/node-http-handler-4.4.8.tgz 401ms (cache miss)
+754 http fetch GET 200 https://registry.npmjs.org/@smithy/middleware-serde/-/middleware-serde-4.2.9.tgz 409ms (cache miss)
+755 http fetch GET 200 https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz 412ms (cache miss)
+756 http fetch GET 200 https://registry.npmjs.org/@smithy/middleware-content-length/-/middleware-content-length-4.2.8.tgz 419ms (cache miss)
+757 http fetch GET 200 https://registry.npmjs.org/@smithy/invalid-dependency/-/invalid-dependency-4.2.8.tgz 435ms (cache miss)
+758 http fetch GET 200 https://registry.npmjs.org/@smithy/credential-provider-imds/-/credential-provider-imds-4.2.8.tgz 452ms (cache miss)
+759 http fetch GET 200 https://registry.npmjs.org/@smithy/hash-node/-/hash-node-4.2.8.tgz 460ms (cache miss)
+760 http fetch GET 200 https://registry.npmjs.org/@smithy/fetch-http-handler/-/fetch-http-handler-5.3.9.tgz 461ms (cache miss)
+761 http fetch GET 200 https://registry.npmjs.org/@smithy/config-resolver/-/config-resolver-4.4.6.tgz 465ms (cache miss)
+762 http fetch GET 200 https://registry.npmjs.org/@smithy/abort-controller/-/abort-controller-4.2.8.tgz 469ms (cache miss)
+763 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.971.0.tgz 475ms (cache miss)
+764 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-login/-/credential-provider-login-3.971.0.tgz 498ms (cache miss)
+765 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/types/-/types-3.969.0.tgz 502ms (cache miss)
+766 http fetch GET 200 https://registry.npmjs.org/@smithy/middleware-endpoint/-/middleware-endpoint-4.4.8.tgz 518ms (cache miss)
+767 http fetch GET 200 https://registry.npmjs.org/@smithy/types/-/types-4.12.0.tgz 524ms (cache miss)
+768 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.971.0.tgz 530ms (cache miss)
+769 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.971.0.tgz 533ms (cache miss)
+770 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.971.0.tgz 537ms (cache miss)
+771 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.971.0.tgz 547ms (cache miss)
+772 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-process/-/credential-provider-process-3.970.0.tgz 583ms (cache miss)
+773 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.971.0.tgz 585ms (cache miss)
+774 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.971.0.tgz 605ms (cache miss)
+775 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/types/-/types-3.969.0.tgz 607ms (cache miss)
+776 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/middleware-logger/-/middleware-logger-3.969.0.tgz 627ms (cache miss)
+777 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/middleware-user-agent/-/middleware-user-agent-3.970.0.tgz 628ms (cache miss)
+778 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/xml-builder/-/xml-builder-3.969.0.tgz 637ms (cache miss)
+779 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-env/-/credential-provider-env-3.970.0.tgz 659ms (cache miss)
+780 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/util-endpoints/-/util-endpoints-3.970.0.tgz 663ms (cache miss)
+781 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-http/-/credential-provider-http-3.970.0.tgz 686ms (cache miss)
+782 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/endpoint-cache/-/endpoint-cache-3.968.0.tgz 696ms (cache miss)
+783 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/middleware-recursion-detection/-/middleware-recursion-detection-3.969.0.tgz 709ms (cache miss)
+784 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/region-config-resolver/-/region-config-resolver-3.969.0.tgz 721ms (cache miss)
+785 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/middleware-host-header/-/middleware-host-header-3.969.0.tgz 731ms (cache miss)
+786 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-login/-/credential-provider-login-3.970.0.tgz 801ms (cache miss)
+787 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.971.0.tgz 819ms (cache miss)
+788 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-web-identity/-/credential-provider-web-identity-3.970.0.tgz 832ms (cache miss)
+789 http fetch GET 200 https://registry.npmjs.org/@smithy/core/-/core-3.20.7.tgz 837ms (cache miss)
+790 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-ini/-/credential-provider-ini-3.970.0.tgz 854ms (cache miss)
+791 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/middleware-endpoint-discovery/-/middleware-endpoint-discovery-3.969.0.tgz 859ms (cache miss)
+792 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-node/-/credential-provider-node-3.970.0.tgz 870ms (cache miss)
+793 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/nested-clients/-/nested-clients-3.970.0.tgz 879ms (cache miss)
+794 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/util-user-agent-browser/-/util-user-agent-browser-3.969.0.tgz 893ms (cache miss)
+795 http fetch GET 200 https://registry.npmjs.org/diff 737ms (cache miss)
+796 silly packumentCache corgi:https://registry.npmjs.org/diff set size:undefined disposed:false
+797 http fetch GET 200 https://registry.npmjs.org/preact 742ms (cache miss)
+798 silly packumentCache corgi:https://registry.npmjs.org/preact set size:undefined disposed:false
+799 silly packumentCache corgi:https://registry.npmjs.org/next-auth cache-miss
+800 silly packumentCache corgi:https://registry.npmjs.org/preact-render-to-string cache-miss
+801 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/dynamodb-codec/-/dynamodb-codec-3.970.0.tgz 920ms (cache miss)
+802 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/util-user-agent-node/-/util-user-agent-node-3.970.0.tgz 921ms (cache miss)
+803 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.970.0.tgz 936ms (cache miss)
+804 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/token-providers/-/token-providers-3.970.0.tgz 971ms (cache miss)
+805 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/credential-provider-sso/-/credential-provider-sso-3.970.0.tgz 980ms (cache miss)
+806 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/client-sso/-/client-sso-3.970.0.tgz 982ms (cache miss)
+807 http fetch GET 200 https://registry.npmjs.org/preact-render-to-string 208ms (cache miss)
+808 silly packumentCache corgi:https://registry.npmjs.org/preact-render-to-string set size:undefined disposed:false
+809 http fetch GET 200 https://registry.npmjs.org/next-auth 225ms (cache miss)
+810 silly packumentCache corgi:https://registry.npmjs.org/next-auth set size:undefined disposed:false
+811 http fetch GET 200 https://registry.npmjs.org/@aws-sdk/core/-/core-3.970.0.tgz 1223ms (cache miss)
+812 silly ADD node_modules/obliterator
+813 silly ADD node_modules/mnemonist
+814 silly ADD node_modules/@aws-sdk/endpoint-cache
+815 silly ADD node_modules/@aws-sdk/middleware-endpoint-discovery
+816 silly ADD node_modules/@aws-sdk/middleware-endpoint-discovery/node_modules/@aws-sdk/types
+817 silly ADD node_modules/@aws-sdk/util-dynamodb
+818 silly ADD node_modules/@aws-sdk/client-dynamodb
+819 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/endpoint-cache
+820 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/token-providers
+821 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-sso
+822 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/nested-clients
+823 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-login
+824 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-web-identity
+825 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-sso
+826 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-process
+827 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-ini
+828 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-http
+829 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-env
+830 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/xml-builder
+831 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/util-user-agent-node
+832 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/util-user-agent-browser
+833 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/util-endpoints
+834 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/types
+835 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/region-config-resolver
+836 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/middleware-user-agent
+837 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/middleware-recursion-detection
+838 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/middleware-logger
+839 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/middleware-host-header
+840 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb
+841 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/token-providers
+842 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-sso
+843 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/nested-clients
+844 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-login
+845 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-web-identity
+846 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-sso
+847 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-ini
+848 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/util-user-agent-node
+849 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/middleware-endpoint-discovery
+850 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-node
+851 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/dynamodb-codec
+852 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/credential-provider-node
+853 silly ADD node_modules/@aws-sdk/client-dynamodb/node_modules/@aws-sdk/core
+854 silly ADD
+855 silly ADD
+856 silly ADD
+857 silly ADD
+858 silly ADD
+859 silly ADD
+860 silly ADD
+861 silly ADD
+862 silly ADD
+863 silly ADD
+864 silly ADD
+865 silly ADD
+866 silly ADD
+867 silly ADD
+868 silly ADD
+869 silly ADD
+870 silly ADD
+871 silly ADD
+872 silly ADD
+873 silly ADD
+874 silly ADD
+875 silly ADD
+876 silly ADD
+877 silly ADD
+878 silly ADD
+879 silly ADD
+880 silly ADD
+881 silly ADD
+882 silly ADD
+883 silly ADD
+884 silly ADD
+885 silly ADD
+886 silly ADD
+887 silly ADD
+888 silly ADD
+889 silly ADD
+890 silly ADD
+891 silly ADD
+892 silly ADD
+893 silly ADD
+894 silly ADD
+895 silly ADD
+896 silly ADD
+897 silly ADD
+898 silly ADD
+899 silly ADD
+900 silly ADD
+901 silly ADD
+902 silly ADD
+903 silly ADD
+904 silly ADD
+905 silly ADD
+906 silly ADD
+907 silly ADD
+908 silly ADD
+909 silly ADD
+910 silly ADD
+911 silly ADD
+912 silly ADD
+913 silly ADD
+914 silly ADD
+915 silly CHANGE node_modules/@smithy/util-waiter
+916 silly CHANGE node_modules/@smithy/util-stream
+917 silly CHANGE node_modules/@smithy/util-retry
+918 silly CHANGE node_modules/@smithy/util-middleware
+919 silly CHANGE node_modules/@smithy/util-endpoints
+920 silly CHANGE node_modules/@smithy/util-defaults-mode-node
+921 silly CHANGE node_modules/@smithy/util-defaults-mode-browser
+922 silly CHANGE node_modules/@smithy/url-parser
+923 silly CHANGE node_modules/@smithy/types
+924 silly CHANGE node_modules/@smithy/smithy-client
+925 silly CHANGE node_modules/@smithy/signature-v4
+926 silly CHANGE node_modules/@smithy/shared-ini-file-loader
+927 silly CHANGE node_modules/@smithy/service-error-classification
+928 silly CHANGE node_modules/@smithy/querystring-parser
+929 silly CHANGE node_modules/@smithy/querystring-builder
+930 silly CHANGE node_modules/@smithy/protocol-http
+931 silly CHANGE node_modules/@smithy/property-provider
+932 silly CHANGE node_modules/@smithy/node-http-handler
+933 silly CHANGE node_modules/@smithy/node-config-provider
+934 silly CHANGE node_modules/@smithy/middleware-stack
+935 silly CHANGE node_modules/@smithy/middleware-serde
+936 silly CHANGE node_modules/@smithy/middleware-retry
+937 silly CHANGE node_modules/@smithy/middleware-endpoint
+938 silly CHANGE node_modules/@smithy/middleware-content-length
+939 silly CHANGE node_modules/@smithy/invalid-dependency
+940 silly CHANGE node_modules/@smithy/hash-node
+941 silly CHANGE node_modules/@smithy/fetch-http-handler
+942 silly CHANGE node_modules/@smithy/credential-provider-imds
+943 silly CHANGE node_modules/@smithy/core
+944 silly CHANGE node_modules/@smithy/config-resolver
+945 silly CHANGE node_modules/@smithy/abort-controller
+946 verbose cwd /Users/jorgeluiscontrerasherrera/Documents/_git/legis
+947 verbose os Darwin 24.6.0
+948 verbose node v22.17.1
+949 verbose npm  v10.9.2
+950 verbose exit 0
+951 info ok

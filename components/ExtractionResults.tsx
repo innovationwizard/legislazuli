@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { ExtractedField } from '@/types';
 import { CopyButton } from './ui/CopyButton';
@@ -26,16 +26,7 @@ export function ExtractionResults({
   const [feedback, setFeedback] = useState<Record<string, Record<string, any>>>({});
   const [loadingFeedback, setLoadingFeedback] = useState(true);
 
-  // Load existing feedback
-  useEffect(() => {
-    if (isCondor && extractionId) {
-      fetchFeedback();
-    } else {
-      setLoadingFeedback(false);
-    }
-  }, [isCondor, extractionId]);
-
-  const fetchFeedback = async () => {
+  const fetchFeedback = useCallback(async () => {
     try {
       const response = await fetch(`/api/feedback?extraction_id=${extractionId}`);
       if (response.ok) {
@@ -57,7 +48,16 @@ export function ExtractionResults({
     } finally {
       setLoadingFeedback(false);
     }
-  };
+  }, [extractionId]);
+
+  // Load existing feedback
+  useEffect(() => {
+    if (isCondor && extractionId) {
+      fetchFeedback();
+    } else {
+      setLoadingFeedback(false);
+    }
+  }, [isCondor, extractionId, fetchFeedback]);
 
   const handleFeedbackSubmitted = () => {
     fetchFeedback();

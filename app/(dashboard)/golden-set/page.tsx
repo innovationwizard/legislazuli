@@ -248,7 +248,7 @@ export default function GoldenSetPage() {
               </p>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              El Golden Set se usa para pruebas de regresión. Se creará una <strong>instantánea inmutable</strong> de los valores actuales como "verdad" para comparaciones futuras.
+              El Golden Set se usa para pruebas de regresión. Se creará una <strong>instantánea inmutable</strong> de los valores actuales como &quot;verdad&quot; para comparaciones futuras.
             </p>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">

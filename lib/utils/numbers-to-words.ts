@@ -50,6 +50,22 @@ export function numberToWords(num: number): string {
     if (remainder === 0) return millionWord;
     return `${millionWord} ${numberToWords(remainder)}`;
   }
+
+  if (num < 1000000000000) {
+    const billions = Math.floor(num / 1000000000);
+    const remainder = num % 1000000000;
+    let billionWord = billions === 1 ? 'mil millones' : `${numberToWords(billions)} mil millones`;
+    if (remainder === 0) return billionWord;
+    return `${billionWord} ${numberToWords(remainder)}`;
+  }
+
+  if (num < 1000000000000000) {
+    const trillions = Math.floor(num / 1000000000000);
+    const remainder = num % 1000000000000;
+    let trillionWord = trillions === 1 ? 'un billón' : `${numberToWords(trillions)} billones`;
+    if (remainder === 0) return trillionWord;
+    return `${trillionWord} ${numberToWords(remainder)}`;
+  }
   
   return num.toString();
 }
