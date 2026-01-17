@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { PDFDocument, StandardFonts, degrees, rgb } from 'pdf-lib';
 import { dateToWords, numberToWords } from '@/lib/utils/numbers-to-words';
@@ -311,7 +312,7 @@ export default function LegalizacionPage() {
             {isGenerating ? 'Generando...' : 'Generar PDF legalizado'}
           </Button>
           {outputUrl && (
-            <div className="pt-3">
+            <div className="pt-3 space-y-3">
               <a
                 href={outputUrl}
                 download="legalizacion.pdf"
@@ -319,6 +320,17 @@ export default function LegalizacionPage() {
               >
                 Descargar PDF legalizado
               </a>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => window.location.reload()}
+                >
+                  Legalizar otro documento
+                </Button>
+                <Link href="/dashboard">
+                  <Button variant="primary">Volver al inicio</Button>
+                </Link>
+              </div>
             </div>
           )}
         </div>
