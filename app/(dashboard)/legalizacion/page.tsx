@@ -675,6 +675,14 @@ async function generateLegalizationPdf(
     currentY -= lineHeight;
   }
 
+  outputPage.drawText('Hoja Única', {
+    x: 7 * 72,
+    y: LEGAL_HEIGHT - 0.5 * 72,
+    size: 11,
+    font,
+    color: rgb(0, 0, 0),
+  });
+
   return outputPdf.save();
 }
 
