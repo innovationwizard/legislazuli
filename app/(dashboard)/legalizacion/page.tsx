@@ -654,24 +654,34 @@ async function generateLegalizationPdf(
   }
 
   const font = await outputPdf.embedFont(StandardFonts.TimesRoman);
+  const boldFont = await outputPdf.embedFont(StandardFonts.TimesRomanBold);
   const fontSize = fitFontSize(paragraphText, font, LETTER_WIDTH - LEGAL_MARGIN_X * 2, LEGAL_BOTTOM_SPACE - 12);
-  const lines = wrapText(paragraphText, font, fontSize, LETTER_WIDTH - LEGAL_MARGIN_X * 2);
+  const lines = wrapTextWithParagraphs(paragraphText, font, fontSize, LETTER_WIDTH - LEGAL_MARGIN_X * 2);
   const lineHeight = fontSize * 1.25;
   let currentY = LEGAL_BOTTOM_SPACE - 8;
 
   for (const line of lines) {
-    if (line === '') {
+    if (line.text === '') {
       currentY -= lineHeight;
       continue;
     }
 
-    outputPage.drawText(line, {
-      x: LEGAL_MARGIN_X,
-      y: currentY,
-      size: fontSize,
-      font,
-      color: rgb(0, 0, 0),
-    });
+    if (line.isSignature) {
+      drawCenteredLine(outputPage, line.text, font, boldFont, fontSize, LEGAL_WIDTH, currentY);
+    } else if (line.isLastOfParagraph) {
+      drawLeftLine(outputPage, line.text, font, boldFont, fontSize, LEGAL_MARGIN_X, currentY);
+    } else {
+      drawJustifiedLine(
+        outputPage,
+        line.text,
+        font,
+        boldFont,
+        fontSize,
+        LEGAL_MARGIN_X,
+        currentY,
+        LETTER_WIDTH - LEGAL_MARGIN_X * 2
+      );
+    }
     currentY -= lineHeight;
   }
 
@@ -740,9 +750,189 @@ function wrapText(text: string, font: any, size: number, maxWidth: number): stri
   return lines;
 }
 
+function wrapTextWithParagraphs(
+  text: string,
+  font: any,
+  size: number,
+  maxWidth: number
+): Array<{ text: string; isLastOfParagraph: boolean; isSignature: boolean }> {
+  const paragraphs = text.split('\n');
+  const lines: Array<{ text: string; isLastOfParagraph: boolean; isSignature: boolean }> = [];
+
+  for (const paragraph of paragraphs) {
+    const trimmed = paragraph.trim();
+    if (!trimmed) {
+      lines.push({ text: '', isLastOfParagraph: true, isSignature: false });
+      continue;
+    }
+
+    const words = paragraph.split(' ');
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const width = font.widthOfTextAtSize(testLine, size);
+      if (width > maxWidth && currentLine) {
+        lines.push({
+          text: currentLine,
+          isLastOfParagraph: false,
+          isSignature: isSignatureLine(currentLine),
+        });
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+
+    if (currentLine) {
+      lines.push({
+        text: currentLine,
+        isLastOfParagraph: true,
+        isSignature: isSignatureLine(currentLine),
+      });
+    }
+  }
+
+  return lines;
+}
+
+function isSignatureLine(text: string): boolean {
+  const normalized = text.trim().toUpperCase();
+  return normalized.startsWith('POR ');
+}
+
+function drawLeftLine(
+  page: any,
+  text: string,
+  font: any,
+  boldFont: any,
+  size: number,
+  x: number,
+  y: number
+) {
+  drawSegmentedLine(page, text, font, boldFont, size, x, y, 0, 'left');
+}
+
+function drawCenteredLine(
+  page: any,
+  text: string,
+  font: any,
+  boldFont: any,
+  size: number,
+  totalWidth: number,
+  y: number
+) {
+  const lineWidth = measureLineWidth(text, font, boldFont, size, 0);
+  const x = (totalWidth - lineWidth) / 2;
+  drawSegmentedLine(page, text, font, boldFont, size, x, y, 0, 'left');
+}
+
+function drawJustifiedLine(
+  page: any,
+  text: string,
+  font: any,
+  boldFont: any,
+  size: number,
+  x: number,
+  y: number,
+  maxWidth: number
+) {
+  const words = text.split(' ');
+  const spaceCount = Math.max(words.length - 1, 0);
+  if (spaceCount === 0) {
+    drawSegmentedLine(page, text, font, boldFont, size, x, y, 0, 'left');
+    return;
+  }
+
+  const contentWidth = measureLineWidth(text, font, boldFont, size, 0);
+  const extraSpace = (maxWidth - contentWidth) / spaceCount;
+  drawSegmentedLine(page, text, font, boldFont, size, x, y, extraSpace, 'justify');
+}
+
+function drawSegmentedLine(
+  page: any,
+  text: string,
+  font: any,
+  boldFont: any,
+  size: number,
+  x: number,
+  y: number,
+  extraSpace: number,
+  mode: 'left' | 'justify'
+) {
+  const words = text.split(' ');
+  const boldIndices = getBoldWordIndices(words);
+  const baseSpace = font.widthOfTextAtSize(' ', size);
+  let cursorX = x;
+
+  words.forEach((word, index) => {
+    const isBold = boldIndices.has(index);
+    const activeFont = isBold ? boldFont : font;
+    page.drawText(word, {
+      x: cursorX,
+      y,
+      size,
+      font: activeFont,
+      color: rgb(0, 0, 0),
+    });
+    cursorX += activeFont.widthOfTextAtSize(word, size);
+    if (index < words.length - 1) {
+      cursorX += baseSpace + (mode === 'justify' ? extraSpace : 0);
+    }
+  });
+}
+
+function measureLineWidth(
+  text: string,
+  font: any,
+  boldFont: any,
+  size: number,
+  extraSpace: number
+): number {
+  const words = text.split(' ');
+  const boldIndices = getBoldWordIndices(words);
+  const baseSpace = font.widthOfTextAtSize(' ', size);
+  let width = 0;
+
+  words.forEach((word, index) => {
+    const isBold = boldIndices.has(index);
+    const activeFont = isBold ? boldFont : font;
+    width += activeFont.widthOfTextAtSize(word, size);
+    if (index < words.length - 1) {
+      width += baseSpace + extraSpace;
+    }
+  });
+
+  return width;
+}
+
+function getBoldWordIndices(words: string[]): Set<number> {
+  const normalized = words.map((word) => normalizeBoldWord(word));
+  const boldIndices = new Set<number>();
+
+  for (let i = 0; i < normalized.length - 1; i += 1) {
+    const first = normalized[i];
+    const second = normalized[i + 1];
+    if (first === 'DOY' && second === 'FE') {
+      boldIndices.add(i);
+      boldIndices.add(i + 1);
+    }
+    if (first === 'ES' && second === 'AUTÉNTICA') {
+      boldIndices.add(i);
+      boldIndices.add(i + 1);
+    }
+  }
+
+  return boldIndices;
+}
+
+function normalizeBoldWord(word: string): string {
+  return word.replace(/[.,;:()]/g, '').toUpperCase();
+}
+
 function fitFontSize(text: string, font: any, maxWidth: number, maxHeight: number): number {
   for (let size = 10; size >= 7; size -= 1) {
-    const lines = wrapText(text, font, size, maxWidth);
+    const lines = wrapTextWithParagraphs(text, font, size, maxWidth);
     const height = lines.length * size * 1.25;
     if (height <= maxHeight) {
       return size;
