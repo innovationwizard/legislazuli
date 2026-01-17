@@ -612,29 +612,32 @@ async function generateLegalizationPdf(
   if (file.type === 'application/pdf') {
     const sourcePdf = await PDFDocument.load(sourceBytes);
     const sourcePage = sourcePdf.getPages()[0];
-    const rotatedPage = pageInfo?.needsRotation;
-
-    if (rotatedPage) {
-      const { width, height } = sourcePage.getSize();
-      sourcePage.setRotation(degrees(90));
-      sourcePage.setSize(height, width);
-      const pageAny = sourcePage as any;
-      if (pageAny.translateContent) {
-        pageAny.translateContent(height, 0);
-      }
-    }
+    const { width, height } = sourcePage.getSize();
+    const needsRotation = pageInfo?.needsRotation ?? width > height;
 
     const embeddedPage = await outputPdf.embedPage(sourcePage);
-    const scaleX = LETTER_WIDTH / embeddedPage.width;
-    const scaleY = LETTER_HEIGHT / embeddedPage.height;
     const yPosition = LEGAL_HEIGHT - LETTER_HEIGHT;
 
-    outputPage.drawPage(embeddedPage, {
-      x: 0,
-      y: yPosition,
-      xScale: scaleX,
-      yScale: scaleY,
-    });
+    if (needsRotation) {
+      const scaleX = LETTER_HEIGHT / width;
+      const scaleY = LETTER_WIDTH / height;
+      outputPage.drawPage(embeddedPage, {
+        x: LETTER_WIDTH,
+        y: yPosition,
+        xScale: scaleX,
+        yScale: scaleY,
+        rotate: degrees(90),
+      });
+    } else {
+      const scaleX = LETTER_WIDTH / width;
+      const scaleY = LETTER_HEIGHT / height;
+      outputPage.drawPage(embeddedPage, {
+        x: 0,
+        y: yPosition,
+        xScale: scaleX,
+        yScale: scaleY,
+      });
+    }
   } else {
     const imageBytes = await prepareImageBytes(file, pageInfo?.needsRotation);
     const embed = file.type === 'image/png'
