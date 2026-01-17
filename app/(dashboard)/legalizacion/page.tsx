@@ -668,7 +668,11 @@ async function generateLegalizationPdf(
 
     if (line.isSignature) {
       drawCenteredLine(outputPage, line.text, font, boldFont, fontSize, LEGAL_WIDTH, currentY);
+    } else if (line.isLastLine) {
+      // Last line of paragraph: left-aligned, no justification
+      drawSegmentedLine(outputPage, line.text, font, boldFont, fontSize, LEGAL_MARGIN_X, currentY, 0, 'left');
     } else {
+      // Middle line: justify to full width
       drawJustifiedLine(
         outputPage,
         line.text,
@@ -716,65 +720,31 @@ async function prepareImageBytes(file: File, rotate?: boolean): Promise<Uint8Arr
   return new Uint8Array(buffer);
 }
 
-function wrapText(text: string, font: any, size: number, maxWidth: number): string[] {
-  const paragraphs = text.split('\n');
-  const lines: string[] = [];
-
-  for (const paragraph of paragraphs) {
-    if (!paragraph.trim()) {
-      lines.push('');
-      continue;
-    }
-
-    const words = paragraph.split(' ');
-    let currentLine = '';
-
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const width = font.widthOfTextAtSize(testLine, size);
-      if (width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
-      }
-    }
-
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-  }
-
-  return lines;
-}
-
 function wrapTextWithParagraphs(
   text: string,
   font: any,
   size: number,
   maxWidth: number
-): Array<{ text: string; isSignature: boolean }> {
+): Array<{ text: string; isSignature: boolean; isLastLine: boolean }> {
   const paragraphs = text.split('\n');
-  const lines: Array<{ text: string; isSignature: boolean }> = [];
+  const lines: Array<{ text: string; isSignature: boolean; isLastLine: boolean }> = [];
 
   for (const paragraph of paragraphs) {
     const trimmed = paragraph.trim();
     if (!trimmed) {
-      lines.push({ text: '', isSignature: false });
+      lines.push({ text: '', isSignature: false, isLastLine: false });
       continue;
     }
 
     const words = paragraph.split(' ');
     let currentLine = '';
+    const paragraphLines: string[] = [];
 
     for (const word of words) {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
       const width = font.widthOfTextAtSize(testLine, size);
       if (width > maxWidth && currentLine) {
-        lines.push({
-          text: currentLine,
-          isSignature: isSignatureLine(currentLine),
-        });
+        paragraphLines.push(currentLine);
         currentLine = word;
       } else {
         currentLine = testLine;
@@ -782,11 +752,16 @@ function wrapTextWithParagraphs(
     }
 
     if (currentLine) {
-      lines.push({
-        text: currentLine,
-        isSignature: isSignatureLine(currentLine),
-      });
+      paragraphLines.push(currentLine);
     }
+
+    paragraphLines.forEach((line, index) => {
+      lines.push({
+        text: line,
+        isSignature: isSignatureLine(line),
+        isLastLine: index === paragraphLines.length - 1,
+      });
+    });
   }
 
   return lines;
