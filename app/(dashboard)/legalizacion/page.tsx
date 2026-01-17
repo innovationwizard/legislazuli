@@ -277,7 +277,7 @@ export default function LegalizacionPage() {
                 {pageInfo.needsRotation ? '(se corregirá automáticamente)' : ''}
               </p>
               <p>
-                Carta 8.5x11: {pageInfo.isLetterSize ? 'Sí' : 'No (verifica el tamaño antes de legalizar)'}
+                Carta 8.5x11: {pageInfo.isLetterSize ? 'Sí' : 'No (se ajustará automáticamente a carta)'}
               </p>
             </div>
           ) : (
@@ -625,30 +625,28 @@ async function generateLegalizationPdf(
     }
 
     const embeddedPage = await outputPdf.embedPage(sourcePage);
-    const scale = LETTER_WIDTH / embeddedPage.width;
-    const scaledHeight = embeddedPage.height * scale;
-    const yPosition = LEGAL_HEIGHT - scaledHeight;
+    const scaleX = LETTER_WIDTH / embeddedPage.width;
+    const scaleY = LETTER_HEIGHT / embeddedPage.height;
+    const yPosition = LEGAL_HEIGHT - LETTER_HEIGHT;
 
     outputPage.drawPage(embeddedPage, {
       x: 0,
       y: yPosition,
-      xScale: scale,
-      yScale: scale,
+      xScale: scaleX,
+      yScale: scaleY,
     });
   } else {
     const imageBytes = await prepareImageBytes(file, pageInfo?.needsRotation);
     const embed = file.type === 'image/png'
       ? await outputPdf.embedPng(imageBytes)
       : await outputPdf.embedJpg(imageBytes);
-    const scale = LETTER_WIDTH / embed.width;
-    const scaledHeight = embed.height * scale;
-    const yPosition = LEGAL_HEIGHT - scaledHeight;
+    const yPosition = LEGAL_HEIGHT - LETTER_HEIGHT;
 
     outputPage.drawImage(embed, {
       x: 0,
       y: yPosition,
       width: LETTER_WIDTH,
-      height: scaledHeight,
+      height: LETTER_HEIGHT,
     });
   }
 
